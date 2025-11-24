@@ -1,9 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
-export enum EventType {
-  INFO = "INFO",
-  WARNING = "WARNING",
-  ERROR = "ERROR",
-}
+import { EventType } from "../enums/EventType";
 //ovo nece biti u mikroservisu samo privremeno dok prvi servis ne kreira strukturu
 @Entity("event")
 export class Event{

@@ -20,7 +20,8 @@ export class ParserController {
 
     private async NormalizeMessage(req: Request, res: Response): Promise<void>{
         try{
-            const rawMessage=req.body.message as string;  //drugi tim mora da nam salje json sa message kako bi mi izvukli poruku
+            const rawMessage=req.body.message as string;  //drugi tim mora da nam salje json sa message kako bi 
+                                                             // mi izvukli poruku
             console.log('raw message je'+rawMessage);
             const response=this.parserService.normalizeAndSaveEvent(rawMessage);
             res.status(201).json(response);

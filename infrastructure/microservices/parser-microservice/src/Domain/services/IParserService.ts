@@ -1,4 +1,5 @@
 import { EventDTO } from "../DTOs/EventDTO";
+import { Event } from "../models/Event";
 import { ParserEvent } from "../models/ParserEvent";
 
 export interface IParserService{
@@ -6,6 +7,6 @@ export interface IParserService{
     getAll():Promise<ParserEvent[]>;
     getParserEventById(id:number):Promise<ParserEvent>;
     deleteById(id:number):Promise<boolean>;
-    /*normalizeEvent(message:string):Promise<Event>; //kad ubace model u event service odkomentarisati
-    llmAnalysis(message:string):Promise<Event>;*/
+    normalizeEvent(message:string):Promise<Event>;
+    llmAnalysis(message:string):Promise<EventDTO>;
 }

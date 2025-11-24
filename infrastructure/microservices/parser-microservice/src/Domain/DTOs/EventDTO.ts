@@ -1,4 +1,4 @@
-import { EventType } from "../models/Event";
+import { EventType } from "../enums/EventType";
 
 //ovo mozemo iz event service uzeti,dok oni ne naprave ovo koristiti
 export interface EventDTO {
