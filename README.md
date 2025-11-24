@@ -18,6 +18,7 @@ SIEM consists of multiple subsystems that monitor and respond to various types o
 - [Jira](#jira)
 - [Database System Design](#database-system-design)
 - [Information System Design](#information-system-design)
+- [License](#license)
 
 ## Jira
 Used for issue tracking, sprint/board management, and backlog refinement.
