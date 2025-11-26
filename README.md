@@ -35,5 +35,10 @@ Visual representation of the system architecture, showing main components and th
 
 🔗 Link : [https://www.canva.com/design/DAG4gJA9UlQ/U4iY5-UtDKtD2JKzSfgsuA/edit](https://www.canva.com/design/DAG4gJA9UlQ/U4iY5-UtDKtD2JKzSfgsuA/edit)
 
+## Wireframe Design 
+Wireframe design of the client application shows the core screen structure and component layout. It serves as a functional blueprint for defining user flows and guiding UI implementation.
+
+🔗 Link : [https://www.figma.com/design/HkosxDFQSBS5kpIagimJGS/SIEM?t=zKqqPW7OJ7ESgIR2-1](https://www.figma.com/design/HkosxDFQSBS5kpIagimJGS/SIEM?t=zKqqPW7OJ7ESgIR2-1)
+
 ## License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
