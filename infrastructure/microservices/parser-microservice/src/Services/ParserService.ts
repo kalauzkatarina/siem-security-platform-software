@@ -84,6 +84,10 @@ export class ParserService implements IParserService {
         if (parseResult.doesMatch)
             return parseResult.event!;
 
+        parseResult = this.parseRateLimitMessage(message);
+        if (parseResult.doesMatch)
+            return parseResult.event!;
+
         return new Event();
     }
 
@@ -158,6 +162,33 @@ export class ParserService implements IParserService {
         const username = usernameMatch[3];
 
         const normalizedDescription = `User '${username}' performed a large database access operation.`;
+
+        const event = new Event();
+        event.source = '';
+        event.type = EventType.WARNING;
+        event.description = normalizedDescription;
+        event.timestamp = new Date();
+
+        return {
+            doesMatch: true,
+            event,
+        };
+    }
+
+    private parseRateLimitMessage(message: string): ParseResult {
+        const RATE_LIMIT_REGEX = /\b(rate\s+limit(ed)?|quota\s+exceeded|throttled?|429|too\s+many\s+requests)\b/i;
+        const USERNAME_REGEX = /\b(user(name)?|account)\s*[:=]\s*"?([A-Za-z0-9._-]+)"?/i;
+
+        if (!RATE_LIMIT_REGEX.test(message)) {
+            return { doesMatch: false };
+        }
+
+        const usernameMatch = USERNAME_REGEX.exec(message);
+        const username = usernameMatch ? usernameMatch[3] : null;   // It's okay to go without username for this event
+
+        const normalizedDescription = username
+            ? `User '${username}' exceeded API rate limit.`
+            : `API rate limit exceeded.`;
 
         const event = new Event();
         event.source = '';
