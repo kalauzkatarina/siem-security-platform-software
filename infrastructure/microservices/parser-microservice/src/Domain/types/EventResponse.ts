@@ -1,4 +1,4 @@
-export type EventResponseType={
-    success:boolean;
-    message:string;
+export type EventResponseType = {
+    success: boolean;
+    message: string;
 }

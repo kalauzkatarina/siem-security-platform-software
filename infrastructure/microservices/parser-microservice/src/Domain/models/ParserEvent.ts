@@ -1,18 +1,16 @@
 import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
 
 @Entity("parser")
-export class ParserEvent{
-    @PrimaryGeneratedColumn()
-    parser_id!:number;
+export class ParserEvent {
+    @PrimaryGeneratedColumn({ name: "parser_id" })
+    parserId!: number;
 
-    @Column({type:"int"})
-    event_id!:number;
+    @Column({ name: "event_id", type: "int" })
+    eventId!: number;
 
-    @Column({type:"varchar",length:255})
-    normalize_text!:string;
+    @Column({ name: "text_before_parsing", type: "varchar", length: 255 })
+    textBeforeParsing!: string;
 
-    @Column({type:"timestamp"})
-    normalize_timestamp!:Date;
-
-
+    @Column({ type: "timestamp" })
+    timestamp!: Date;
 }
