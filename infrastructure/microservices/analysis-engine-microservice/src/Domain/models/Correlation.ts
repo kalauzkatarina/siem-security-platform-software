@@ -1,6 +1,5 @@
 import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 
-
 @Entity("correlation")
 export class Correlation{
     @PrimaryGeneratedColumn()
