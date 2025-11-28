@@ -1,41 +1,55 @@
 import express from 'express';
 import cors from 'cors';
-import "reflect-metadata";
-import { initialize_database } from './Database/InitializeConnection';
+import 'reflect-metadata';
 import dotenv from 'dotenv';
+import { initialize_database } from './Database/InitializeConnection';
 import { Repository } from 'typeorm';
 import { Db } from './Database/DbConnectionPool';
-
-
+import { Event } from './Domain/models/Event';
+import { IEventsService } from './Domain/services/IEventsService';
+import { EventsService } from './Services/EventsService';
+import { EventsController } from './WebAPI/controllers/EventsController';
+import { ILogerService } from './Domain/services/ILoggerService';
+import { LogerService } from './Services/LoggerService';
 
 dotenv.config({ quiet: true });
 
 const app = express();
 
-// Read CORS settings from environment
-const corsOrigin = process.env.CORS_ORIGIN?.split(",").map(m=>m.trim()) ?? "*"; //imamo vise adresa u cors origin
-const corsMethods = process.env.CORS_METHODS?.split(",").map(m => m.trim()) ?? ["POST"];
-
-// Protected microservice from unauthorized access
-app.use(cors({
-  origin: corsOrigin,
-  methods: corsMethods,
-}));
-
+// parsiranje JSON body-ja
 app.use(express.json());
 
-initialize_database();
+// CORS podešavanje iz .env
+const corsOrigin =
+  process.env.CORS_ORIGIN?.split(",").map((m) => m.trim()) ?? ["*"];
 
-// ORM Repositories
+const corsMethods =
+  process.env.CORS_METHODS?.split(",").map((m) => m.trim()) ??
+  ["GET", "POST", "DELETE", "OPTIONS"];
 
+app.use(
+  cors({
+    origin: corsOrigin,
+    methods: corsMethods,
+  }),
+);
 
-// Services
+// inicijalizacija baze
+void (async () => {
+  await initialize_database();
+})();
 
+// ORM Repository
+const eventRepository: Repository<Event> = Db.getRepository(Event);
 
-// WebAPI routes
+// Servisi
+const eventsService: IEventsService = new EventsService(eventRepository);
+const loggerService: ILogerService = new LogerService();
 
+// WebAPI rute
+const eventsController = new EventsController(eventsService, loggerService);
 
-// Registering routes
-
+// Registracija ruta
+app.use('/api/v1', eventsController.getRouter());
 
 export default app;
