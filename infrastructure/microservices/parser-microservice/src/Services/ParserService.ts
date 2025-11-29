@@ -56,6 +56,7 @@ export class ParserService implements IParserService {
     async normalizeAndSaveEvent(eventMessage: string): Promise<EventDTO> {
         let event = this.normalizeEventWithRegexes(eventMessage);
 
+        
         if (event.id === -1)    // Couldn't normalize with regexes -> send it to LLM
             event = await this.normalizeEventWithLlm(eventMessage);
 
@@ -101,6 +102,7 @@ export class ParserService implements IParserService {
         return event;
     }
 
+    //1
     private parseLoginMessage(message: string): ParseResult {
         const SUCCESS_LOGIN_REGEX = /\b(success(ful(ly)?)?|logged\s+in|login\s+ok|authentication\s+successful)\b/i;
         const FAIL_LOGIN_REGEX = /\b(fail(ed)?|unsuccessful|incorrect|invalid|denied|error).*(login|authentication)\b/i;
@@ -128,6 +130,7 @@ export class ParserService implements IParserService {
         };
     }
 
+    //2
     private parsePermissionChangeMessage(message: string): ParseResult {
         const PERMISSION_CHANGE_REGEX = /\b((permission|role|access|privilege)(s)?\s+(changed?|updated?|granted?|assigned?)|(promoted?|elevated?|upgraded?)\s+to|(admin|privileged?|manager|supervisor)\s+(role|access|rights?)(s?)?\s+(granted?|assigned?))\b/i;
 
@@ -152,6 +155,7 @@ export class ParserService implements IParserService {
         };
     }
 
+    //3
     private parseDbAccessMessage(message: string): ParseResult {
         const DB_ACCESS_REGEX = /\b(bulk|massive|large|batch)\s+(read|select|insert|update|delete|export|import|operation|query|write)s?\b/i;
 
@@ -176,6 +180,7 @@ export class ParserService implements IParserService {
         };
     }
 
+    //4
     private parseRateLimitMessage(message: string): ParseResult {
         const RATE_LIMIT_REGEX = /\b(rate\s+limit(ed)?|quota\s+exceeded|throttled?|429|too\s+many\s+requests)\b/i;
 
@@ -201,6 +206,7 @@ export class ParserService implements IParserService {
         };
     }
 
+    //5
     private parseBruteForceMessage(message: string): ParseResult {
         const BRUTE_FORCE_REGEX = /\b(brute\s*force\s*(attack|attempt|detected)?)\b/i;
 
@@ -225,6 +231,7 @@ export class ParserService implements IParserService {
         };
     }
 
+    //5
     private parseSqlInjectionMessage(message: string): ParseResult {
         const SQLI_REGEX = /\b(sql(\s|-)?injection|sqli|potential\s*sql\s*injection|sql\s*attack|sql\s*exploit)\b/i;
 
@@ -248,6 +255,58 @@ export class ParserService implements IParserService {
             event
         };
     }
+
+    //6A
+    private parseServiceConfigurationChangeMessage(message: string): ParseResult {
+         const SERVICE_CONFIG_REGEX = /\b(config(uration)?\s*(file|setting|service)?\s*(changed?|modified?|updated?|edited?)|service\s*(restart(ed)?|reloaded?|stopped?|started?)|settings\s*(changed?|updated?|modified?))\b/i;
+
+        if (!SERVICE_CONFIG_REGEX.test(message))
+            return { doesMatch: false };
+
+        const username = this.extractUsernameFromMessage(message);
+
+        const description = username !== ''
+            ? `Service or configuration change made by user '${username}'.`
+            : `Service or configuration change detected.`;
+
+        const event = new Event();
+        event.source = '';
+        event.type = EventType.WARNING; 
+        event.description = description;
+        event.timestamp = new Date();
+
+        return {
+            doesMatch: true,
+            event
+        };
+    }
+
+    //6B
+    private pareseResourceExplotationMessage(message: string): ParseResult {
+         const RESOURCE_EXPLOIT_REGEX = /\b(cpu|processor|memory|ram|disk|storage|resource)\s*(overuse|abuse|exhaustion|spike|anomaly|overflow|limit|hog|leak)\b/i;
+
+         if (!RESOURCE_EXPLOIT_REGEX.test(message))
+            return { doesMatch: false };
+
+        const username = this.extractUsernameFromMessage(message);
+
+        const description = username !== ''
+            ? `Suspicious resource usage anomaly detected involving user '${username}'.`
+            : `Suspicious resource usage anomaly detected.`;
+
+        const event = new Event();
+        event.source = '';
+        event.type = EventType.WARNING; 
+        event.description = description;
+        event.timestamp = new Date();
+
+        return {
+            doesMatch: true,
+            event
+        };
+    }
+
+    //7
 
     private extractUsernameFromMessage(message: string): string {   // Returns username or empty string if username is not found
         const USERNAME_REGEX = /\b(user(name)?|account)\s*[:=]\s*"?([A-Za-z0-9._-]+)"?/i;
