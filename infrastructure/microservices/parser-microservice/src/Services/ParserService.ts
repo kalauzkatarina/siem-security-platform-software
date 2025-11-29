@@ -60,7 +60,7 @@ export class ParserService implements IParserService {
         if (event.id === -1)    // Couldn't normalize with regexes -> send it to LLM
             event = await this.normalizeEventWithLlm(eventMessage);
 
-        const eventDTO = (await this.eventClient.post<EventDTO>("ruta neka", event)).data;    // Saving to the Events table (calling event-collector)
+        const eventDTO = (await this.eventClient.post<EventDTO>("/AnalysisEngine/processEvent", event)).data;    // Saving to the Events table (calling event-collector)
         if (eventDTO.id === -1)
             throw Error("Failed to save event to the database");
 
@@ -395,10 +395,29 @@ export class ParserService implements IParserService {
     }
 
     private async normalizeEventWithLlm(message: string): Promise<Event> {
-        const prompt = "CUSTOM PROMPT: " + message;
-        const responseFromLlm = (await this.analysisEngineClient.post<string>("ruta njhova", prompt)).data;    // CSV format of Event class attributes
 
-        throw new Error("Not implemented yet.");
+        const requestBody = {
+            message: message
+        };
+
+        //Call Analysis Engine endpoint
+        const response = await this.analysisEngineClient.post("/AnalysisEngine/processEvent", requestBody);
+
+        //Extract LLM-generated event JSON
+        const eventData = response.data?.eventData;
+        if(!eventData) {
+            throw new Error("Invalid response from Analysis Engine (missing eventData)");
+        }
+
+        //Convert JSON to Event model
+        const event = new Event();
+        event.type = eventData.type;
+        event.description = eventData.description;
+        event.source = eventData.source ?? "";  // opciono
+        event.timestamp = eventData.timestamp ? new Date(eventData.timestamp) : new Date();
+
+        return event;
+
     }
 
     private toDTO(event: Event): EventDTO {
