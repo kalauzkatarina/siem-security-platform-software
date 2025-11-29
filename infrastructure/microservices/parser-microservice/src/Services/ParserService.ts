@@ -307,6 +307,31 @@ export class ParserService implements IParserService {
     }
 
     //7
+    private parseFileChangeMessage(message: string): ParseResult {
+         const FILE_EVENT_REGEX = /\b(file\s*(changed|modified|edited|tampered|corrupted)|malicious\s+file|infected\s+file|virus\s+detected|checksum\s*(failed|mismatch)|hash\s*(failed|mismatch)|integrity\s*(check\s*)?(failed|mismatch))\b/i;
+        
+         if (!FILE_EVENT_REGEX.test(message))
+            return { doesMatch: false };
+
+        const username = this.extractUsernameFromMessage(message);
+
+        const description = username !== ''
+            ? `File integrity issue detected involving user '${username}'.`
+            : `File integrity issue detected.`;
+
+        const event = new Event();
+        event.source = '';
+        event.type = EventType.ERROR; 
+        event.description = description;
+        event.timestamp = new Date();
+
+        return {
+            doesMatch: true,
+            event
+        };
+    }
+
+    
 
     private extractUsernameFromMessage(message: string): string {   // Returns username or empty string if username is not found
         const USERNAME_REGEX = /\b(user(name)?|account)\s*[:=]\s*"?([A-Za-z0-9._-]+)"?/i;
