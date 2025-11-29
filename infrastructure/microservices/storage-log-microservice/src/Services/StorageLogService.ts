@@ -20,14 +20,6 @@ export class StorageLogService implements IStorageLogService{
         //radi proveru 
         mkdirSync(ARCHIVE_DIR, {recursive: true});
         mkdirSync(TEMP_DIR, {recursive: true});
-
-        console.log("[StorageLogService] initialized");
-    }
-
-    private isOlderThan72h(timestamp: Date): boolean{
-        const ts = new Date(timestamp).getTime();
-        const cutoff = Date.now() - 72 * 60 * 60 * 1000;
-        return ts < cutoff;
     }
     
     private getTimeGroup(timeStamp: Date): string{
@@ -48,21 +40,18 @@ export class StorageLogService implements IStorageLogService{
     }
 
     public async runArchiveProcess(): Promise<void> {
-        console.log("[StorageLogService] Starting archive process...");
-        
-        // dobavljanje dogadjaja
-        const allEvents = (await this.eventClient.get<EventDTO[]>(
-            "neka ruta" // zamijeniti rutu kada se zavrsi event collector servis
+        const hours = 72;
+        // dobavljanje dogadjaja i pretnje
+        //getOldEvents(int hours) : List<Event>
+        const eventsToArchive = (await this.eventClient.get<EventDTO[]>(
+            "neka ruta", // zamijeniti rutu kada se zavrsi event collector servis
+            {params: { hours }}
         )).data;
 
-        const eventsToArchive = allEvents.filter(e => this.isOlderThan72h(e.timestamp));
-
-        // dobavljanje alerta/correlationa
-        const allCorrelations = (await this.correlationClient.get<CorrelationDTO[]>(
-            "neka ruta" // zamijeniti rutu kada se zavrsi alert servis
-        )).data;
-
-        const correlationsToArchive = allCorrelations.filter(c => this.isOlderThan72h(c.timestamp));
+        // // dobavljanje alerta/correlationa
+        // const allCorrelations = (await this.correlationClient.get<CorrelationDTO[]>(
+        //     "neka ruta" // zamijeniti rutu kada se zavrsi alert servis
+        // )).data;
 
         const groups: Record<string, string[]> = {};
 
@@ -73,12 +62,12 @@ export class StorageLogService implements IStorageLogService{
             groups[key].push(`EVENT | ID=${e.id} | TYPE=${e.type} | SOURCE=${e.source} | ${e.description} | ${e.timestamp}`);
         }
 
-        for(const c of correlationsToArchive){
-            const key = this.getTimeGroup(c.timestamp);
-            if(!groups[key]) groups[key] = [];
+        // for(const c of correlationsToArchive){
+        //     const key = this.getTimeGroup(c.timestamp);
+        //     if(!groups[key]) groups[key] = [];
 
-            groups[key].push(`CORRELATION | ID=${c.id} | ALERT=${c.is_alert} | ${c.description} | ${c.timestamp}`);
-        }
+        //     groups[key].push(`CORRELATION | ID=${c.id} | ALERT=${c.is_alert} | ${c.description} | ${c.timestamp}`);
+        // }
 
         // generisanje txt fajlova
         const txtFiles: string[] = [];
@@ -91,20 +80,16 @@ export class StorageLogService implements IStorageLogService{
             txtFiles.push(name);
         }
 
-        console.log(`[StorageLogService] Created ${txtFiles.length} batch files.`);
-
         // kreiranje tar arhive
         const tarName = `logs_${new Date().toISOString().replace(/[:.]/g, "_")}.tar`;
         const tarPath = path.join(ARCHIVE_DIR, tarName);
 
         execSync(`tar -cf ${tarPath} -C ${TEMP_DIR} ${txtFiles.join(" ")}`);
         
-        console.log("[StorageLogService] TAR archive created: ", tarName);
-
         // upis u bazu
         const entry = this.storageRepo.create({
             fileName: tarName,
-            eventCount: eventsToArchive.length + correlationsToArchive.length
+            eventCount: eventsToArchive.length //+ correlationsToArchive.length
         });
 
         await this.storageRepo.save(entry);
@@ -114,18 +99,17 @@ export class StorageLogService implements IStorageLogService{
             unlinkSync(path.join(TEMP_DIR, f));
         }
 
-        // slanje delete zahtjeva drugim servisima
+        // salje se Event Collector Service-u
         await this.eventClient.delete(
             "neka ruta", // zamijeniti rutu kada se zavrsi event collector servis
             {data: eventsToArchive.map(e => e.id)}
         );
 
+        //salje se Analysis Engine Service-u
         await this.correlationClient.delete(
             "neka ruta", // zamijeniti rutu kada se zavrsi alert servis
-            {data: correlationsToArchive.map(c => c.id)}
+            {data: eventsToArchive.map(c => c.id)}
+            //{data: correlationsToArchive.map(c => c.id)}
         );
-
-        console.log("[StorageLogService] Archive process completed");
-
     }
 }
