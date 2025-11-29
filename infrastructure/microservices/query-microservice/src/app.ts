@@ -5,6 +5,8 @@ import dotenv from 'dotenv';
 import { initialize_database } from './Database/InitializeConnection';
 //import { Repository } from 'typeorm';
 import { Db } from './Database/DbConnectionPool';
+import { CacheEntry } from './Domain/models/CacheEntry';
+import { MongoRepository } from 'typeorm';
 
 
 dotenv.config({ quiet: true });
@@ -35,7 +37,7 @@ void (async () => {
 })();
 
 // ORM Repository
-
+const cacheRepository : MongoRepository<CacheEntry> = Db.getMongoRepository(CacheEntry);
 // Servisi
 
 
