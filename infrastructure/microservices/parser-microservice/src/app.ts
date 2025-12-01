@@ -9,7 +9,6 @@ import { ParserEvent } from './Domain/models/ParserEvent';
 import { IParserService } from './Domain/services/IParserService';
 import { ParserService } from './Services/ParserService';
 import { ParserController } from './WebAPI/controllers/ParserController';
-import { EventValidator } from './Application/validators/EventValidator';
 import { IParserRepositoryService } from './Domain/services/IParserRepositoryService';
 import { ParserRepositoryService } from './Services/ParserRepositoryService';
 import { ILogerService } from './Domain/services/ILogerService';
@@ -37,10 +36,10 @@ initialize_database();
 const parserEventRepository: Repository<ParserEvent> = Db.getRepository(ParserEvent);
 
 // Validators
-const validator = new EventValidator();
+
 
 // Services
-const parserService: IParserService = new ParserService(parserEventRepository, validator);
+const parserService: IParserService = new ParserService(parserEventRepository);
 const parserRepositoryService: IParserRepositoryService = new ParserRepositoryService(parserEventRepository);
 const logger: ILogerService = new LogerService();
 

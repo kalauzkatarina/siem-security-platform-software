@@ -26,6 +26,7 @@ export class ParserController {
         try {
             const rawMessage = req.body.message as string;  // Team 2 sends JSON with event message and event source (microservice which called log)
             const source = req.body.source as string;
+            
             const validate = ValidateInputMessage(rawMessage);
             if (!validate.success) {
                 res.status(400).json({ success: false, message: validate.message });

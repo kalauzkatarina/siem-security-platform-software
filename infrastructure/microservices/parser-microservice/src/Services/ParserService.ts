@@ -5,13 +5,12 @@ import { IParserService } from "../Domain/services/IParserService";
 import axios, { AxiosInstance } from "axios";
 import { EventType } from "../Domain/enums/EventType";
 import { ParseResult } from "../Domain/types/ParseResult";
-import { IEventValidator } from "../Domain/validators/IEventValidator";
 
 export class ParserService implements IParserService {
     private readonly analysisEngineClient: AxiosInstance;
     private readonly eventClient: AxiosInstance;
 
-    constructor(private parserEventRepository: Repository<ParserEvent>, private validator: IEventValidator) {
+    constructor(private parserEventRepository: Repository<ParserEvent>) {
         const analysisServiceURL = process.env.ANALYSIS_ENGINE_API;
         const eventServiceURL = process.env.EVENT_SERVICE_API;
 
