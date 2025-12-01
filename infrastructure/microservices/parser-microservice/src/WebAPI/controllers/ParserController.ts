@@ -18,9 +18,10 @@ export class ParserController {
 
     private async log(req: Request, res: Response): Promise<void> {
         try {
-            const rawMessage = req.body.message as string;  //drugi tim mora da nam salje json sa message kako bi mi izvukli poruku
+            const rawMessage = req.body.message as string;  // Team 2 sends JSON with event message and event source (microservice which called log)
+            const source = req.body.source as string;
             console.log('Log message before normalization: ' + rawMessage);
-            const response = await this.parserService.normalizeAndSaveEvent(rawMessage);
+            const response = await this.parserService.normalizeAndSaveEvent(rawMessage, source);
             res.status(201).json(response);
         } catch (err) {
             res.status(500).json({ message: (err as Error).message });

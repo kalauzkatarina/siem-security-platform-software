@@ -33,7 +33,8 @@ export class ParserService implements IParserService {
         });
     }
 
-    async normalizeAndSaveEvent(eventMessage: string): Promise<EventDTO> {
+    async normalizeAndSaveEvent(eventMessage: string, eventSource: string): Promise<EventDTO> {
+        const timeOfEvent: Date = new Date();
         this.validator.validateInputMessage(eventMessage);
 
         let event = this.normalizeEventWithRegexes(eventMessage);
@@ -42,12 +43,14 @@ export class ParserService implements IParserService {
         /*if (event.id === -1)    // Couldn't normalize with regexes -> send it to LLM
             event = await this.normalizeEventWithLlm(eventMessage);
 
+        event.source = eventSource;
+        event.timestamp = timeOfEvent;
         const responseEvent = (await this.eventClient.post<EventDTO>("/events", event)).data;    // Saving to the Events table (calling event-collector)
 
         if (responseEvent.id === -1)
             throw Error("Failed to save event to the database");
 
-        const parserEvent: ParserEvent = { parserId: 0, eventId: responseEvent.id, textBeforeParsing: eventMessage, timestamp: new Date() }
+        const parserEvent: ParserEvent = { parserId: 0, eventId: responseEvent.id, textBeforeParsing: eventMessage, timestamp: timeOfEvent }
         await this.parserEventRepository.insert(parserEvent);   // Saving to the Parser table
 
         return responseEvent;*/
@@ -120,10 +123,8 @@ export class ParserService implements IParserService {
 
         const event: EventDTO = {
             id: 0,
-            source: '',
             type: EventType.INFO,
             description: normalizedDescription,
-            timestamp: new Date(),
         };
 
         return {
@@ -147,10 +148,8 @@ export class ParserService implements IParserService {
 
         const event: EventDTO = {
             id: 0,
-            source: '',
             type: EventType.WARNING,
             description: normalizedDescription,
-            timestamp: new Date(),
         };
 
         return {
@@ -174,10 +173,8 @@ export class ParserService implements IParserService {
 
         const event: EventDTO = {
             id: 0,
-            source: '',
             type: EventType.WARNING,
             description: normalizedDescription,
-            timestamp: new Date(),
         };
 
         return {
@@ -202,10 +199,8 @@ export class ParserService implements IParserService {
 
         const event: EventDTO = {
             id: 0,
-            source: '',
             type: EventType.WARNING,
             description: normalizedDescription,
-            timestamp: new Date(),
         };
 
         return {
@@ -229,10 +224,8 @@ export class ParserService implements IParserService {
 
         const event: EventDTO = {
             id: 0,
-            source: '',
             type: EventType.WARNING,
             description: normalizedDescription,
-            timestamp: new Date(),
         };
 
         return {
@@ -256,10 +249,8 @@ export class ParserService implements IParserService {
 
         const event: EventDTO = {
             id: 0,
-            source: '',
             type: EventType.WARNING,
             description: normalizedDescription,
-            timestamp: new Date(),
         };
 
         return {
@@ -283,10 +274,8 @@ export class ParserService implements IParserService {
 
         const event: EventDTO = {
             id: 0,
-            source: '',
             type: EventType.WARNING,
             description: normalizedDescription,
-            timestamp: new Date(),
         };
 
         return {
@@ -310,10 +299,8 @@ export class ParserService implements IParserService {
 
         const event: EventDTO = {
             id: 0,
-            source: '',
             type: EventType.WARNING,
             description: normalizedDescription,
-            timestamp: new Date(),
         };
 
         return {
@@ -337,10 +324,8 @@ export class ParserService implements IParserService {
 
         const event: EventDTO = {
             id: 0,
-            source: '',
             type: EventType.ERROR,
             description: normalizedDescription,
-            timestamp: new Date(),
         };
 
         return {
@@ -369,10 +354,8 @@ export class ParserService implements IParserService {
 
         const event: EventDTO = {
             id: 0,
-            source: '',
             type: EventType.ERROR,
             description: normalizedDescription,
-            timestamp: new Date(),
         };
 
         return {
@@ -401,13 +384,11 @@ export class ParserService implements IParserService {
             throw new Error("Invalid response from Analysis Engine (missing eventData)");
         }
 
-        // Convert JSON to Event model
+        // Convert JSON to Event
         const event: EventDTO = {
             id: 0,
-            source: eventData.source ?? "",  // opciono
             type: eventData.type,
             description: eventData.description,
-            timestamp: eventData.timestamp ? new Date(eventData.timestamp) : new Date()
         };
 
         return event;
