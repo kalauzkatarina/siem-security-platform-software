@@ -1,4 +1,3 @@
-import { EventDTO } from "../DTOs/EventDTO";
 import { ParserEvent } from "../models/ParserEvent";
 
 export interface IParserRepositoryService {

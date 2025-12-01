@@ -1,16 +1,13 @@
-import { Repository } from "typeorm";
+import { Repository, Timestamp } from "typeorm";
 import { EventDTO } from "../Domain/DTOs/EventDTO";
 import { ParserEvent } from "../Domain/models/ParserEvent";
 import { IParserService } from "../Domain/services/IParserService";
 import axios, { AxiosInstance } from "axios";
-import { Event } from "../Domain/models/Event";
 import { EventType } from "../Domain/enums/EventType";
 import { ParseResult } from "../Domain/types/ParseResult";
-import { AnlysisEngineResponseType } from "../Domain/types/AnalysisEngineResponse";
 import { IEventValidator } from "../Domain/validators/IEventValidator";
 
 export class ParserService implements IParserService {
-
     private readonly analysisEngineClient: AxiosInstance;
     private readonly eventClient: AxiosInstance;
 
@@ -40,25 +37,23 @@ export class ParserService implements IParserService {
         this.validator.validateInputMessage(eventMessage);
 
         let event = this.normalizeEventWithRegexes(eventMessage);
-
-        if (event.id === -1)    // Couldn't normalize with regexes -> send it to LLM
+        console.log(event);
+        return event;
+        /*if (event.id === -1)    // Couldn't normalize with regexes -> send it to LLM
             event = await this.normalizeEventWithLlm(eventMessage);
 
-        this.validator.validateEvent(event);    // Validate generated event
-        const dto = this.toDTO(event);
+        const responseEvent = (await this.eventClient.post<EventDTO>("/events", event)).data;    // Saving to the Events table (calling event-collector)
 
-        const eventDTO = (await this.eventClient.post<EventDTO>("/events", dto)).data;    // Saving to the Events table (calling event-collector)
-
-        if (eventDTO.id === -1)
+        if (responseEvent.id === -1)
             throw Error("Failed to save event to the database");
 
-        const parserEvent: ParserEvent = { parserId: 0, eventId: eventDTO.id, textBeforeParsing: eventMessage, timestamp: new Date() }
+        const parserEvent: ParserEvent = { parserId: 0, eventId: responseEvent.id, textBeforeParsing: eventMessage, timestamp: new Date() }
         await this.parserEventRepository.insert(parserEvent);   // Saving to the Parser table
 
-        return eventDTO;
+        return responseEvent;*/
     }
 
-    private normalizeEventWithRegexes(message: string): Event {
+    private normalizeEventWithRegexes(message: string): EventDTO {
         let parseResult;
 
         parseResult = this.parseLoginMessage(message);
@@ -101,8 +96,10 @@ export class ParserService implements IParserService {
         if (parseResult.doesMatch)
             return parseResult.event!;
 
-        const event = new Event();  // Nothing matched -> send to LLM
-        event.id = -1;
+        const event: EventDTO = {
+            id: -1,
+        };
+
         return event;
     }
 
@@ -121,11 +118,13 @@ export class ParserService implements IParserService {
         const normalizedDescription = SUCCESS_LOGIN_REGEX.test(message) ?
             `User '${username}' successfully logged in.` : `Unsuccessful login attempt for user '${username}'.`;
 
-        const event = new Event();
-        event.source = '';              // Not sure what is source of event, TODO: Change this
-        event.type = EventType.INFO;
-        event.description = normalizedDescription;
-        event.timestamp = new Date();
+        const event: EventDTO = {
+            id: 0,
+            source: '',
+            type: EventType.INFO,
+            description: normalizedDescription,
+            timestamp: new Date(),
+        };
 
         return {
             doesMatch: true,
@@ -146,11 +145,13 @@ export class ParserService implements IParserService {
 
         const normalizedDescription = `User '${username}' permissions or roles changed.`;
 
-        const event = new Event();
-        event.source = '';
-        event.type = EventType.WARNING;
-        event.description = normalizedDescription;
-        event.timestamp = new Date();
+        const event: EventDTO = {
+            id: 0,
+            source: '',
+            type: EventType.WARNING,
+            description: normalizedDescription,
+            timestamp: new Date(),
+        };
 
         return {
             doesMatch: true,
@@ -171,11 +172,13 @@ export class ParserService implements IParserService {
 
         const normalizedDescription = `User '${username}' performed a large database access operation.`;
 
-        const event = new Event();
-        event.source = '';
-        event.type = EventType.WARNING;
-        event.description = normalizedDescription;
-        event.timestamp = new Date();
+        const event: EventDTO = {
+            id: 0,
+            source: '',
+            type: EventType.WARNING,
+            description: normalizedDescription,
+            timestamp: new Date(),
+        };
 
         return {
             doesMatch: true,
@@ -197,11 +200,13 @@ export class ParserService implements IParserService {
             ? `User '${username}' exceeded API rate limit.`
             : `API rate limit exceeded.`;
 
-        const event = new Event();
-        event.source = '';
-        event.type = EventType.WARNING;
-        event.description = normalizedDescription;
-        event.timestamp = new Date();
+        const event: EventDTO = {
+            id: 0,
+            source: '',
+            type: EventType.WARNING,
+            description: normalizedDescription,
+            timestamp: new Date(),
+        };
 
         return {
             doesMatch: true,
@@ -218,15 +223,17 @@ export class ParserService implements IParserService {
 
         const username = this.extractUsernameFromMessage(message);
 
-        const description = username !== ''
+        const normalizedDescription = username !== ''
             ? `Brute force attack detected from or targeting user '${username}'.`
             : `Brute force attack detected.`;
 
-        const event = new Event();
-        event.source = '';
-        event.type = EventType.WARNING;
-        event.description = description;
-        event.timestamp = new Date();
+        const event: EventDTO = {
+            id: 0,
+            source: '',
+            type: EventType.WARNING,
+            description: normalizedDescription,
+            timestamp: new Date(),
+        };
 
         return {
             doesMatch: true,
@@ -243,15 +250,17 @@ export class ParserService implements IParserService {
 
         const username = this.extractUsernameFromMessage(message);
 
-        const description = username !== ''
+        const normalizedDescription = username !== ''
             ? `Potential SQL injection attempt detected targeting user '${username}'.`
             : `Potential SQL injection attempt detected.`;
 
-        const event = new Event();
-        event.source = '';
-        event.type = EventType.WARNING;
-        event.description = description;
-        event.timestamp = new Date();
+        const event: EventDTO = {
+            id: 0,
+            source: '',
+            type: EventType.WARNING,
+            description: normalizedDescription,
+            timestamp: new Date(),
+        };
 
         return {
             doesMatch: true,
@@ -268,15 +277,17 @@ export class ParserService implements IParserService {
 
         const username = this.extractUsernameFromMessage(message);
 
-        const description = username !== ''
+        const normalizedDescription = username !== ''
             ? `Service or configuration change made by user '${username}'.`
             : `Service or configuration change detected.`;
 
-        const event = new Event();
-        event.source = '';
-        event.type = EventType.WARNING;
-        event.description = description;
-        event.timestamp = new Date();
+        const event: EventDTO = {
+            id: 0,
+            source: '',
+            type: EventType.WARNING,
+            description: normalizedDescription,
+            timestamp: new Date(),
+        };
 
         return {
             doesMatch: true,
@@ -293,15 +304,17 @@ export class ParserService implements IParserService {
 
         const username = this.extractUsernameFromMessage(message);
 
-        const description = username !== ''
+        const normalizedDescription = username !== ''
             ? `Suspicious resource usage anomaly detected involving user '${username}'.`
             : `Suspicious resource usage anomaly detected.`;
 
-        const event = new Event();
-        event.source = '';
-        event.type = EventType.WARNING;
-        event.description = description;
-        event.timestamp = new Date();
+        const event: EventDTO = {
+            id: 0,
+            source: '',
+            type: EventType.WARNING,
+            description: normalizedDescription,
+            timestamp: new Date(),
+        };
 
         return {
             doesMatch: true,
@@ -318,15 +331,17 @@ export class ParserService implements IParserService {
 
         const username = this.extractUsernameFromMessage(message);
 
-        const description = username !== ''
+        const normalizedDescription = username !== ''
             ? `File integrity issue detected involving user '${username}'.`
             : `File integrity issue detected.`;
 
-        const event = new Event();
-        event.source = '';
-        event.type = EventType.ERROR;
-        event.description = description;
-        event.timestamp = new Date();
+        const event: EventDTO = {
+            id: 0,
+            source: '',
+            type: EventType.ERROR,
+            description: normalizedDescription,
+            timestamp: new Date(),
+        };
 
         return {
             doesMatch: true,
@@ -348,15 +363,17 @@ export class ParserService implements IParserService {
 
         const username = this.extractUsernameFromMessage(message);
 
-        const description = username !== ''
+        const normalizedDescription = username !== ''
             ? `Network anomaly detected involving user '${username}'.`
             : `Network anomaly detected.`;
 
-        const event = new Event();
-        event.source = '';
-        event.type = EventType.WARNING;
-        event.description = description;
-        event.timestamp = new Date();
+        const event: EventDTO = {
+            id: 0,
+            source: '',
+            type: EventType.ERROR,
+            description: normalizedDescription,
+            timestamp: new Date(),
+        };
 
         return {
             doesMatch: true,
@@ -371,7 +388,7 @@ export class ParserService implements IParserService {
         return usernameMatch && usernameMatch[3] ? usernameMatch[3] : '';
     }
 
-    private async normalizeEventWithLlm(message: string): Promise<Event> {
+    private async normalizeEventWithLlm(message: string): Promise<EventDTO> {
         const requestBody = {
             message: message
         };
@@ -385,22 +402,14 @@ export class ParserService implements IParserService {
         }
 
         // Convert JSON to Event model
-        const event = new Event();
-        event.type = eventData.type;
-        event.description = eventData.description;
-        event.source = eventData.source ?? "";  // opciono
-        event.timestamp = eventData.timestamp ? new Date(eventData.timestamp) : new Date();
+        const event: EventDTO = {
+            id: 0,
+            source: eventData.source ?? "",  // opciono
+            type: eventData.type,
+            description: eventData.description,
+            timestamp: eventData.timestamp ? new Date(eventData.timestamp) : new Date()
+        };
 
         return event;
-    }
-
-    private toDTO(event: Event): EventDTO {
-        return {
-            id: event.id,
-            source: event.source,
-            type: event.type,
-            description: event.description,
-            timestamp: event.timestamp
-        }
     }
 }
