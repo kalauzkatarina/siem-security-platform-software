@@ -6,12 +6,15 @@ import { LuLayers3 } from "react-icons/lu";
 import { MdKeyboardArrowRight } from "react-icons/md";
 import { useState } from "react";
 
-// npm install react-icons
-// Inline styles for now, will be in CSS later
+interface SidebarProps {
+    setSideMenuPage: (page: number) => void;
+}
 
-export default function Sidebar() {
+export default function Sidebar({ setSideMenuPage }: SidebarProps) {
 
     const [isSidebarOpened, setIsSidebarOpened] = useState(false);
+
+    // Inline styles for now, will be in CSS later
 
     const sidebarStyle: React.CSSProperties = {
         width: isSidebarOpened ? '200px' : '45px',
@@ -36,7 +39,7 @@ export default function Sidebar() {
         color: 'white',
         cursor: 'pointer',
         padding: '0px',
-        border: 'none'
+        border: 'none'//add hover when we move to css
     };
 
     const itemTextStyle: React.CSSProperties = {
@@ -61,12 +64,24 @@ export default function Sidebar() {
 
             {isSidebarOpened && (
                 <div style={sidebarItemStyle}>
-                    <button style={itemTextStyle}><TbLayoutDashboardFilled size={20} /> Dashboard<MdKeyboardArrowRight size={20} /></button>
-                    <button style={itemTextStyle}><BsCalendarFill size={20} /> Events<MdKeyboardArrowRight size={20} /></button>
-                    <button style={itemTextStyle}><VscGraph size={20} /> Statistics<MdKeyboardArrowRight size={20} /></button>
-                    <button style={itemTextStyle}><LuLayers3 size={20} /> Storage<MdKeyboardArrowRight size={20} /></button>
+                    <button style={itemTextStyle} onClick={() => setSideMenuPage(0)}>
+                        <TbLayoutDashboardFilled size={20} /> Dashboard <MdKeyboardArrowRight size={20} />
+                    </button>
+
+                    <button style={itemTextStyle} onClick={() => setSideMenuPage(1)}>
+                        <BsCalendarFill size={20} /> Events <MdKeyboardArrowRight size={20} />
+                    </button>
+
+                    <button style={itemTextStyle} onClick={() => setSideMenuPage(2)}>
+                        <VscGraph size={20} /> Statistics <MdKeyboardArrowRight size={20} />
+                    </button>
+
+                    <button style={itemTextStyle} onClick={() => setSideMenuPage(3)}>
+                        <LuLayers3 size={20} /> Storage <MdKeyboardArrowRight size={20} />
+                    </button>
                 </div>
             )}
         </div>
     );
+
 }
