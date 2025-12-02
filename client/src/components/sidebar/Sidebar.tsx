@@ -4,14 +4,32 @@ import { BsCalendarFill } from "react-icons/bs";
 import { VscGraph } from "react-icons/vsc";
 import { LuLayers3 } from "react-icons/lu";
 import { MdKeyboardArrowRight } from "react-icons/md";
-import { useState } from "react";
+import { JSX, useState } from "react";
 
 // npm install react-icons
 // Inline styles for now, will be in CSS later
+type PageType = "Dashboard" | "Events" | "Statistics" | "Storage"; //move in types folders later
 
-export default function Sidebar() {
+interface SidebarProps {
+  activePage: (value: PageType) => void; // setter koji prima samo validne stringove
+}
+export default function Sidebar({activePage}:SidebarProps) {
 
     const [isSidebarOpened, setIsSidebarOpened] = useState(false);
+    const [hoveredButton, setHoveredButton] = useState<number | null>(null);
+    const [selectButton, setSelectButton] = useState<number | null>(0);
+
+    const buttons: { icon: JSX.Element; label: PageType }[]=[
+        { icon: <TbLayoutDashboardFilled size={20} />, label: "Dashboard" },
+        { icon: <BsCalendarFill size={20} />, label: "Events" },
+        { icon: <VscGraph size={20} />, label: "Statistics" },
+        { icon: <LuLayers3 size={20} />, label: "Storage" },
+    ];
+    
+    const setSelectPage =(index:number)=>{
+        setSelectButton(index);
+       activePage(buttons[index].label);
+    }
 
     const sidebarStyle: React.CSSProperties = {
         width: isSidebarOpened ? '200px' : '45px',
@@ -39,19 +57,19 @@ export default function Sidebar() {
         border: 'none'
     };
 
-    const itemTextStyle: React.CSSProperties = {
+    const itemTextStyle =(index:number):React.CSSProperties =>({
         fontSize: '14px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
         gap: '10px',
-        backgroundColor: '#202020',
+        backgroundColor:selectButton===index? '#a1a1a1ff': hoveredButton===index ? '#a1a1a1ff' : '#202020',
         color: 'white',
         padding: '8px 2px',
         border: 'none',
         width: '100%',
         cursor: 'pointer'
-    };
+    });
 
     return (
         <div style={sidebarStyle}>
@@ -59,14 +77,20 @@ export default function Sidebar() {
                 <IoIosMenu size={30} />
             </button>
 
-            {isSidebarOpened && (
-                <div style={sidebarItemStyle}>
-                    <button style={itemTextStyle}><TbLayoutDashboardFilled size={20} /> Dashboard<MdKeyboardArrowRight size={20} /></button>
-                    <button style={itemTextStyle}><BsCalendarFill size={20} /> Events<MdKeyboardArrowRight size={20} /></button>
-                    <button style={itemTextStyle}><VscGraph size={20} /> Statistics<MdKeyboardArrowRight size={20} /></button>
-                    <button style={itemTextStyle}><LuLayers3 size={20} /> Storage<MdKeyboardArrowRight size={20} /></button>
-                </div>
-            )}
+
+            <div style={sidebarItemStyle}>
+                {buttons.map((btn, index) => (
+                    <button
+                        key={index}
+                        style={itemTextStyle(index)}
+                        onClick={()=>setSelectPage(index)}
+                        onMouseOver={() => setHoveredButton(index)}
+                        onMouseLeave={() => setHoveredButton(null)}
+                    >
+                        <div style={{ width: 20, height: 20 }}>{btn.icon}</div>  {isSidebarOpened && <span>{btn.label}</span>} <MdKeyboardArrowRight size={20} />
+                    </button>
+                ))}
+            </div>
         </div>
     );
 }
