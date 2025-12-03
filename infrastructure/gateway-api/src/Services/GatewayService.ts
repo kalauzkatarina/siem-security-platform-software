@@ -4,14 +4,19 @@ import { LoginUserDTO } from "../Domain/DTOs/LoginUserDTO";
 import { RegistrationUserDTO } from "../Domain/DTOs/RegistrationUserDTO";
 import { AuthResponseType } from "../Domain/types/AuthResponse";
 import { UserDTO } from "../Domain/DTOs/UserDTO";
+import { AlertDTO } from "../Domain/DTOs/AlertDTO";
+import { AlertQueryDTO} from "../Domain/DTOs/AlertQueryDTO";
+import { PaginatedAlertsDTO } from "../Domain/DTOs/PaginatedAlertsDTO";
 
 export class GatewayService implements IGatewayService {
   private readonly authClient: AxiosInstance;
   private readonly userClient: AxiosInstance;
+  private readonly alertClient: AxiosInstance;
 
   constructor() {
     const authBaseURL = process.env.AUTH_SERVICE_API;
     const userBaseURL = process.env.USER_SERVICE_API;
+    const alertBaseURL = process.env.ALERT_SERVICE_API;
 
     this.authClient = axios.create({
       baseURL: authBaseURL,
@@ -26,6 +31,11 @@ export class GatewayService implements IGatewayService {
     });
 
     // TODO: ADD MORE CLIENTS
+    this.alertClient = axios.create({
+      baseURL: alertBaseURL,
+      headers: { "Content-Type": "application/json" },
+      timeout: 10000,
+    });
   }
 
   // Auth microservice
@@ -59,4 +69,40 @@ export class GatewayService implements IGatewayService {
   }
 
   // TODO: ADD MORE API CALLS
+
+  // Alert Service
+  async getAllAlerts(): Promise<AlertDTO[]> {
+    const response = await this.alertClient.get<AlertDTO[]>("/alerts");
+    return response.data;
+  }
+
+  async getAlertById(id: number): Promise<AlertDTO> {
+    const response = await this.alertClient.get<AlertDTO>(`/alerts/${id}`);
+    return response.data;
+  }
+
+  async searchAlerts(query: AlertQueryDTO): Promise<PaginatedAlertsDTO> {
+    const response = await this.alertClient.get<PaginatedAlertsDTO>("/alerts/search", {
+      params: query
+    });
+    return response.data;
+  }
+
+  async resolveAlert(id: number, resolvedBy: string, status: string): Promise<AlertDTO> {
+    const response = await this.alertClient.put<AlertDTO>(`/alerts/${id}/resolve`, {
+      resolvedBy,
+      status
+    });
+    return response.data;
+  }
+
+  async updateAlertStatus(id: number, status: string): Promise<AlertDTO> {
+    const response = await this.alertClient.put<AlertDTO>(`/alerts/${id}/status`, { status });
+    return response.data;
+  }
+
+  async deleteAlert(id: number): Promise<{ success: boolean }> {
+    const response = await this.alertClient.delete<{ success: boolean }>(`/alerts/${id}`);
+    return response.data;
+  }
 }
