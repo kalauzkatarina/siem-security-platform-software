@@ -1,4 +1,4 @@
-import {IntegerType, Repository} from "typeorm";
+import {In, Repository} from "typeorm";
 import { ICorrelationService } from "../Domain/Services/ICorrelationService";
 import { Correlation } from "../Domain/models/Correlation";
 import { CorrelationEventMap } from "../Domain/models/CorrelationEventMap";
@@ -63,10 +63,13 @@ export class CorrelationService implements ICorrelationService{
     }
 
 
-    private async sendCorrelationAlert(correlation: CorrelationDTO): Promise<void> {
+     async sendCorrelationAlert(correlation: CorrelationDTO): Promise<void> {
         try {
-            await this.alertClient.post("/AlertService/createAlertFromCorrelation", {
-                correlation
+            await this.alertClient.post("/alerts/correlation", {
+                correlationId: correlation.id,
+                description: correlation.description,
+                severity: correlation.severity,
+                correlatedEventIds: correlation.correlatedEventIds
             });
             console.log(
                 `\x1b[35m[CorrelationService]\x1b[0m Notified Alert service for correlation ID ${correlation.id}`
@@ -102,8 +105,21 @@ export class CorrelationService implements ICorrelationService{
     }
 
 
-    async deleteArchivedCorrelations(): Promise<void> {
-        throw new Error("Method not implemented.");
+    async deleteCorrelationsByEventIds(eventIds: number[]): Promise<number> {
+        if(!eventIds || eventIds.length === 0) return 0 ;
+
+        const maps = await this.correlationEventMap.find({
+            where: { event_id: In(eventIds) }
+        })
+
+        const correlationIds = Array.from(new Set(maps.map(map => map.correlation_id)));
+        if(correlationIds.length === 0) return 0 ;
+
+        await this.correlationEventMap.delete({ correlation_id: In(correlationIds) });
+        await this.correlationRepo.delete({ id: In(correlationIds) });
+
+        console.log(`\x1b[35m[CorrelationService]\x1b[0m Deleted correlations associated with event IDs: [${eventIds.join(", ")}]`);    
+        return correlationIds.length;
     }
 
 }
