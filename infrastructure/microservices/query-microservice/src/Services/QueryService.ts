@@ -2,6 +2,7 @@ import { IQueryService } from "../Domain/services/IQueryService";
 import { IQueryRepositoryService } from "../Domain/services/IQueryRepositoryService";
 import { Event } from "../Domain/models/Event";
 import { parseQueryString } from "../Utils/ParseQuery";
+import { EventDTO } from "../Domain/DTOs/EventDTO";
 
 export class QueryService implements IQueryService {
     constructor(
@@ -49,6 +50,14 @@ export class QueryService implements IQueryService {
 
             return true;
         });
+    }
+    public convertEventsToJson(events: EventDTO[]): string {
+        try {
+            return JSON.stringify(events);
+        } catch (error) {
+            console.error(error);
+            return JSON.stringify([]); 
+        }
     }
     
 }

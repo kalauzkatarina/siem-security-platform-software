@@ -1,3 +1,4 @@
+import { EventDTO } from "../DTOs/EventDTO";
 import { CacheEntry } from "../models/CacheEntry";
 
 export interface IQueryService {
@@ -10,4 +11,5 @@ export interface IQueryService {
     // npr konvertovanje rezultata pretrage u JSON i obrnuto
 
     searchEvents(query: string): Promise<any[]>;
+    convertEventsToJson(events: EventDTO[]): string;
 }
