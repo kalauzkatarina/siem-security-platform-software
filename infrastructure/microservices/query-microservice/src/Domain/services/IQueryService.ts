@@ -13,13 +13,7 @@ import { CacheEntry } from "../models/CacheEntry";
 
 export interface IQueryService {
 
-    //saveEvent(eventDto: EventDTO): Promise<EventDTO>;
-
     searchEvents(query: string): Promise<EventDTO[]>;
-    
-    //getEventById(id: number): Promise<EventDTO | null>;
-
-    //getAllEvents(page: number, limit: number): Promise<EventDTO[]>;
 
     //runCacheInvalidationJob(): Promise<void>;
 
