@@ -114,6 +114,45 @@ export class EventsController {
         }
     }
 
+    private async getMaxId(req: Request, res: Response): Promise<void> {
+         try{
+            const created = await this.eventsService.getMaxId();
+            res.status(201).json(created);
+         } 
+         catch(err){
+            const message = (err as Error).message;
+            await this.logger.log(`Error while creating event: ${message}`);
+            res.status(500).json({ message });
+         }
+   }
+
+    private async getEventsFromId1ToId2(req: Request, res: Response): Promise<void>{
+        try{
+        const fromId = Number(req.params.fromId);
+        const toId = Number(req.params.toId);
+
+        if(Number.isNaN(fromId)){
+            res.status(400).json({ message: "Invalid starting id" });
+        }
+
+         if(Number.isNaN(toId)){
+            res.status(400).json({ message: "Invalid ending id" });
+        }
+
+        if(fromId > toId){
+            res.status(400).json({ message: "From id should be lesser than to id value" });
+        }
+
+        const events = await this.eventsService.getEventsFromId1ToId2(fromId,toId)
+        res.status(200).json(events);
+
+    }
+    catch(err){
+        const message = (err as Error).message;
+            await this.logger.log(`Error while getting events from range: ${message}`);
+            res.status(500).json({ message });
+    }
+  }
 
 
     public getRouter(): Router {

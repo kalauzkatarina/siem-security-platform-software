@@ -7,4 +7,6 @@ export interface IEventsService {
     getById(id: number): Promise<Event>;
     deleteById(id: number): Promise<boolean>;
     deleteOldEvents(expiredIds:Number[]): Promise<boolean>;
+    getMaxId():Promise<Event>;
+    getEventsFromId1ToId2(fromId: number, toId: number): Promise<Event[]>
 }

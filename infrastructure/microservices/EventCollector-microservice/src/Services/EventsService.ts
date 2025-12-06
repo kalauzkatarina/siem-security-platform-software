@@ -2,6 +2,7 @@ import { Repository } from "typeorm";
 import { Event } from "../Domain/models/Event";
 import { EventDTO } from "../Domain/DTOs/EventDTO";
 import { IEventsService } from "../Domain/services/IEventsService";
+import { Between } from "typeorm"
 
 export class EventsService implements IEventsService {
     constructor(
@@ -51,7 +52,26 @@ export class EventsService implements IEventsService {
         }
         return deletedOnes > 0
     }
-
+    
+    async getMaxId(): Promise<Event> {
+        const event = await this.eventRepository.findOne({
+        order: { id: "DESC" }
+    });
+        if (!event) {
+            throw new Error(`Event database is empty`);
+        }
+        return event;
+    }
+    async getEventsFromId1ToId2(fromId: number, toId: number): Promise<Event[]> {
+      return await this.eventRepository.find({
+        where: {
+            id: Between(fromId, toId)
+        },
+        order: {
+            id: "ASC"
+        }
+    });
+    }
 
     private toDTO(event: Event): EventDTO {
         return {
