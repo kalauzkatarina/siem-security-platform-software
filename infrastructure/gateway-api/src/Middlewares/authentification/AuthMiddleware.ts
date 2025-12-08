@@ -1,38 +1,43 @@
 import { Request, Response, NextFunction } from "express";
-import jwt from "jsonwebtoken";
 import { AuthTokenClaimsType } from "../../Domain/types/AuthTokenClaims";
+import { IGatewayService } from "../../Domain/services/IGatewayService";
 
 declare global {
   namespace Express {
     interface Request {
       user?: AuthTokenClaimsType;
+      isSysAdmin?: boolean;
     }
   }
 }
 
-export const authenticate = (
-  req: Request,
-  res: Response,
-  next: NextFunction
-): void => {
-  const authHeader = req.headers.authorization;
+export const createAuthMiddleware = (gatewayService: IGatewayService) => {
+  return async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
+    const authHeader = req.headers.authorization;
 
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    res.status(401).json({ success: false, message: "Token is missing!" });
-    return;
-  }
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      res.status(401).json({ success: false, message: "Token is missing!" });
+      return;
+    }
 
-  const token = authHeader.split(" ")[1];
+    const token = authHeader.split(" ")[1];
+    try {
+      const result = await gatewayService.validateToken(token);
 
-  try {
-    const decoded = jwt.verify(
-      token,
-      process.env.JWT_SECRET ?? ""
-    ) as AuthTokenClaimsType;
+      if (!result.valid) {
+        res.status(401).json({ success: false, message: result.error });
+        return;
+      }
 
-    req.user = decoded;
-    next();
-  } catch (err) {
-    res.status(401).json({ success: false, message: "Invalid token provided!" });
-  }
+      req.user = result.payload;
+      req.isSysAdmin = result.isSysAdmin;
+      next();
+    } catch (error) {
+      res.status(500).json({ success: false, message: error });
+    }
+  };
 };

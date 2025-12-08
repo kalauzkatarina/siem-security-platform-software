@@ -3,15 +3,21 @@ import { IGatewayService } from "../Domain/services/IGatewayService";
 import { LoginUserDTO } from "../Domain/DTOs/LoginUserDTO";
 import { RegistrationUserDTO } from "../Domain/DTOs/RegistrationUserDTO";
 import { AlertQueryDTO } from "../Domain/DTOs/AlertQueryDTO";
-import { authenticate } from "../Middlewares/authentification/AuthMiddleware";
-import { authorize } from "../Middlewares/authorization/AuthorizeMiddleware";
+import { createAuthMiddleware } from "../Middlewares/authentification/AuthMiddleware";
+import {
+  authorize,
+  requireSysAdmin,
+  ROLES,
+} from "../Middlewares/authorization/AuthorizeMiddleware";
 import axios from "axios";
 
 export class GatewayController {
   private readonly router: Router;
+  private readonly authenticate: any;
 
   constructor(private readonly gatewayService: IGatewayService) {
     this.router = Router();
+    this.authenticate = createAuthMiddleware(gatewayService);
     this.initializeRoutes();
   }
 
@@ -21,36 +27,86 @@ export class GatewayController {
     this.router.post("/register", this.register.bind(this));
 
     // Users
-    this.router.get("/users", authenticate, authorize("admin"), this.getAllUsers.bind(this));
-    this.router.get("/users/:id", authenticate, authorize("admin", "seller"), this.getUserById.bind(this));
+    this.router.get(
+      "/users",
+      this.authenticate,
+      authorize(ROLES.ADMIN),
+      this.getAllUsers.bind(this)
+    );
+    this.router.get(
+      "/users/:id",
+      this.authenticate,
+      authorize(ROLES.ADMIN, ROLES.PROJECT_MANAGER),
+      this.getUserById.bind(this)
+    );
 
     // Alert
-    
+
     // SSE Stream za real-time notifikacije
-    this.router.get("/siem/alerts/notifications/stream", authenticate,authorize("sysadmin"),this.streamAlertNotifications.bind(this));
+    this.router.get(
+      "/siem/alerts/notifications/stream",
+      this.authenticate,
+      requireSysAdmin,
+      this.streamAlertNotifications.bind(this)
+    );
 
     // Alert CRUD operacije
-    this.router.get("/siem/alerts/search", authenticate, authorize("sysadmin"), this.searchAlerts.bind(this));
-    this.router.get("/siem/alerts",authenticate,authorize("sysadmin"),this.getAllAlerts.bind(this));
-    this.router.get("/siem/alerts/:id",authenticate,authorize("sysadmin"),this.getAlertById.bind(this));
-    this.router.put("/siem/alerts/:id/resolve",authenticate,authorize("sysadmin"),this.resolveAlert.bind(this));
-    this.router.put("/siem/alerts/:id/status",authenticate,authorize("sysadmin"),this.updateAlertStatus.bind(this));
+    this.router.get(
+      "/siem/alerts/search",
+      this.authenticate,
+      requireSysAdmin,
+      this.searchAlerts.bind(this)
+    );
+    this.router.get(
+      "/siem/alerts",
+      this.authenticate,
+      requireSysAdmin,
+      this.getAllAlerts.bind(this)
+    );
+    this.router.get(
+      "/siem/alerts/:id",
+      this.authenticate,
+      requireSysAdmin,
+      this.getAlertById.bind(this)
+    );
+    this.router.put(
+      "/siem/alerts/:id/resolve",
+      this.authenticate,
+      requireSysAdmin,
+      this.resolveAlert.bind(this)
+    );
+    this.router.put(
+      "/siem/alerts/:id/status",
+      this.authenticate,
+      requireSysAdmin,
+      this.updateAlertStatus.bind(this)
+    );
 
     // Query
-    this.router.get("/siem/query/search", authenticate, authorize("sysadmin"), this.searchEvents.bind(this));
-    this.router.get("/siem/query/oldEvents/:hours", authenticate, authorize("sysadmin"), this.getOldEvents.bind(this));
+    this.router.get(
+      "/siem/query/search",
+      this.authenticate,
+      requireSysAdmin,
+      this.searchEvents.bind(this)
+    );
+    this.router.get(
+      "/siem/query/oldEvents/:hours",
+      this.authenticate,
+      requireSysAdmin,
+      this.getOldEvents.bind(this)
+    );
   }
 
   private async login(req: Request, res: Response): Promise<void> {
-      const data: LoginUserDTO = req.body;
-      const result = await this.gatewayService.login(data);
-      res.status(200).json(result);
+    const data: LoginUserDTO = req.body;
+    const result = await this.gatewayService.login(data);
+    res.status(200).json(result);
   }
 
   private async register(req: Request, res: Response): Promise<void> {
-      const data: RegistrationUserDTO = req.body;
-      const result = await this.gatewayService.register(data);
-      res.status(200).json(result);
+    const data: RegistrationUserDTO = req.body;
+    const result = await this.gatewayService.register(data);
+    res.status(200).json(result);
   }
 
   private async getAllUsers(req: Request, res: Response): Promise<void> {
@@ -64,7 +120,7 @@ export class GatewayController {
 
   private async getUserById(req: Request, res: Response): Promise<void> {
     try {
-      const id = parseInt(req.params.id, 10); 
+      const id = parseInt(req.params.id, 10);
       if (!req.user || req.user.user_id !== id) {
         res.status(401).json({ message: "You can only access your own data!" });
         return;
@@ -79,9 +135,12 @@ export class GatewayController {
 
   // Alert
 
-  private async streamAlertNotifications(req: Request, res: Response): Promise<void> {
+  private async streamAlertNotifications(
+    req: Request,
+    res: Response
+  ): Promise<void> {
     const alertServiceURL = process.env.ALERT_SERVICE_API;
-    
+
     if (!alertServiceURL) {
       res.status(500).json({ error: "Alert service URL not configured" });
       return;
@@ -97,7 +156,9 @@ export class GatewayController {
       const userId = req.user?.user_id || "unknown";
       const username = req.user?.username || "unknown";
 
-      console.log(`\x1b[36m[Gateway]\x1b[0m SSE connection established for SysAdmin: ${username}`);
+      console.log(
+        `\x1b[36m[Gateway]\x1b[0m SSE connection established for SysAdmin: ${username}`
+      );
 
       const response = await axios.get(
         `${alertServiceURL}/alerts/notifications/stream`,
@@ -113,10 +174,11 @@ export class GatewayController {
 
       // Cleanup kada se klijent diskonektuje
       req.on("close", () => {
-        console.log(`\x1b[36m[Gateway]\x1b[0m SSE connection closed for ${username}`);
+        console.log(
+          `\x1b[36m[Gateway]\x1b[0m SSE connection closed for ${username}`
+        );
         response.data.destroy();
       });
-
     } catch (err) {
       console.error(`\x1b[31m[Gateway]\x1b[0m SSE proxy error:`, err);
       if (!res.headersSent) {
@@ -151,11 +213,15 @@ export class GatewayController {
         limit: req.query.limit ? Number(req.query.limit) : undefined,
         severity: req.query.severity as any,
         status: req.query.status as any,
-        startDate: req.query.startDate ? new Date(req.query.startDate as string) : undefined,
-        endDate: req.query.endDate ? new Date(req.query.endDate as string) : undefined,
+        startDate: req.query.startDate
+          ? new Date(req.query.startDate as string)
+          : undefined,
+        endDate: req.query.endDate
+          ? new Date(req.query.endDate as string)
+          : undefined,
         source: req.query.source as string,
         sortBy: req.query.sortBy as any,
-        sortOrder: req.query.sortOrder as any
+        sortOrder: req.query.sortOrder as any,
       };
 
       const result = await this.gatewayService.searchAlerts(query);
@@ -171,7 +237,11 @@ export class GatewayController {
       const resolvedBy = req.user?.username || "Unknown";
       const status = req.body.status || "RESOLVED";
 
-      const result = await this.gatewayService.resolveAlert(id, resolvedBy, status);
+      const result = await this.gatewayService.resolveAlert(
+        id,
+        resolvedBy,
+        status
+      );
       res.status(200).json(result);
     } catch (err) {
       res.status(500).json({ message: (err as Error).message });
