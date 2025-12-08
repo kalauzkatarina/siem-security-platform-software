@@ -5,6 +5,7 @@ import axios, { all, AxiosInstance } from "axios";
 import { Event } from "../Domain/models/Event";
 import { CacheEntryDTO } from "../Domain/DTOs/CacheEntryDTO";
 import { tokenize } from "../Utils/EventToTokensParser";
+import { ILoggerService } from "../Domain/services/ILoggerService";
 
 // princip pretrage:
 // imamo recnik koji mapira reci iz eventa na event id-eve
@@ -26,7 +27,7 @@ export class QueryRepositoryService implements IQueryRepositoryService {
 
     private readonly eventClient : AxiosInstance;
 
-    constructor(private readonly cacheRepository: MongoRepository<CacheEntry>) 
+    constructor(private readonly cacheRepository: MongoRepository<CacheEntry>, private readonly loggerService: ILoggerService) 
     {
         const eventUrl = process.env.EVENT_SERVICE_API;
 
@@ -37,6 +38,16 @@ export class QueryRepositoryService implements IQueryRepositoryService {
         });
 
         this.startIndexingWorker();
+    }
+
+    async findById(id: number): Promise<Event> {
+        //ovo ne treba ovako ispraviti!!
+            const response = await this.eventClient.get(`/events/${id}`);
+            if(!response){
+                 this.loggerService.log(`findById error fetching id ${id}`);
+                 return new Event();
+                 }
+            return response.data;
     }
     
     async addEntry(entry: CacheEntryDTO): Promise<CacheEntry> {
@@ -132,10 +143,10 @@ export class QueryRepositoryService implements IQueryRepositoryService {
                     newEvents.forEach(event => this.addEventToIndex(event));
                     
                     this.lastProcessedId = maxId;
-                    // kad se doda LoggerService dodati neku poruku
+                    this.loggerService.log(`Indexed ${newEvents.length} new events up to id ${maxId}`);
                 }
             } catch (err) {
-                // kad se doda LoggerService dodati neku poruku
+                 this.loggerService.log(`Indexing worker error: ${err}`);
             }
         }, intervalMs);
     }

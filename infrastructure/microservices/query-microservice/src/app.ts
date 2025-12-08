@@ -9,6 +9,7 @@ import { CacheEntry } from './Domain/models/CacheEntry';
 import { MongoRepository } from 'typeorm';
 import { QueryRepositoryService } from './Services/QueryRepositoryService';
 import { QueryService } from './Services/QueryService';
+import { LoggerService } from './Services/LoggerService';
 import { QueryController } from './WebAPI/controllers/QueryController';
 
 
@@ -43,8 +44,9 @@ void (async () => {
 const cacheRepository : MongoRepository<CacheEntry> = Db.getMongoRepository(CacheEntry);
 
 // Servisi
-const queryRepositoryService = new QueryRepositoryService(cacheRepository);
-const queryService = new QueryService();
+const loggerService = new LoggerService();
+const queryRepositoryService = new QueryRepositoryService(cacheRepository, loggerService);
+const queryService = new QueryService(queryRepositoryService);
 
 // WebAPI rute
 const queryController = new QueryController(queryRepositoryService);
