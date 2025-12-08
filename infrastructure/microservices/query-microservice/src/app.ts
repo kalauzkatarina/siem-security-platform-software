@@ -11,6 +11,7 @@ import { QueryRepositoryService } from './Services/QueryRepositoryService';
 import { QueryService } from './Services/QueryService';
 import { LoggerService } from './Services/LoggerService';
 import { QueryController } from './WebAPI/controllers/QueryController';
+import { saveQueryState } from './Utils/StateManager';
 
 
 dotenv.config({ quiet: true });
@@ -49,9 +50,27 @@ const queryRepositoryService = new QueryRepositoryService(cacheRepository, logge
 const queryService = new QueryService(queryRepositoryService);
 
 // WebAPI rute
-const queryController = new QueryController(queryRepositoryService);
+const queryController = new QueryController(queryService, queryRepositoryService);
 
 // Registracija ruta
 app.use('/api/v1', queryController.getRouter());
+
+process.on('SIGINT', async () => {
+  loggerService.log("Saving query service state before shutdown...");
+
+  // ako se inverted indeks struktura azurira => sacekaj da se zavrsi
+  while (queryRepositoryService.isIndexingInProgress()) {
+    loggerService.log("Indexing in progress, waiting to save state...");
+    await new Promise(resolve => setTimeout(resolve, 1000));
+  }
+
+  saveQueryState({
+    lastProcessedId: queryRepositoryService.getLastProcessedId(),
+    invertedIndex: queryRepositoryService.getInvertedIndex(),
+    eventTokenMap: queryRepositoryService.getEventIdToTokens()
+  });
+  loggerService.log("State saved. Exiting...");
+  process.exit(0);
+});
 
 export default app;

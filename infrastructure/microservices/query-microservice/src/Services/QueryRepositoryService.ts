@@ -6,6 +6,7 @@ import { Event } from "../Domain/models/Event";
 import { CacheEntryDTO } from "../Domain/DTOs/CacheEntryDTO";
 import { tokenize } from "../Utils/EventToTokensParser";
 import { ILoggerService } from "../Domain/services/ILoggerService";
+import { loadQueryState, saveQueryState } from "../Utils/StateManager";
 
 // princip pretrage:
 // imamo recnik koji mapira reci iz eventa na event id-eve
@@ -24,6 +25,8 @@ export class QueryRepositoryService implements IQueryRepositoryService {
     private invertedIndex: Map<string, Set<number>> = new Map();
     private eventIdToTokens: Map<number, string[]> = new Map();
     private lastProcessedId: number = 0;
+    
+    private indexingInProgress: boolean = false;
 
     private readonly eventClient : AxiosInstance;
 
@@ -36,6 +39,11 @@ export class QueryRepositoryService implements IQueryRepositoryService {
             headers: { "Content-Type": "application/json" },
             timeout: 5000,
         });
+
+        const savedState = loadQueryState();
+        this.lastProcessedId = savedState.lastProcessedId;
+        this.invertedIndex = savedState.invertedIndex;
+        this.eventIdToTokens = savedState.eventTokenMap;
 
         this.startIndexingWorker();
     }
@@ -79,7 +87,8 @@ export class QueryRepositoryService implements IQueryRepositoryService {
     public addEventToIndex(event: Event): void {
         const tokens = [
             ...tokenize(event.description),
-            ...tokenize(event.source)
+            ...tokenize(event.source),
+            ...tokenize(event.type)
         ];
 
         this.eventIdToTokens.set(event.id, tokens);
@@ -134,6 +143,9 @@ export class QueryRepositoryService implements IQueryRepositoryService {
     // pokrece se na 10 sekundi
     public startIndexingWorker(intervalMs: number = 10000): void {
         setInterval(async () => {
+            if (this.indexingInProgress) return;
+            this.indexingInProgress = true;
+
             try {
                 const maxId = await this.getMaxId();
 
@@ -147,7 +159,25 @@ export class QueryRepositoryService implements IQueryRepositoryService {
                 }
             } catch (err) {
                  this.loggerService.log(`Indexing worker error: ${err}`);
+            } finally {
+                this.indexingInProgress = false;
             }
         }, intervalMs);
+    }
+
+    public getInvertedIndex(): Map<string, Set<number>> {
+        return this.invertedIndex;
+    }
+
+    public getEventIdToTokens(): Map<number, string[]> {
+        return this.eventIdToTokens;
+    }
+
+    public getLastProcessedId(): number {
+        return this.lastProcessedId;
+    }
+
+    public isIndexingInProgress(): boolean {
+        return this.indexingInProgress;
     }
 }
