@@ -54,7 +54,7 @@ export default function Dashboard() {
                 <StatCard title="Most weight archive" subtitle="logs_2025_11_06_22_00.tar" value={100} valueDescription="MB" />
             </div>
             <h3 style={{ marginTop: '10px' , padding:"5px", margin: "10px"  }}>Recent Events</h3>
-            <RecentEventsTable events={events} />
+            <RecentEventsTable events={events} />s
         </div>
     );
 };

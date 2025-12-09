@@ -5,6 +5,7 @@ import { VscGraph } from "react-icons/vsc";
 import { LuLayers3 } from "react-icons/lu";
 import { MdKeyboardArrowRight } from "react-icons/md";
 import { useState } from "react";
+import { BiError } from "react-icons/bi";
 
 interface SidebarProps {
     setSideMenuPage: (page: number) => void;
@@ -80,6 +81,11 @@ export default function Sidebar({ setSideMenuPage }: SidebarProps) {
                     <button style={itemTextStyle(3)} onClick={() => {setSideMenuPage(3); setSelectedButton(3)}} onMouseEnter={() => setHover(3)} onMouseLeave={() => setHover(null)}>
                         <LuLayers3 size={20} /> Storage <MdKeyboardArrowRight size={20} />
                     </button>
+
+                    <button style={itemTextStyle(4)} onClick={() => {setSideMenuPage(4); setSelectedButton(4)}} onMouseEnter={() => setHover(4)} onMouseLeave={() => setHover(null)}>
+                        <BiError size={23}/> Alerts <MdKeyboardArrowRight size={20} />
+                    </button>
+
 
                 </div>
             )}

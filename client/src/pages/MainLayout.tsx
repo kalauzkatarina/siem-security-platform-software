@@ -4,6 +4,7 @@ import Dashboard from '../components/views/Dashboard';
 import Events from '../components/views/Events';
 import Statistics from '../components/views/Statistics';
 import Storage from '../components/views/Storage';
+import Alert from '../components/views/Alerts';
 
 // npm install react-icons
 // Inline styles for now, will be in CSS later
@@ -38,6 +39,7 @@ export default function MainLayout() {
                 {sideMenuPage === 1 && <Events />}
                 {sideMenuPage === 2 && <Statistics />}
                 {sideMenuPage === 3 && <Storage />}
+                {sideMenuPage === 4  && <Alert/>}
             </div>
         </div>
     );
