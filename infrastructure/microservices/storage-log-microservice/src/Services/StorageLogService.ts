@@ -9,6 +9,7 @@ import { exec } from "child_process";
 import { getTimeGroup } from "../Utils/TimeGroup";
 import { ILogerService } from "../Domain/services/ILogerService";
 import util from "util";
+import { ArchiveStatsDTO } from "../Domain/DTOs/ArchiveStatsDTO";
 
 //da bi izvrsio komandu asinhrono, arhiviranje se odvija u pozadi
 const execSync = util.promisify(exec);
@@ -118,8 +119,25 @@ export class StorageLogService implements IStorageLogService {
         // kreiranje tar arhive
         const tarName = `logs_${new Date().toISOString().replace(/[:.]/g, "_")}.tar`;
         const tarPath = path.join(ARCHIVE_DIR, tarName);
-        const stats = statSync(tarPath);
-        const sizeInBytes = stats.size;
+        
+        try {
+            const cmd = `tar -cf $"${tarPath}" -C "${TEMP_DIR}" ${txtFiles.join(" ")}`;
+            await execSync(cmd);
+
+            await this.logger.log(`Created tar archive: ${tarName}`);
+        }
+        catch(err){
+            await this.logger.log("ERROR creating tar archive: " + err);
+            return false;
+        }
+
+        let stats: any;
+        try{
+            stats = statSync(tarPath);
+        } catch(err) {
+            await this.logger.log("ERROR reading tar file stats");
+            return false;
+        }
 
         try {
             await execSync(`tar -cf ${tarPath} -C ${TEMP_DIR} ${txtFiles.join(" ")}`);
@@ -226,5 +244,29 @@ export class StorageLogService implements IStorageLogService {
             return 0; 
         });
         return allArchives;
+    }
+
+    public async getStats(): Promise<ArchiveStatsDTO>{
+        const archives = await this.storageRepo.find();
+
+        const totalSize = archives.reduce((sum, a) => sum + a.fileSize, 0);
+        const lastArchive = archives.sort(
+            (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        )[0];
+
+        return {
+            totalSize,
+            retentionHours: 72,
+            lastArchiveName: lastArchive ? lastArchive.fileName : null
+        };
+    }
+
+    public async getArchiveFilePath(id: number): Promise<string | null> {
+        const log = await this.storageRepo.findOne({ where: {storageLogId: id}});
+        if(!log)
+            return null;
+        
+        const fullPath = path.join(ARCHIVE_DIR, log.fileName);
+        return fullPath;
     }
 }

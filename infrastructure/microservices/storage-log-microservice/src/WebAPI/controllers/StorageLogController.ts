@@ -16,6 +16,8 @@ export class StorageLogController{
         this.router.post("/storageLog/run", this.runArchiveProcess.bind(this));
         this.router.get("/storageLog/search", this.searchArchives.bind(this));
         this.router.get("/storageLog/sort", this.sortArchives.bind(this));
+        this.router.get("/storageLog/stats", this.getStats.bind(this));
+        this.router.get("/storageLog/file/:id", this.getArchiveFile.bind(this));
     }
 
     private async getAllArchives(req: Request, res: Response): Promise<void>{
@@ -58,7 +60,32 @@ export class StorageLogController{
         }
     }
 
-       public getRouter(): Router {
+    private async getStats(req: Request, res: Response): Promise<void> {
+        try{
+            const result = await this.storageLogService.getStats();
+            res.status(200).json(result);
+        }catch (err){
+            res.status(500).json({message: (err as Error).message});
+        }
+    }  
+    
+    private async getArchiveFile(req: Request, res: Response): Promise<void>{ 
+        try{
+            const id = Number(req.params.id);
+            const filePath = await this.storageLogService.getArchiveFilePath(id);
+
+            if(!filePath) {
+                res.status(404).json({error: "Archive not found"});
+                return;
+            }
+
+            res.download(filePath);
+        }catch(err) {
+            res.status(500).json({message: (err as Error).message});
+        }
+    }
+
+    public getRouter(): Router {
         return this.router;
     }
 }
