@@ -1,4 +1,5 @@
 import { ArchiveDTO } from "../../models/storage/ArchiveDTO";
+import { ArchiveStatsDTO } from "../../models/storage/ArchiveStatsDTO";
 import { IStorageAPI } from "./IStorageAPI";
 import axios, { AxiosInstance } from "axios";
 
@@ -20,8 +21,27 @@ export class StorageAPI implements IStorageAPI {
     }
 
     async searchArchives(query: string): Promise<ArchiveDTO[]> {
-        const response = await this.client.get<ArchiveDTO[]>("/storageLog/run", {
+        const response = await this.client.get<ArchiveDTO[]>("/storageLog/search", {
             params: {q: query},
+        });
+        return response.data;
+    }
+
+    async sortArchives(by: "date" | "size" | "name", order: "asc" | "desc"): Promise<ArchiveDTO[]> {
+        const response = await this.client.get<ArchiveDTO[]>("/storageLog/sort", {
+            params: {by, order}
+        });
+        return response.data;
+    }
+
+    async getStats(): Promise<ArchiveStatsDTO> {
+        const response = await this.client.get<ArchiveStatsDTO>("/storageLog/stats");
+        return response.data;
+    }
+
+    async downloadArchive(id: number): Promise<Blob> {
+        const response = await this.client.get(`/storageLog/file/${id}`, {
+            responseType: "blob"
         });
         return response.data;
     }
