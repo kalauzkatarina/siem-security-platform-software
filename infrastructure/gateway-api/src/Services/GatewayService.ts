@@ -14,6 +14,7 @@ export class GatewayService implements IGatewayService {
   private readonly alertClient: AxiosInstance;
   private readonly queryClient: AxiosInstance;
   private readonly siemAuthClient: AxiosInstance;
+  private readonly storageLogClient: AxiosInstance;
 
   constructor() {
     const authBaseURL = process.env.AUTH_SERVICE_API;
@@ -21,6 +22,7 @@ export class GatewayService implements IGatewayService {
     const alertBaseURL = process.env.ALERT_SERVICE_API;
     const queryBaseURL = process.env.QUERY_SERVICE_API;
     const siemAuthBaseURL = process.env.SIEM_AUTH_SERVICE_API;
+    const storageAuthBaseURL = process.env.STORAGE_LOG_SERVICE_API;
 
     this.authClient = axios.create({
       baseURL: authBaseURL,
@@ -50,6 +52,12 @@ export class GatewayService implements IGatewayService {
     this.siemAuthClient = axios.create({
       baseURL: siemAuthBaseURL,
       headers: { "Content-Type": "application/json" },
+      timeout: 5000,
+    });
+
+    this.storageLogClient = axios.create({
+      baseURL: storageAuthBaseURL,
+      headers: { "Content-Type": "application/json"},
       timeout: 5000,
     });
   }
@@ -178,4 +186,5 @@ export class GatewayService implements IGatewayService {
     );
     return response.data;
   }
+
 }

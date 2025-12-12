@@ -1,5 +1,7 @@
 import { AlertDTO } from "../DTOs/AlertDTO";
 import { AlertQueryDTO } from "../DTOs/AlertQueryDTO";
+import { ArchiveDTO } from "../DTOs/ArchiveDTO";
+import { ArchiveStatsDTO } from "../DTOs/ArchiveStatsDTO";
 import { LoginUserDTO } from "../DTOs/LoginUserDTO";
 import { PaginatedAlertsDTO } from "../DTOs/PaginatedAlertsDTO";
 import { RegistrationUserDTO } from "../DTOs/RegistrationUserDTO";
@@ -37,4 +39,12 @@ export interface IGatewayService {
   // Query
   searchEvents(query: string): Promise<any>;
   getOldEvents(hours: number): Promise<any>;
+
+  // Storage 
+  getAllArchives(): Promise<ArchiveDTO[]>;
+  runArchiveProcess(): Promise<ArchiveDTO>;
+  searchArchives(query: string): Promise<ArchiveDTO[]>;
+  sortArchives(by: "date" | "size" | "name", order: "asc" | "desc"): Promise<ArchiveDTO[]>;
+  getArchiveStats(): Promise<ArchiveStatsDTO>;
+  downloadArchive(id: string): Promise<ArrayBuffer>;
 }
