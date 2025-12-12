@@ -7,6 +7,7 @@ import { UserDTO } from "../Domain/DTOs/UserDTO";
 import { AlertDTO } from "../Domain/DTOs/AlertDTO";
 import { AlertQueryDTO } from "../Domain/DTOs/AlertQueryDTO";
 import { PaginatedAlertsDTO } from "../Domain/DTOs/PaginatedAlertsDTO";
+import { ArchiveDTO } from "../Domain/DTOs/ArchiveDTO";
 
 export class GatewayService implements IGatewayService {
   private readonly authClient: AxiosInstance;
@@ -187,4 +188,23 @@ export class GatewayService implements IGatewayService {
     return response.data;
   }
 
+  // Storage 
+  async getAllArchives(): Promise<ArchiveDTO[]> {
+    const response = await this.storageLogClient.get<ArchiveDTO[]>("/storageLog");
+    return response.data;
+  }
+
+  async searchArchives(query: string): Promise<ArchiveDTO[]> {
+    const response = await this.storageLogClient.get<ArchiveDTO[]>("/storageLog/search", {
+      params: {q: query},
+    });
+    return response.data;
+  }
+
+  async sortArchives(by: "date" | "size" | "name", order: "asc" | "desc"): Promise<ArchiveDTO[]> {
+    const response = await this.storageLogClient.get<ArchiveDTO[]>("/storageLog/sort", {
+      params: {by, order},
+    });
+    return response.data;
+  }
 }

@@ -39,7 +39,7 @@ export class StorageAPI implements IStorageAPI {
         return response.data;
     }
 
-    async downloadArchive(id: number): Promise<Blob> {
+    async downloadArchive(id: number): Promise<ArrayBuffer> {
         const response = await this.client.get(`/storageLog/file/${id}`, {
             responseType: "blob"
         });

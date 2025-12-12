@@ -6,5 +6,5 @@ export interface IStorageAPI {
     searchArchives(query: string): Promise<ArchiveDTO[]>;
     sortArchives(by: "date" | "size" | "name", order: "asc" | "desc"): Promise<ArchiveDTO[]>;
     getStats(): Promise<ArchiveStatsDTO>;
-    downloadArchive(id: number): Promise<Blob>; // ide u <a href=... download>
+    downloadArchive(id: number): Promise<ArrayBuffer>; 
 }
