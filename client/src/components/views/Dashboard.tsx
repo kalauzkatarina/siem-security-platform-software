@@ -27,15 +27,15 @@ export default function Dashboard() {
     };
 
     interface EventRow {
-        id: string;
+        source: string;
         time: string;
         type: "Info" | "Warning" | "Error";
     }
 
     const events: EventRow[] = [
-        { id: "d66bc2ea-13ef-4a18-9ed0-b8038ef21b32", time: "01:23:33   22/11/2025", type: "Info" },
-        { id: "51ac7386-394d-474e-b1f3-fb337c72e2b0", time: "01:25:49   22/11/2025", type: "Warning" },
-        { id: "7fa98056-2dd3-4fbe-8e7c-2bb3ad892f45", time: "21:03:11   20/11/2025", type: "Error" }
+        { source: "Auth Service", time: "01:23:33   22/11/2025", type: "Info" },
+        { source: "Auth Service", time: "01:25:49   22/11/2025", type: "Warning" },
+        { source: "Database", time: "21:03:11   20/11/2025", type: "Error" }
     ];
 
     return (
@@ -54,7 +54,7 @@ export default function Dashboard() {
                 <StatCard title="Most weight archive" subtitle="logs_2025_11_06_22_00.tar" value={100} valueDescription="MB" />
             </div>
             <h3 style={{ marginTop: '10px' , padding:"5px", margin: "10px"  }}>Recent Events</h3>
-            <RecentEventsTable events={events} />s
+            <RecentEventsTable events={events} />
         </div>
     );
 };

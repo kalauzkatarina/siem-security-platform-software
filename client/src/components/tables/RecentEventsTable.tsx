@@ -1,5 +1,5 @@
 interface EventRow {
-    id: string;
+    source: string;
     time: string;
     type: "Info" | "Warning" | "Error";
 }
@@ -81,7 +81,7 @@ export default function RecentEventsTable({ events }: { events: EventRow[] }) {
             <table style={tableStyle}>
                 <thead style={theadStyle}>
                     <tr>
-                        <th style={thStyle}>Event ID</th>
+                        <th style={thStyle}>Source</th>
                         <th style={thStyle}>Time</th>
                         <th style={thStyle}>Type</th>
                     </tr>
@@ -90,7 +90,7 @@ export default function RecentEventsTable({ events }: { events: EventRow[] }) {
                 <tbody>
                     {events.map((e, index) => (
                         <tr key={index}>
-                            <td style={eventIdStyle}>{e.id}</td>
+                            <td style={eventIdStyle}>{e.source}</td>
                             <td style={tdStyle}>{e.time}</td>
                             <td style={tdStyle}>
                                 <span style={{ ...badgeBase, ...badgeColors[e.type] }}>

@@ -4,7 +4,7 @@ import { ExpandedRow } from "./ExpandedRow";
 import { EventType } from "../../enums/EventType";
 
 interface EventRow {  //at the end,move into a right folders(types) 
-    id: string;
+    source: string;
     time: string;
     type: EventType;
 }
@@ -61,7 +61,7 @@ export default function AllEventsTable({ e, index }: RowProps) {
     return (
         <>
             <tr key={index} className="hover:bg-gray-600">
-                <td style={eventIdStyle}>{e.id}</td>
+                <td style={eventIdStyle}>{e.source}</td>
                 <td style={tdStyle}>{e.time}</td>
                 <td style={tdStyle}>
                     <span style={{ ...badgeBase, ...badgeColors[e.type] }}>

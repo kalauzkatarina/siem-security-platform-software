@@ -2,13 +2,13 @@ import AllEventsTable from "../tables/AllEventsTable";
 import React, { useEffect, useState } from "react";
 import { FiDownload } from "react-icons/fi";
 import { useAuth } from "../../hooks/useAuthHook";
-import { EventAPI } from "../../api/events/EventAPI";
 import { EventDTO } from "../../models/events/EventDTO";
 import { EventType } from "../../enums/EventType";
 import DropDownMenu from "../events/DropDownMenu";
+import { QueryAPI } from "../../api/query/QueryAPI";
 
 interface EventRow { 
-    id: string;
+    source: string;
     time: string;
     type: EventType;
 }
@@ -87,15 +87,44 @@ export default function Events() {
         }
 
         return {
-            id: e.id.toString(),
+            source: e.source.toString(),
             time: formatTime(e.timestamp),
             type,
         };
     };
 
-    useEffect(() => {
+    const loadEventsWithQuery = async () => {
         if (!token) return;
 
+        try {
+            setIsLoading(true);
+            setError(null);
+
+            const api = new QueryAPI();
+            
+            // pravi se query za search
+            // npr: text=server
+            const query =
+                searchText && searchText.trim() !== ""
+                    ? `text=${searchText}`
+                    : "";
+
+            const data: EventDTO[] = await api.getEventsByQuery(query);
+            const mapped = data.map(mapEventDTOToRow);
+
+            setEvents(mapped);
+        } catch (err) {
+            console.error(err);
+            setError("Search failed.");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        if (!token) return;
+        loadEventsWithQuery();
+        /*
         const api = new EventAPI();
 
         const loadEvents = async () => {
@@ -117,6 +146,7 @@ export default function Events() {
         };
 
         void loadEvents();
+        */
     }, [token]);
 
     return (
@@ -127,10 +157,16 @@ export default function Events() {
                 <DropDownMenu OnSortTypeChange={(value:number)=>setSortType(value)}/>
                 <input
                     style={elementsStyle}
-                    placeholder="🔍Search by id"
+                    placeholder="🔍Search..."
                     value={searchText}
                     onChange={(e) => setSearchText(e.target.value.toString())}
                 />
+                <button
+                    style={elementsStyle}
+                    onClick={() => loadEventsWithQuery()}
+                >
+                    Search
+                </button>
 
                 <button
                     style={downloadStyle}

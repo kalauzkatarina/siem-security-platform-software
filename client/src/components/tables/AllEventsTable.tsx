@@ -3,7 +3,7 @@ import EventTableRow from "./EventTableRow";
 import { EventType } from "../../enums/EventType";
 
 interface EventRow {
-    id: string;
+    source: string;
     time: string;
     type: EventType;
 }
@@ -23,16 +23,17 @@ export default function AllEventsTable({ events, sortType, searchText }: Argumen
 
     useEffect(() => {
         let copy = [...events];
+        /*
         if (searchText && searchText.trim() !== "") {
             copy = copy.filter(item =>
-                item.id.toLowerCase().includes(searchText.toLowerCase())
+                item.source.toLowerCase().includes(searchText.toLowerCase())
             );
         }
-
+        */
         if (sortType === 1) {
-            copy.sort((a, b) => a.id.localeCompare(b.id));
+            copy.sort((a, b) => a.source.localeCompare(b.source));
         } else if (sortType === 2) {
-            copy.sort((a, b) => b.id.localeCompare(a.id));
+            copy.sort((a, b) => b.source.localeCompare(a.source));
         } else if (sortType === 3) {
             copy.sort((a, b) => a.time.localeCompare(b.time));
         } else if (sortType === 4) {
@@ -80,7 +81,7 @@ export default function AllEventsTable({ events, sortType, searchText }: Argumen
             <table style={tableStyle}>
                 <thead style={theadStyle}>
                     <tr>
-                        <th style={thStyle}>Event ID</th>
+                        <th style={thStyle}>Source</th>
                         <th style={thStyle}>Time</th>
                         <th style={thStyle}>Type</th>
                         <th style={thStyle}></th>
