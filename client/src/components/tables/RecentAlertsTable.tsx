@@ -45,6 +45,7 @@ export default function RecentAlertsTable({
     boxShadow: "0 2px 8px rgba(0,0,0,0.5)",
     marginTop: "12px",
     border: "1px solid #333",
+    margin: "10px",
   };
 
   const tableStyle: React.CSSProperties = {
@@ -122,7 +123,6 @@ export default function RecentAlertsTable({
                 onMouseEnter={(e) => e.currentTarget.style.background = "#2a2a2a"}
                 onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
               >
-                {/* Icon */}
                 <td style={tdStyle}>
                   {alert.severity === AlertSeverity.CRITICAL || alert.severity === AlertSeverity.HIGH ? (
                     <PiWarningOctagonFill color={getSeverityColor(alert.severity)} size={20} />
@@ -131,34 +131,28 @@ export default function RecentAlertsTable({
                   )}
                 </td>
 
-                {/* ID */}
                 <td style={{ ...tdStyle, fontFamily: "Consolas, monospace", fontSize: "13px", color: "#60cdff" }}>
                   #{alert.id}
                 </td>
 
-                {/* Title */}
                 <td style={{ ...tdStyle, maxWidth: "300px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                   {alert.title}
                 </td>
 
-                {/* Severity */}
                 <td style={tdStyle}>
                   <span style={badgeStyle(getSeverityColor(alert.severity))}>
                     {alert.severity}
                   </span>
                 </td>
 
-                {/* Status */}
                 <td style={tdStyle}>
                   <span style={badgeStyle(getStatusColor(alert.status))}>
                     {alert.status}
                   </span>
                 </td>
 
-                {/* Source */}
                 <td style={tdStyle}>{alert.source}</td>
 
-                {/* Created At */}
                 <td style={tdStyle}>
                   {new Date(alert.createdAt).toLocaleString('en-US', {
                     month: 'short',
@@ -168,7 +162,6 @@ export default function RecentAlertsTable({
                   })}
                 </td>
 
-                {/* Actions */}
                 <td style={{ ...tdStyle, textAlign: "center" }}>
                   <button
                     onClick={() => onSelectAlert(alert.id)}
