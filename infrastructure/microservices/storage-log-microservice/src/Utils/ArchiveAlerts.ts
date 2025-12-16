@@ -1,6 +1,6 @@
 import { AxiosInstance } from "axios";
 import path from "path";
-import { Repository } from "typeorm";
+import { Repository, TreeRepository } from "typeorm";
 import { StorageLog } from "../Domain/models/StorageLog";
 import { createArchive } from "./CreateArchive";
 import { statSync } from "fs";
@@ -10,6 +10,7 @@ import { CorrelationDTO } from "../Domain/DTOs/CorrelationDTO";
 const ARCHIVE_DIR = process.env.ARCHIVE_PATH || path.join(__dirname, "../../archives");
 
 export async function archiveAlerts(hours: number, queryClient: AxiosInstance, correlationClient: AxiosInstance, storageRepo: Repository<StorageLog>): Promise<void> {
+    try {
     const alerts = (
         await queryClient.get<CorrelationDTO[]>("/query/oldAlerts", {
             params: { hours },
@@ -25,15 +26,17 @@ export async function archiveAlerts(hours: number, queryClient: AxiosInstance, c
 
     const tarPath = path.join(ARCHIVE_DIR, tarName);
     const stats = statSync(tarPath);
-
-    await storageRepo.save(storageRepo.create({
-        fileName: tarName,
-        archiveType: ArchiveType.ALERT,
-        recordCount: alerts.length,
-        fileSize: stats.size,
-    }));
-
-    await correlationClient.delete("/AnalysisEngine/correlations/deleteByEventIds",{
-        data: alerts.map(a => a.id),
-    });
+        await storageRepo.save(storageRepo.create({
+            fileName: tarName,
+            archiveType: ArchiveType.ALERT,
+            recordCount: alerts.length,
+            fileSize: stats.size,
+        }));
+        
+        await correlationClient.delete("/AnalysisEngine/correlations/deleteByEventIds",{
+            data: alerts.map(a => a.id),
+        });
+    } catch (err) {
+        throw err; //i onda ovaj error hvata u runArchiveProcess
+    }
 }
