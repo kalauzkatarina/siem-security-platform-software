@@ -3,11 +3,46 @@ import { Event } from "../Domain/models/Event";
 import { EventDTO } from "../Domain/DTOs/EventDTO";
 import { IEventsService } from "../Domain/services/IEventsService";
 import { Between } from "typeorm"
+import { EventType } from "../Domain/enums/EventType";
 
 export class EventsService implements IEventsService {
     constructor(
         private readonly eventRepository: Repository<Event>,
     ) {}
+
+
+    async getSortedEventsByDate(): Promise<Event[]> {
+       return await this.eventRepository.find({
+        order: {
+            timestamp: "DESC", 
+        },
+    });
+    }
+    async getEventPercentagesByEvent(): Promise<Number[]> {
+        const total = await this.eventRepository.count();
+
+    if (total === 0) {
+        return [0, 0, 0];
+    }
+
+    const infoCount = await this.eventRepository.count({
+        where: { type: EventType.INFO },
+    });
+
+    const warningCount = await this.eventRepository.count({
+        where: { type: EventType.WARNING },
+    });
+
+    const errorCount = await this.eventRepository.count({
+        where: { type: EventType.ERROR },
+    });
+    //ide procenat za info,warning pa error 
+    return [
+        (infoCount / total) * 100,
+        (warningCount / total) * 100,
+        (errorCount / total) * 100,
+    ];
+    }
 
    
 

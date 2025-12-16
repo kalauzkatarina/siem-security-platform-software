@@ -9,4 +9,6 @@ export interface IEventsService {
     deleteOldEvents(expiredIds:Number[]): Promise<boolean>;
     getMaxId():Promise<Event>;
     getEventsFromId1ToId2(fromId: number, toId: number): Promise<Event[]>
+    getSortedEventsByDate(): Promise<Event[]>
+    getEventPercentagesByEvent(): Promise<Number[]>
 }

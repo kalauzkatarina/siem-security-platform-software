@@ -19,6 +19,9 @@ export class EventsController {
         this.router.get("/events/health", this.healthCheck.bind(this));
         this.router.get("/events", this.getAllEvents.bind(this));
         this.router.get("/events/:id", this.getEventById.bind(this));
+        this.router.get("/events/fromId1toId2",this.getEventsFromId1ToId2.bind(this))
+        this.router.get("/events/sortedEventsByDate",this.getSortedEventsByDate.bind(this))
+        this.router.get("/events/percentages",this.getEventPercentagesByEvent.bind(this))
         this.router.post("/events", this.createEvent.bind(this));
         this.router.delete("/events/:id", this.deleteEvent.bind(this));
         this.router.delete("/events/old", this.deleteOldEvents.bind(this));
@@ -154,7 +157,28 @@ export class EventsController {
     }
   }
 
+  private async getSortedEventsByDate(req: Request, res: Response): Promise<void>{
+    try {
+            const events = await this.eventsService.getSortedEventsByDate();
+            res.status(200).json(events);
+        } catch (err) {
+            const message = (err as Error).message;
+            await this.logger.log(`Error while getting sorted events by date: ${message}`);
+            res.status(500).json({ message });
+        }
+    }
 
+    private async getEventPercentagesByEvent(req: Request, res: Response): Promise<void>{
+        try{
+            const percentages = await this.eventsService.getEventPercentagesByEvent()
+            res.status(200).json(percentages)
+        }
+        catch(err){
+            const message = (err as Error).message;
+            await this.logger.log(`Error while getting percentages for each event type: ${message}`);
+            res.status(500).json({ message });
+        }
+    }
     public getRouter(): Router {
         return this.router;
     }
