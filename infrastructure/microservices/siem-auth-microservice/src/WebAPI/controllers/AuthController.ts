@@ -1,23 +1,23 @@
 import { Router, Request, Response } from "express";
-import { ValidationService } from "../../Services/ValidationService";
+import { IValidationService } from "../../Domain/services/IValidationService";
 
 export class AuthController {
     private readonly router: Router;
 
-    constructor(private readonly validationService: ValidationService){
+    constructor(private readonly validationService: IValidationService) {
         this.router = Router();
         this.initializeRoutes();
     }
 
-    private initializeRoutes(): void{
+    private initializeRoutes(): void {
         this.router.post('/validate', this.validateToken.bind(this));
     }
 
     private async validateToken(req: Request, res: Response): Promise<void> {
-        try{
+        try {
             const token = req.body.token as string;
 
-            if(!token){
+            if (!token) {
                 res.status(400).json({
                     success: false,
                     message: 'Token is required',
@@ -28,7 +28,7 @@ export class AuthController {
 
             const result = await this.validationService.verifyToken(token);
 
-            if(!result.valid){
+            if (!result.valid) {
                 res.status(401).json({
                     success: false,
                     message: 'Invalid token',
@@ -43,7 +43,7 @@ export class AuthController {
                 isSysAdmin: result.isSysAdmin,
                 user: result.payload,
             });
-        } catch(err) {
+        } catch (err) {
             res.status(500).json({
                 success: false,
                 message: (err as Error).message,
@@ -51,7 +51,7 @@ export class AuthController {
         }
     }
 
-    public getRouter(): Router{
+    public getRouter(): Router {
         return this.router;
     }
 }

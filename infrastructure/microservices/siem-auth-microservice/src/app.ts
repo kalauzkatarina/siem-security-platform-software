@@ -35,7 +35,7 @@ const secretJWT = process.env.JWT_SECRET ?? "";
 const sysAdminRoleId = process.env.SYS_ADMIN_ROLE_ID ? parseInt(process.env.SYS_ADMIN_ROLE_ID, 10) : undefined;
 
 //Services
-const validationService: ValidationService = new ValidationService(secretJWT,sysAdminRoleId);
+const validationService: IValidationService = new ValidationService(secretJWT, sysAdminRoleId);
 
 // WebAPI routes
 const authController = new AuthController(validationService);
