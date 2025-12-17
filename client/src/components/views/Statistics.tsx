@@ -9,7 +9,7 @@ import { TopArchiveDTO } from "../../models/storage/TopArchiveDTO";
 import { ArchiveVolumeDTO } from "../../models/storage/ArchiveVolumeDTO";
 
 import {StatisticsChart} from "../statistics/StatisticsChart";
-import {EventDistribution} from "../statistics/EventDistribution";
+import EventDistribution from "../statistics/EventDistribution";
 import TopArchives from "../statistics/TopArchives";
 import ArchiveVolume from "../statistics/ArchiveVolume";
 
@@ -18,6 +18,9 @@ const queryAPI = new QueryAPI();
 const storageAPI = new StorageAPI();
 
 export default function Statistics() {
+
+    const testData: DistributionDTO = {notifications: 35, warnings: 35, errors: 30};
+
     const {token} = useAuth();
 
     const [archiveType, setArchiveType] = useState<"events" | "alerts">("events");
@@ -110,7 +113,7 @@ export default function Statistics() {
             <div style={sectionStyle}>
                 <div>
                     <h3 style={headingStyle}>Event Distribution</h3>
-                    <EventDistribution/>
+                    {testData && <EventDistribution data={testData}/>}
                 </div>
 
                 <div>
