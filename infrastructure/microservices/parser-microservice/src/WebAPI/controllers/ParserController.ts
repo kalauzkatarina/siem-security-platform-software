@@ -43,9 +43,10 @@ export class ParserController {
     }
 
     private async getAllParserEvents(req: Request, res: Response): Promise<void> {
+        console.log("bbbbbb\n");
         try {
             this.logger.log(`Fetching all parser events`);
-            const response = this.parserRepositoryService.getAll();
+            const response =await this.parserRepositoryService.getAll();
             res.status(200).json(response);
         } catch (err) {
             res.status(500).json({ message: (err as Error).message });

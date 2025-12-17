@@ -1,7 +1,7 @@
-import { ParserEvent } from "../models/ParserEvent";
+import { ParserEventDto } from "../DTOs/ParserEventDTO";
 
 export interface IParserRepositoryService {
-    getAll(): Promise<ParserEvent[]>;
-    getParserEventById(id: number): Promise<ParserEvent>;
+    getAll(): Promise<ParserEventDto[]>;
+    getParserEventById(id: number): Promise<ParserEventDto>;
     deleteById(id: number): Promise<boolean>;
 }
