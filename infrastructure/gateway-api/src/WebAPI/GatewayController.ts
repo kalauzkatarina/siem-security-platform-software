@@ -529,24 +529,47 @@ export class GatewayController {
   private async analysisEngineNormalize(req: Request, res: Response): Promise<void> {
     try {
       const rawMessage = req.body.message as string;
-      const result = await this.gatewayService.analysisEngineNormalize(rawMessage);
 
       if(!rawMessage){
         res.status(400).json({ message: "Raw message is required" });
         return;
       }
+      
+      const result = await this.gatewayService.analysisEngineNormalize(rawMessage);
+
+      
       res.status(200).json(result);
     } catch (err) {
-      res.status(500).json({ message: (err as Error).message });
+        console.error("[AnalysisEngineErorr]", err);
+        res.status(500).json({ message: "Internal server error" });
     }
+
   }
 
   private async analysisEngineDeleteCorrelationsByEventIds(req: Request, res: Response): Promise<void> {
     try {
-      const result = await this.gatewayService.analysisEngineDeleteCorrelationsByEventIds();
-      res.status(200).json(result);
+      const eventIds: number[] = req.body.eventIds;
+      
+      if (!eventIds || !Array.isArray(eventIds) || eventIds.length === 0) {
+        res.status(400).json({
+           message: "Event IDs are required" 
+          });
+        return;
+      }
+      const deletedCount = await this.gatewayService.analysisEngineDeleteCorrelationsByEventIds(eventIds);
+
+      if(deletedCount === 0){
+        res.status(204).send();
+        return;
+      }
+
+      res.status(200).json({ 
+        deletedCount: deletedCount
+       });
+
     } catch (err) {
-      res.status(500).json({ message: (err as Error).message });
+        console.error("[AnalysisEngineError]", err);
+        res.status(500).json({ message: "Internal server error" });
     }
   }
 
