@@ -1,4 +1,4 @@
-import { MongoRepository } from "typeorm";
+import { Between, MongoRepository, Repository } from "typeorm";
 import { CacheEntry } from "../Domain/models/CacheEntry";
 import { IQueryRepositoryService } from "../Domain/services/IQueryRepositoryService";
 import axios, { all, AxiosInstance } from "axios";
@@ -21,6 +21,13 @@ import { loadQueryState, saveQueryState } from "../Utils/StateManager";
 // na 15 minuta se brisu eventi koji su stariji od 72h, i tada se brisu i njihovi podaci iz recnika
 // imamo i mapu koja mapira event id na reci iz eventa za lakse brisanje
 
+const emptyCacheEntry: CacheEntry = {
+    _id: "",
+    key: "NOT_FOUND",
+    result: [],
+    cachedAt: new Date(0)
+};
+
 export class QueryRepositoryService implements IQueryRepositoryService {
     private invertedIndex: Map<string, Set<number>> = new Map();
     private eventIdToTokens: Map<number, string[]> = new Map();
@@ -28,10 +35,13 @@ export class QueryRepositoryService implements IQueryRepositoryService {
     
     private indexingInProgress: boolean = false;
 
-    private readonly eventClient : AxiosInstance;
+    //private readonly eventClient : AxiosInstance;
 
-    constructor(private readonly cacheRepository: MongoRepository<CacheEntry>, private readonly loggerService: ILoggerService) 
+    constructor(private readonly cacheRepository: MongoRepository<CacheEntry>, 
+                private readonly loggerService: ILoggerService,
+                private readonly eventRepository: Repository<Event>) 
     {
+        /*
         const eventUrl = process.env.EVENT_SERVICE_API;
 
         this.eventClient = axios.create({
@@ -39,7 +49,7 @@ export class QueryRepositoryService implements IQueryRepositoryService {
             headers: { "Content-Type": "application/json" },
             timeout: 5000,
         });
-
+        */
         const savedState = loadQueryState();
         this.lastProcessedId = savedState.lastProcessedId;
         this.invertedIndex = savedState.invertedIndex;
@@ -48,18 +58,13 @@ export class QueryRepositoryService implements IQueryRepositoryService {
         this.startIndexingWorker();
     }
 
-    async findById(id: number): Promise<Event> {
-        //ovo ne treba ovako ispraviti!!
-
-        // TODO!!!!!
-        // treba da trazi iz NoSQL baze a ne od event servisa
-        // id je string a ne broj
-            const response = await this.eventClient.get(`/events/${id}`);
-            if(!response){
-                 this.loggerService.log(`findById error fetching id ${id}`);
-                 return new Event();
-                 }
-            return response.data;
+    async findByKey(key: string): Promise<CacheEntry> {
+        const response = await this.cacheRepository.findBy({key: key});
+        if(!response){
+                this.loggerService.log(`findByKey error fetching key ${key}`);
+                return emptyCacheEntry;
+                }
+        return response[0];
     }
     
     async addEntry(entry: CacheEntryDTO): Promise<CacheEntry> {
@@ -68,12 +73,11 @@ export class QueryRepositoryService implements IQueryRepositoryService {
         newEntry.result = entry.result;
         newEntry.cachedAt = new Date(); 
         // postavljamo trenutno vreme kao vreme kesiranja
-        return await this.cacheRepository.save(entry);
+        return await this.cacheRepository.save(newEntry);
     }
 
     async getAllEvents(): Promise<Event[]> {
-        const response = await this.eventClient.get("/events");
-        return response.data;
+        return this.eventRepository.find();
     }
 
     async getOldEvents(hours : number): Promise<Event[]> {
@@ -135,13 +139,15 @@ export class QueryRepositoryService implements IQueryRepositoryService {
     }
 
     public async getMaxId(): Promise<number> {
-        const response = await this.eventClient.get("/events/maxId");   // izmeni kad dodaju metodu!!!
-        return response.data.maxId; 
+        const event = await this.eventRepository.findOne({ order: { id: "DESC" }});
+        if (!event) {
+            throw new Error(`Event database is empty`);
+        }
+        return event.id;
     }
 
     public async getEventsFromId1ToId2(fromId: number, toId: number): Promise<Event[]> {
-        const response = await this.eventClient.get(`/events?from=${fromId}&to=${toId}`);   // izmeni kad dodaju metodu!!!
-        return response.data;
+        return await this.eventRepository.find({where: {id: Between(fromId, toId)}, order: { id: "ASC" }});
     }
 
     // pokrece se na 10 sekundi

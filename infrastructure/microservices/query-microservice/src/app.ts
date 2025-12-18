@@ -2,11 +2,12 @@ import express from 'express';
 import cors from 'cors';
 import 'reflect-metadata';
 import dotenv from 'dotenv';
-import { initialize_database } from './Database/InitializeConnection';
+import { initialize_mongo_database, initialize_mysql_database } from './Database/InitializeConnection';
 //import { Repository } from 'typeorm';
-import { Db } from './Database/DbConnectionPool';
+import { MongoDb, MySQLDb } from './Database/DbConnectionPool';
 import { CacheEntry } from './Domain/models/CacheEntry';
-import { MongoRepository } from 'typeorm';
+import { Event } from './Domain/models/Event';
+import { MongoRepository, Repository } from 'typeorm';
 import { QueryRepositoryService } from './Services/QueryRepositoryService';
 import { QueryService } from './Services/QueryService';
 import { LoggerService } from './Services/LoggerService';
@@ -38,15 +39,17 @@ app.use(
 
 // inicijalizacija baze
 void (async () => {
-  await initialize_database();
+  await initialize_mongo_database();
+  await initialize_mysql_database();
 })();
 
 // ORM Repository
-const cacheRepository : MongoRepository<CacheEntry> = Db.getMongoRepository(CacheEntry);
+const cacheRepository : MongoRepository<CacheEntry> = MongoDb.getMongoRepository(CacheEntry);
+const eventRepository : Repository<Event> = MySQLDb.getRepository(Event);
 
 // Servisi
 const loggerService = new LoggerService();
-const queryRepositoryService = new QueryRepositoryService(cacheRepository, loggerService);
+const queryRepositoryService = new QueryRepositoryService(cacheRepository, loggerService, eventRepository);
 const queryService = new QueryService(queryRepositoryService);
 
 // WebAPI rute

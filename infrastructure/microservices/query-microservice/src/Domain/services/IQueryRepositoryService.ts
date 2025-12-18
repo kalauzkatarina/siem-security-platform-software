@@ -12,7 +12,7 @@ export interface IQueryRepositoryService {
     getIdsForTokens(query: string): Set<number>;
     getMaxId(): Promise<number>;
     getEventsFromId1ToId2(fromId: number, toId: number): Promise<Event[]>;
-    findById(id: number): Promise<Event>;
+    findByKey(key: string): Promise<CacheEntry>;
     //saveEvent(event: Event): Promise<Event>;
     //searchEvents(query: string): Promise<Event[]>;
     getLastThreeEvents(): Promise<Event[]>;

@@ -4,6 +4,7 @@ import { Event } from "../Domain/models/Event";
 import { parseQueryString } from "../Utils/ParseQuery";
 import { EventDTO } from "../Domain/DTOs/EventDTO";
 import { PdfGenerator } from "../Utils/PdfGenerator";
+import { CacheEntry } from "../Domain/models/CacheEntry";
 
 // princip pretrage:
 // imamo recnik koji mapira reci iz eventa na event id-eve
@@ -24,6 +25,13 @@ export class QueryService implements IQueryService {
     ) {}
 
     async searchEvents(query: string): Promise<EventDTO[]> {
+        const cacheResult = this.queryRepositoryService.findByKey(query); 
+        if ((await cacheResult).key != "NOT_FOUND") {
+            // potencijalno ovde treba da se doda json to EventDTO mapping
+            // ne znam kako vraca podatke iz kesa
+            return (await cacheResult).result;
+        }
+
         const allEvents = await this.queryRepositoryService.getAllEvents();
 
         if (query.trim() === "") {
@@ -79,15 +87,10 @@ export class QueryService implements IQueryService {
             timestamp: e.timestamp,
         }));
 
-        /*
-        TODO:
-        kad se doda provera kesa, onda se prvo proveri pa onda kesira
-        // kesiranje
         this.queryRepositoryService.addEntry({
             key: query,
             result: result,
         });
-        */
         return result;
     } 
 
