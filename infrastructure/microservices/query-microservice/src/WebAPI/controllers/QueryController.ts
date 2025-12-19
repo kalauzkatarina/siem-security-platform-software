@@ -53,7 +53,7 @@ export class QueryController {
 
     private async searchEvents(req: Request, res: Response): Promise<void> {
         try {
-            const query = req.query.query as string;
+            const query = req.query.q as string || "";
             const results = await this.queryService.searchEvents(query);
             res.status(200).json(results);
         } catch (err) {

@@ -25,13 +25,14 @@ export class QueryService implements IQueryService {
     ) {}
 
     async searchEvents(query: string): Promise<EventDTO[]> {
+        /*
         const cacheResult = this.queryRepositoryService.findByKey(query); 
         if ((await cacheResult).key != "NOT_FOUND") {
             // potencijalno ovde treba da se doda json to EventDTO mapping
             // ne znam kako vraca podatke iz kesa
             return (await cacheResult).result;
         }
-
+        */
         const allEvents = await this.queryRepositoryService.getAllEvents();
 
         if (query.trim() === "") {

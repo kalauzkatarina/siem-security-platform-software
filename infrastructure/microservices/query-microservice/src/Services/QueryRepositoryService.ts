@@ -55,6 +55,7 @@ export class QueryRepositoryService implements IQueryRepositoryService {
         this.invertedIndex = savedState.invertedIndex;
         this.eventIdToTokens = savedState.eventTokenMap;
 
+        this.bootstrapIndex();
         this.startIndexingWorker();
     }
 
@@ -139,11 +140,13 @@ export class QueryRepositoryService implements IQueryRepositoryService {
     }
 
     public async getMaxId(): Promise<number> {
-        const event = await this.eventRepository.findOne({ order: { id: "DESC" }});
-        if (!event) {
-            throw new Error(`Event database is empty`);
-        }
-        return event.id;
+        const result = await this.eventRepository.find({
+            select: ["id"],
+            order: { id: "DESC" },
+            take: 1
+        });
+
+        return result.length ? result[0].id : 0;
     }
 
     public async getEventsFromId1ToId2(fromId: number, toId: number): Promise<Event[]> {
@@ -158,6 +161,10 @@ export class QueryRepositoryService implements IQueryRepositoryService {
 
             try {
                 const maxId = await this.getMaxId();
+                if (maxId === 0) {
+                    this.indexingInProgress = false;
+                    return;
+                }
 
                 if (maxId > this.lastProcessedId) {
                     const newEvents = await this.getEventsFromId1ToId2(this.lastProcessedId + 1, maxId);
@@ -203,5 +210,25 @@ export class QueryRepositoryService implements IQueryRepositoryService {
         const maxId = await this.getMaxId();
         if (maxId === 0) return 0;
         return maxId;
+    }
+
+    private async bootstrapIndex(): Promise<void> {
+        const allEvents = await this.eventRepository.find();
+
+        if (allEvents.length === 0) return;
+
+        allEvents.forEach(event => this.addEventToIndex(event));
+
+        this.lastProcessedId = Math.max(...allEvents.map(e => e.id));
+
+        this.loggerService.log(
+            `Bootstrap indexing completed. Indexed ${allEvents.length} events.`
+        );
+
+        saveQueryState({
+            lastProcessedId: this.lastProcessedId,
+            invertedIndex: this.invertedIndex,
+            eventTokenMap: this.eventIdToTokens
+        });
     }
 }

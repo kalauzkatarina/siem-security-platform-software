@@ -3,7 +3,6 @@ import cors from 'cors';
 import 'reflect-metadata';
 import dotenv from 'dotenv';
 import { initialize_mongo_database, initialize_mysql_database } from './Database/InitializeConnection';
-//import { Repository } from 'typeorm';
 import { MongoDb, MySQLDb } from './Database/DbConnectionPool';
 import { CacheEntry } from './Domain/models/CacheEntry';
 import { Event } from './Domain/models/Event';
@@ -36,44 +35,54 @@ app.use(
     methods: corsMethods,
   }),
 );
+let loggerService: LoggerService;
+let queryRepositoryService: QueryRepositoryService;
 
-// inicijalizacija baze
+// inicijalizacija baza i servisa
 void (async () => {
   await initialize_mongo_database();
   await initialize_mysql_database();
+
+  // ORM Repository
+  const cacheRepository : MongoRepository<CacheEntry> = MongoDb.getMongoRepository(CacheEntry);
+  const eventRepository : Repository<Event> = MySQLDb.getRepository(Event);
+  //const test = await eventRepository.find();
+  //console.log("EVENTS FROM DB:", test);
+
+  // Servisi
+  loggerService = new LoggerService();
+  queryRepositoryService = new QueryRepositoryService(cacheRepository, loggerService, eventRepository);
+  const queryService = new QueryService(queryRepositoryService);
+
+  // WebAPI rute
+  const queryController = new QueryController(queryService, queryRepositoryService);
+
+  // Registracija ruta
+  app.use('/api/v1', queryController.getRouter());
 })();
 
-// ORM Repository
-const cacheRepository : MongoRepository<CacheEntry> = MongoDb.getMongoRepository(CacheEntry);
-const eventRepository : Repository<Event> = MySQLDb.getRepository(Event);
-
-// Servisi
-const loggerService = new LoggerService();
-const queryRepositoryService = new QueryRepositoryService(cacheRepository, loggerService, eventRepository);
-const queryService = new QueryService(queryRepositoryService);
-
-// WebAPI rute
-const queryController = new QueryController(queryService, queryRepositoryService);
-
-// Registracija ruta
-app.use('/api/v1', queryController.getRouter());
-
 process.on('SIGINT', async () => {
-  loggerService.log("Saving query service state before shutdown...");
+  try {
+    loggerService.log("Saving query service state before shutdown...");
 
-  // ako se inverted indeks struktura azurira => sacekaj da se zavrsi
-  while (queryRepositoryService.isIndexingInProgress()) {
-    loggerService.log("Indexing in progress, waiting to save state...");
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    // ako se inverted indeks struktura azurira => sacekaj da se zavrsi
+    while (queryRepositoryService.isIndexingInProgress()) {
+      loggerService.log("Indexing in progress, waiting to save state...");
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    }
+
+    saveQueryState({
+      lastProcessedId: queryRepositoryService.getLastProcessedId(),
+      invertedIndex: queryRepositoryService.getInvertedIndex(),
+      eventTokenMap: queryRepositoryService.getEventIdToTokens()
+    });
+    loggerService.log("State saved. Exiting...");
+    process.exit(0);
+  } catch(err){
+    loggerService.log(`Error during shutdown: ${err}`);
+    process.exit(1);
   }
 
-  saveQueryState({
-    lastProcessedId: queryRepositoryService.getLastProcessedId(),
-    invertedIndex: queryRepositoryService.getInvertedIndex(),
-    eventTokenMap: queryRepositoryService.getEventIdToTokens()
-  });
-  loggerService.log("State saved. Exiting...");
-  process.exit(0);
 });
 
 export default app;
