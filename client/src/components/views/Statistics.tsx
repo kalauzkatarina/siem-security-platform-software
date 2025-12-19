@@ -22,19 +22,19 @@ export default function Statistics() {
     const testData: DistributionDTO = {notifications: 35, warnings: 35, errors: 30};
 
     const testEvent: EventStatisticsDTO[] = [
-    { date: "2025-12-10", count: 10 },
-    { date: "2025-12-11", count: 15 },
-    { date: "2025-12-12", count: 7 },
-    { date: "2025-12-13", count: 12 },
-    { date: "2025-12-14", count: 9 }
+    { date: "10/12", count: 10 },
+    { date: "11/12", count: 15 },
+    { date: "12/12", count: 7 },
+    { date: "13/12", count: 12 },
+    { date: "14/12", count: 9 }
     ];
 
     const testAlert: AlertStatisticsDTO[] = [
-    { date: "2025-12-10", count: 8 },
-    { date: "2025-12-11", count: 5 },
-    { date: "2025-12-12", count: 13 },
-    { date: "2025-12-13", count: 7 },
-    { date: "2025-12-14", count: 6 }
+    { date: "10/12", count: 8 },
+    { date: "11/12", count: 5 },
+    { date: "12/12", count: 13 },
+    { date: "13/12", count: 7 },
+    { date: "14/12", count: 6 }
     ];
 
     const {token} = useAuth();
@@ -120,8 +120,9 @@ export default function Statistics() {
     }
 */
     return (
-        <div style={rectangleStyle}>
-            <div style={{width: "100%", height: 350}}>
+        <div>
+
+            <div style={rectangleStyle}>
                 <h3 style={headingStyle}>Statistics</h3>
                 <StatisticsChart
                     eventData={testEvent}
@@ -129,9 +130,9 @@ export default function Statistics() {
             </div>
 
             <div style={sectionStyle}>
-                <div>
+                <div style={rectangleStyle}>
                     <h3 style={headingStyle}>Event Distribution</h3>
-                    {testData && <EventDistribution data={testData}/>}
+                    <EventDistribution data={testData}/>
                 </div>
 
                 <div>
