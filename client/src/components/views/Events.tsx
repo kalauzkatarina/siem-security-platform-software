@@ -19,6 +19,10 @@ export default function Events() {
     const { token } = useAuth();
 
     const [searchText, setSearchText] = useState("");
+    const [dateFrom, setDateFrom] = useState<string>("");
+    const [dateTo, setDateTo] = useState<string>("");
+    const [eventType, setEventType] = useState<string>("all");
+
     const [sortType, setSortType] = useState(0);
     const [transition, setTransition] = useState(false);
     const [events, setEvents] = useState<EventRow[]>([]);
@@ -41,11 +45,11 @@ export default function Events() {
         transform: transition ? "scale(1.2)" : "scale(1.0)",
     };
 
-    const containerStyle: React.CSSProperties = {
+    const firstRowStyle: React.CSSProperties = {
         display: "flex",
-        justifyContent: "right",
-        gap: "15px",
-        marginInlineEnd: "15px",
+        justifyContent: "left",
+        gap: "50px",
+        marginInlineStart: "15px",
     };
 
     const elementsStyle: React.CSSProperties = {
@@ -54,6 +58,47 @@ export default function Events() {
         width: "15%",
         borderRadius: "15px",
         padding: "4px",
+        height: "40px"
+    };
+
+    const searchInputStyle: React.CSSProperties = {
+        ...elementsStyle, 
+        width: "250px",  
+    };
+
+    const dateInputStyle: React.CSSProperties = {
+        ...elementsStyle, 
+        width: "180px",  
+        marginLeft: "15px"
+    };
+
+    const selectStyle: React.CSSProperties = {
+        ...elementsStyle, 
+        width: "110px",  
+        marginLeft: "15px"
+    };
+
+    const secondRowStyle: React.CSSProperties = {
+        display: "flex",
+        flexDirection: "row",
+        margin: "10px",
+    };
+
+    const leftSideStyle: React.CSSProperties = {
+        display: "flex",
+        gap: "10px",
+        justifyContent: "left",
+        width: "100%",
+        alignItems: "center",
+    };
+    
+
+    const rightSideStyle: React.CSSProperties = {
+        display: "flex",
+        gap: "15px",
+        justifyContent: "right",
+        width: "100%",
+        alignItems: "center",
     };
 
     const formatTime = (iso: string): string => {
@@ -111,11 +156,29 @@ export default function Events() {
             
             // pravi se query za search
             // npr: text=server
-            const query =
+            let query =
                 searchText && searchText.trim() !== ""
                     ? `text=${searchText}`
                     : "";
+                
+            
+            // dodaje se dateFrom
+            if (dateFrom && dateFrom.trim() !== "") {
+                const fromDate = new Date(dateFrom);
+                query += query ? `|dateFrom=${fromDate.toISOString()}` : `dateFrom=${fromDate.toISOString()}`;
+            }
 
+            // dodaje se dateTo
+            if (dateTo && dateTo.trim() !== "") {
+                const toDate = new Date(dateTo);
+                query += query ? `|dateTo=${toDate.toISOString()}` : `dateTo=${toDate.toISOString()}`;
+            }
+
+            // dodaje se eventType
+            if (eventType && eventType !== "all") {
+                query += query ? `|type=${eventType.toUpperCase()}` : `type=${eventType.toUpperCase()}`;
+            }
+            
             const data: EventDTO[] = await api.getEventsByQuery(query);
             const mapped = data.map(mapEventDTOToRow);
 
@@ -156,28 +219,64 @@ export default function Events() {
         <div style={eventDivStyle}>
             <h3 style={{ padding: "10px", margin: "10px" }}>Events</h3>
 
-            <div style={containerStyle}>
-                <DropDownMenu OnSortTypeChange={(value:number)=>setSortType(value)}/>
-                <input
-                    style={elementsStyle}
-                    placeholder="🔍Search..."
-                    value={searchText}
-                    onChange={(e) => setSearchText(e.target.value.toString())}
-                />
-                <button
-                    style={elementsStyle}
-                    onClick={() => loadEventsWithQuery()}
-                >
-                    Search
-                </button>
+            <div style={firstRowStyle}>
+                <div>
+                    Date from:
+                    <input
+                        style={dateInputStyle}
+                        type="datetime-local"
+                        value={dateFrom}
+                        onChange={(e) => setDateFrom(e.target.value)}
+                    />
+                </div>
+                <div>
+                    Date to:
+                    <input
+                        style={dateInputStyle}
+                        type="datetime-local"
+                        value={dateTo}
+                        onChange={(e) => setDateTo(e.target.value)}
+                    />
+                </div>
 
-                <button
-                    style={downloadStyle}
-                    onMouseEnter={() => setTransition(true)}
-                    onMouseLeave={() => setTransition(false)}
-                >
-                    Download report <FiDownload size={20} />
-                </button>
+                <div>
+                    Type:
+                    <select 
+                        style={selectStyle} 
+                        value={eventType} 
+                        onChange={(e) => setEventType(e.target.value)}>
+                            <option value="all">All types</option>
+                            <option value="info">Informations</option>
+                            <option value="warning">Warnings</option>
+                            <option value="error">Errors</option>
+                    </select>
+                </div>
+            </div>
+            <div style={secondRowStyle}>
+                <div style={leftSideStyle}>
+                    <input
+                        style={searchInputStyle}
+                        placeholder="🔍Type..."
+                        value={searchText}
+                        onChange={(e) => setSearchText(e.target.value.toString())}
+                    />
+                    <button
+                        style={elementsStyle}
+                        onClick={() => loadEventsWithQuery()}
+                    >
+                        Search
+                    </button>
+                </div>
+                <div style={rightSideStyle}>
+                    <DropDownMenu OnSortTypeChange={(value:number)=>setSortType(value)}/>
+                    <button
+                        style={downloadStyle}
+                        onMouseEnter={() => setTransition(true)}
+                        onMouseLeave={() => setTransition(false)}
+                    >
+                        Download report <FiDownload size={20} />
+                    </button>
+                </div>
             </div>
 
             <div style={{ margin: "10px" }}>

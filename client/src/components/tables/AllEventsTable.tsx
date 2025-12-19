@@ -25,13 +25,7 @@ export default function AllEventsTable({ events, sortType, searchText }: Argumen
 
     useEffect(() => {
         let copy = [...events];
-        /*
-        if (searchText && searchText.trim() !== "") {
-            copy = copy.filter(item =>
-                item.source.toLowerCase().includes(searchText.toLowerCase())
-            );
-        }
-        */
+
         if (sortType === 1) {
             copy.sort((a, b) => a.source.localeCompare(b.source));
         } else if (sortType === 2) {

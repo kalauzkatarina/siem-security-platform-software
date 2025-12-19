@@ -4,8 +4,16 @@ import { BiError } from "react-icons/bi";
 import { PiShieldWarningBold } from "react-icons/pi";
 import { IoShieldCheckmark } from "react-icons/io5";
 import RecentEventsTable from "../tables/RecentEventsTable";
+import { useEffect, useState } from "react";
+import { QueryAPI } from "../../api/query/QueryAPI";
+import { EventType } from "../../enums/EventType";
 
 export default function Dashboard() {
+    const [eventsData, setEventsData] = useState<EventRow[]>([]);
+    const [allEventsCount, setEventCount] = useState<number>(0);
+    const [infoCount, setInfoCount] = useState<number>(0);
+    const [warningCount, setWarningCount] = useState<number>(0);
+    const [errorCount, setErrorCount] = useState<number>(0);
 
     // Inline styles for now, will be in CSS later
     // types, interfaces and classes will be moved too
@@ -26,26 +34,62 @@ export default function Dashboard() {
         padding:"10px"
     };
 
-    interface EventRow {
+
+    interface EventRow {  //at the end,move into a right folders(types) 
+        id: number;
         source: string;
         time: string;
-        type: "Info" | "Warning" | "Error";
+        type: EventType;
+        description:string;
     }
 
+    /*
     const events: EventRow[] = [
-        { source: "Auth Service", time: "01:23:33   22/11/2025", type: "Info" },
-        { source: "Auth Service", time: "01:25:49   22/11/2025", type: "Warning" },
-        { source: "Database", time: "21:03:11   20/11/2025", type: "Error" }
+        { id: 1, source: "Auth Service", time: "01:23:33   22/11/2025", type: EventType.INFO, description: "User login successful" },
+        { id: 2, source: "Auth Service", time: "01:25:49   22/11/2025", type: EventType.WARNING, description: "Multiple failed login attempts" },
+        { id: 3, source: "Database", time: "21:03:11   20/11/2025", type: EventType.ERROR, description: "Database connection lost" },
     ];
+    */
+
+    useEffect(() => {
+        const fetchData = async () => {
+            const api = new QueryAPI();
+            try {
+                const recentEvents = await api.getLastThreeEvents();
+                const mappedEvents: EventRow[] = recentEvents.map(event => ({
+                    id: event.id,
+                    source: event.source,
+                    time: new Date(event.timestamp).toLocaleString(),
+                    type: event.type,
+                    description: event.description
+                }));
+                setEventsData(mappedEvents); 
+                //console.log("Recent Events:", mappedEvents);
+                const allEventsCount = await api.getEventsCount();
+                setEventCount(allEventsCount);
+                
+                const infoCount = await api.getInfoCount();
+                setInfoCount(infoCount);
+                const warningCount = await api.getWarningCount();
+                setWarningCount(warningCount);
+                const errorCount = await api.getErrorCount();
+                setErrorCount(errorCount);
+                //console.log("Event Counts:", { allEventsCount, infoCount, warningCount, errorCount });
+            } catch (error) {
+                console.error("Error fetching data:", error);
+            }
+        };
+        fetchData();
+    }, []);
 
     return (
         <div style={dashboardRectangleStyle}>
             <h3 style={{ marginTop: '3px', padding:"5px", margin: "10px" }}>Analytics</h3>
             <div style={dashboardDiv}>
-                <StatCard title="Total Raw Events" value={1800} icon={<BsDatabase />} iconColor="black" />
-                <StatCard title="Errors" value={33} icon={<BiError />} iconColor="red" />
-                <StatCard title="Warnings" value={123} icon={<PiShieldWarningBold />} iconColor="yellow" />
-                <StatCard title="Notifications" value={2000} icon={<IoShieldCheckmark />} iconColor="blue" />
+                <StatCard title="Total Raw Events" value={allEventsCount} icon={<BsDatabase />} iconColor="black" />
+                <StatCard title="Errors" value={errorCount} icon={<BiError />} iconColor="red" />
+                <StatCard title="Warnings" value={warningCount} icon={<PiShieldWarningBold />} iconColor="yellow" />
+                <StatCard title="Notifications" value={infoCount} icon={<IoShieldCheckmark />} iconColor="blue" />
             </div>
             <h3 style={{ marginTop: '10px' , padding:"5px" , margin: "10px"  }}>Short review</h3>
             <div style={dashboardDiv}>
@@ -54,7 +98,7 @@ export default function Dashboard() {
                 <StatCard title="Most weight archive" subtitle="logs_2025_11_06_22_00.tar" value={100} valueDescription="MB" />
             </div>
             <h3 style={{ marginTop: '10px' , padding:"5px", margin: "10px"  }}>Recent Events</h3>
-            <RecentEventsTable events={events} />
+            <RecentEventsTable events={eventsData} />
         </div>
     );
 };

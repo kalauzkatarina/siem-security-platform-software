@@ -8,6 +8,9 @@ export interface IQueryAPI {
   getEventsByQuery(query: string): Promise<EventDTO[]>;
   getLastThreeEvents(): Promise<EventDTO[]>;
   getEventsCount(): Promise<number>;
+  getInfoCount(): Promise<number>;
+  getWarningCount(): Promise<number>;
+  getErrorCount(): Promise<number>;
 
   //statistics:
   getEventStatistics(token: string): Promise<EventStatisticsDTO[]>;

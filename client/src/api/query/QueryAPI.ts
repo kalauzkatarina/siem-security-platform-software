@@ -4,6 +4,7 @@ import { IQueryAPI } from "./IQueryAPI";
 import { EventStatisticsDTO } from "../../models/query/EventStatisticsDTO";
 import { AlertStatisticsDTO } from "../../models/query/AlertStatisticsDTO";
 import { DistributionDTO } from "../../models/query/DistributionDTO";
+import { CountResponseDTO } from "../../models/query/CountResponseDTO";
 
 export class QueryAPI implements IQueryAPI {
   private readonly client: AxiosInstance;
@@ -37,8 +38,23 @@ export class QueryAPI implements IQueryAPI {
   }
 
   async getEventsCount(): Promise<number> {
-    const response = await this.client.get<number>("/siem/query/eventsCount");
-    return response.data;
+    const response = await this.client.get<CountResponseDTO>("/siem/query/eventsCount");
+    return response.data.count;
+  }
+
+  async getInfoCount(): Promise<number> {
+    const response = await this.client.get<CountResponseDTO>("/siem/query/infoCount");
+    return response.data.count;
+  }
+
+  async getWarningCount(): Promise<number> {
+    const response = await this.client.get<CountResponseDTO>("/siem/query/warningCount");
+    return response.data.count;
+  }
+
+  async getErrorCount(): Promise<number> {
+    const response = await this.client.get<CountResponseDTO>("/siem/query/errorCount");
+    return response.data.count;
   }
 
   //statistics:
