@@ -3,9 +3,11 @@ import EventTableRow from "./EventTableRow";
 import { EventType } from "../../enums/EventType";
 
 interface EventRow {
+    id: number;
     source: string;
     time: string;
     type: EventType;
+    description:string;
 }
 
 // Inline styles for now, will be in CSS later
@@ -90,9 +92,10 @@ export default function AllEventsTable({ events, sortType, searchText }: Argumen
 
                 <tbody>
                     {sortedEvents.map((e, index) => (
-                        <><EventTableRow e={e} index={index} />
-
-                        </>
+                        <EventTableRow 
+                            key={e.id} 
+                            e={e} 
+                            index={index} />
                     ))}
                 </tbody>
             </table>

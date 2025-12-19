@@ -2,17 +2,20 @@ import { useState } from "react";
 import { IoIosArrowDown } from "react-icons/io";
 import { ExpandedRow } from "./ExpandedRow";
 import { EventType } from "../../enums/EventType";
+import React from "react";
 
 interface EventRow {  //at the end,move into a right folders(types) 
+    id: number;
     source: string;
     time: string;
     type: EventType;
+    description:string;
 }
 interface RowProps {   //at the end,move into a right folders(types) 
     e: EventRow;
     index: number;
 }
-export default function AllEventsTable({ e, index }: RowProps) {
+export default function EventTableRow({ e, index }: RowProps) {
     const [rotateArrow, setRotateArrow] = useState<number | null>(null);
 
     const tdStyle: React.CSSProperties = {
@@ -59,8 +62,8 @@ export default function AllEventsTable({ e, index }: RowProps) {
     });
     
     return (
-        <>
-            <tr key={index} className="hover:bg-gray-600">
+        <React.Fragment>
+            <tr className="hover:bg-gray-600">
                 <td style={eventIdStyle}>{e.source}</td>
                 <td style={tdStyle}>{e.time}</td>
                 <td style={tdStyle}>
@@ -78,6 +81,6 @@ export default function AllEventsTable({ e, index }: RowProps) {
 
             {/* Expanded details row */}
             <ExpandedRow expanded={rotateArrow===index} e={e}/>
-        </>
+        </React.Fragment>
     );
 }

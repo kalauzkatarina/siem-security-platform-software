@@ -18,12 +18,12 @@ export class QueryAPI implements IQueryAPI {
   }
 
   async getAllEvents(): Promise<EventDTO[]> {
-    const response = await this.client.get<EventDTO[]>("/query/events");
+    const response = await this.client.get<EventDTO[]>("/siem/query/events");
     return response.data;
   }
 
   async getEventsByQuery(query: string): Promise<EventDTO[]> {
-    const response = await this.client.get<EventDTO[]>("/query/events/search", {
+    const response = await this.client.get<EventDTO[]>("/siem/query/search", {
       params: { q: query },
     });
     return response.data;
@@ -31,13 +31,13 @@ export class QueryAPI implements IQueryAPI {
 
   async getLastThreeEvents(): Promise<EventDTO[]> {
     const response = await this.client.get<EventDTO[]>(
-      "/query/events/lastThree"
+      "/siem/query/lastThreeEvents"
     );
     return response.data;
   }
 
   async getEventsCount(): Promise<number> {
-    const response = await this.client.get<number>("/query/events/count");
+    const response = await this.client.get<number>("/siem/query/eventsCount");
     return response.data;
   }
 

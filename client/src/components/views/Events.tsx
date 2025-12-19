@@ -8,9 +8,11 @@ import DropDownMenu from "../events/DropDownMenu";
 import { QueryAPI } from "../../api/query/QueryAPI";
 
 interface EventRow { 
+    id: number;
     source: string;
     time: string;
     type: EventType;
+    description:string;
 }
 
 export default function Events() {
@@ -87,15 +89,20 @@ export default function Events() {
         }
 
         return {
+            id: e.id,
             source: e.source.toString(),
             time: formatTime(e.timestamp),
             type,
+            description: e.description.toString(),
         };
     };
 
     const loadEventsWithQuery = async () => {
-        if (!token) return;
-
+        if (!token) {
+            console.error("No auth token available.");
+            return;
+        }
+        
         try {
             setIsLoading(true);
             setError(null);
@@ -123,30 +130,26 @@ export default function Events() {
 
     useEffect(() => {
         if (!token) return;
-        loadEventsWithQuery();
-        /*
-        const api = new EventAPI();
 
-        const loadEvents = async () => {
+        const loadAllEvents = async () => {
             try {
                 setIsLoading(true);
                 setError(null);
 
-                // prazan query => Query Service vraća sve eventove
-                const data: EventDTO[] = await api.getAllEvents(token);
-                const mapped: EventRow[] = data.map(mapEventDTOToRow);
+                const api = new QueryAPI();
 
+                const data: EventDTO[] = await api.getAllEvents(); 
+                const mapped = data.map(mapEventDTOToRow);
                 setEvents(mapped);
             } catch (err) {
-                console.error("Failed to load events:", err);
+                console.error(err);
                 setError("Failed to load events.");
             } finally {
                 setIsLoading(false);
             }
         };
 
-        void loadEvents();
-        */
+        void loadAllEvents();
     }, [token]);
 
     return (

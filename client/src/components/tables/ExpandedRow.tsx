@@ -1,9 +1,11 @@
 import { EventType } from "../../enums/EventType";
 
 interface EventRow { //move into a right folders(types)
+    id: number;
     source: string;
     time: string;
     type: EventType;
+    description:string;
 }
 interface ExpandedProps{ //move into a right folders(types)
     expanded:boolean;
@@ -69,12 +71,12 @@ export function ExpandedRow({expanded,e}:ExpandedProps){
 
                             <div style={detailRowStyle}>
                                 <span style={labelStyle}>Description:</span>
-                                <span style={valueStyle}>ovde ide description</span>
+                                <span style={{ ...valueStyle, paddingLeft: "16px" }}>{e.description}</span>
                             </div>
 
                             <div style={detailRowStyle}>
-                                <span style={labelStyle}>Raw Message:</span>
-                                <span style={valueStyle}>Ovde ide raw message</span>
+                                <span style={labelStyle}>Type:</span>
+                                <span style={{ ...valueStyle, paddingLeft: "16px" }}>{e.type}</span>
                             </div>
 
                         </div>
