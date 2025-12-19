@@ -7,7 +7,8 @@ import { CorrelationDTO } from "../Domain/types/CorrelationDTO";
 import { extractJson } from "../Infrastructure/parsers/extractJson";
 import { parseEventDTO } from "../Infrastructure/parsers/EventParser";
 import { parseCorrelationCandidates } from "../Infrastructure/parsers/CorrelationParser";
-
+import { EventResponseSchema } from "../Infrastructure/schemas/EventResponse.schema";
+import { CorrelationResponseSchema } from "../Infrastructure/schemas/CorrelationResponse.schema";
 dotenv.config();
 
 export class LLMChatAPIService implements ILLMChatAPIService {
@@ -46,22 +47,22 @@ export class LLMChatAPIService implements ILLMChatAPIService {
         role: "user",
         content: `
             You are a deterministic SIEM normalization engine.
-
-            Return ONLY valid JSON with EXACT structure:
-            {"type":"INFO"|"WARNING"|"ERROR","description":string}
-
+            Return ONLY valid JSON aligned with schema.
             Rules:
             - No markdown
             - No explanations
             - Deterministic output
             - Do not invent data
-
             Log:
             ${rawLog}`.trim(),
       },
     ];
 
-    const raw = await this.sendChatCompletion(this.normalizationModelId, messages);
+    const raw = await this.sendChatCompletion(
+      this.normalizationModelId,
+      messages,
+      EventResponseSchema
+    );
     const event = parseEventDTO(raw);
 
     if (!event) {
@@ -119,7 +120,11 @@ export class LLMChatAPIService implements ILLMChatAPIService {
       },
     ];
 
-    const raw = await this.sendChatCompletion(this.correlationModelId, messages);
+    const raw = await this.sendChatCompletion(
+      this.correlationModelId,
+      messages,
+      CorrelationResponseSchema
+    );
     return parseCorrelationCandidates(raw);
   }
 
@@ -128,17 +133,26 @@ export class LLMChatAPIService implements ILLMChatAPIService {
   // =========================================================
   private async sendChatCompletion(
     modelId: string,
-    messages: ChatMessage[]
+    messages: ChatMessage[],
+    schema?: object
   ): Promise<unknown> {
     const url = `${this.apiUrl}/models/${modelId}:generateContent`;
+
+    const generationConfig: any = { temperature: 0.0 };
+
+    if (schema) {
+      generationConfig.responseMimeType = "application/json";
+      generationConfig.responseSchema = schema;
+    }
 
     const payload = {
       contents: messages.map((m) => ({
         role: m.role,
         parts: [{ text: m.content }],
       })),
-      generationConfig: { temperature: 0.0 },
+      generationConfig,
     };
+
 
     for (let attempt = 1; attempt <= this.maxRetries; attempt++) {
       try {
@@ -150,13 +164,25 @@ export class LLMChatAPIService implements ILLMChatAPIService {
           timeout: this.timeoutMs,
         });
 
-        const text = res.data?.candidates?.[0]?.content?.parts?.[0]?.text;
-        if (!text || typeof text !== "string") return null;
+        const part = res.data?.candidates?.[0]?.content?.parts?.[0];
+        if (!part) return null;
 
-        const jsonText = extractJson(text);
+        // SCHEMA MODE)
+        if (schema) {
+          if (typeof part.text === "string") {
+            return JSON.parse(part.text);
+          }
+          return part;
+        }
+
+        // FALLBACK MODE (no schema)
+        if (typeof part.text !== "string") return null;
+
+        const jsonText = extractJson(part.text);
         if (!jsonText) return null;
 
         return JSON.parse(jsonText);
+
       } catch (err) {
         const axErr = err as AxiosError;
 
