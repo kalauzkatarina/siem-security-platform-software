@@ -1,4 +1,3 @@
-import axios, { AxiosInstance } from "axios";
 import { IGatewayService } from "../Domain/services/IGatewayService";
 import { LoginUserDTO } from "../Domain/DTOs/LoginUserDTO";
 import { RegistrationUserDTO } from "../Domain/DTOs/RegistrationUserDTO";
@@ -14,16 +13,26 @@ import { TopArchiveDTO } from "../Domain/DTOs/TopArchiveDTO";
 import { ParserEventDto } from "../Domain/DTOs/ParserEventDTO";
 import { ArchiveVolumeDTO } from "../Domain/DTOs/ArchiveVolumeDTO";
 import { NormalizedEventDTO } from "../Domain/DTOs/NormalizedEventDTO";
+import { AuthGatewayService } from "./domains/AuthGatewayService";
+import { UserGatewayService } from "./domains/UserGatewayService";
+import { AlertGatewayService } from "./domains/AlertGatewayService";
+import { QueryGatewayService } from "./domains/QueryGatewayService";
+import { StorageGatewayService } from "./domains/StorageGatewayService";
+import { ParserGatewayService } from "./domains/ParserGatewayService";
+import { AnalysisGatewayService } from "./domains/AnalysisGatewayService";
 
+/**
+ * Facade that delegates to domain-specific gateway services.
+ * Keeps controller interface stable while honoring SRP in implementation.
+ */
 export class GatewayService implements IGatewayService {
-  private readonly authClient: AxiosInstance;
-  private readonly userClient: AxiosInstance;
-  private readonly alertClient: AxiosInstance;
-  private readonly queryClient: AxiosInstance;
-  private readonly siemAuthClient: AxiosInstance;
-  private readonly storageLogClient: AxiosInstance;
-  private readonly parserEventClient: AxiosInstance;
-  private readonly analysisEngineClient: AxiosInstance;
+  private readonly authService: AuthGatewayService;
+  private readonly userService: UserGatewayService;
+  private readonly alertService: AlertGatewayService;
+  private readonly queryService: QueryGatewayService;
+  private readonly storageService: StorageGatewayService;
+  private readonly parserService: ParserGatewayService;
+  private readonly analysisService: AnalysisGatewayService;
 
   constructor() {
     const authBaseURL = process.env.AUTH_SERVICE_API;
@@ -35,108 +44,39 @@ export class GatewayService implements IGatewayService {
     const parserEventURL = process.env.PARSER_SERVICE_API;
     const analysisEngineURL = process.env.ANALYSIS_ENGINE_SERVICE_API;
 
-    this.authClient = axios.create({
-      baseURL: authBaseURL,
-      headers: { "Content-Type": "application/json" },
-      timeout: 5000,
-    });
-
-    this.userClient = axios.create({
-      baseURL: userBaseURL,
-      headers: { "Content-Type": "application/json" },
-      timeout: 5000,
-    });
-
-    // TODO: ADD MORE CLIENTS
-    this.alertClient = axios.create({
-      baseURL: alertBaseURL,
-      headers: { "Content-Type": "application/json" },
-      timeout: 10000,
-    });
-
-    this.queryClient = axios.create({
-      baseURL: queryBaseURL,
-      headers: { "Content-Type": "application/json" },
-      timeout: 5000,
-    });
-
-    this.siemAuthClient = axios.create({
-      baseURL: siemAuthBaseURL,
-      headers: { "Content-Type": "application/json" },
-      timeout: 5000,
-    });
-
-    this.storageLogClient = axios.create({
-      baseURL: storageAuthBaseURL,
-      headers: { "Content-Type": "application/json" },
-      timeout: 5000,
-    });
-
-    this.parserEventClient = axios.create({
-      baseURL: parserEventURL,
-      headers: { "Content-Type": "application/json" },
-      timeout: 5000,
-    });
-
-    this.analysisEngineClient = axios.create({
-      baseURL: analysisEngineURL,
-      headers: { "Content-Type": "application/json" },
-      timeout: 5000,
-    });
+    this.authService = new AuthGatewayService(authBaseURL, siemAuthBaseURL);
+    this.userService = new UserGatewayService(userBaseURL);
+    this.alertService = new AlertGatewayService(alertBaseURL);
+    this.queryService = new QueryGatewayService(queryBaseURL);
+    this.storageService = new StorageGatewayService(storageAuthBaseURL);
+    this.parserService = new ParserGatewayService(parserEventURL);
+    this.analysisService = new AnalysisGatewayService(analysisEngineURL);
   }
 
-  //Parser
-
+  // Parser
   async log(eventMessage: string, eventSource: string): Promise<EventDTO> {
-    const response = await this.parserEventClient.post<EventDTO>(
-      "/parserEvents/log",
-      {
-        message: eventMessage,
-        source: eventSource,
-      }
-    );
-
-    return response.data;
+    return this.parserService.log(eventMessage, eventSource);
   }
-  
+
   async getAllParserEvents(): Promise<ParserEventDto[]> {
-    const response = await this.parserEventClient.get<ParserEventDto[]>("/parserEvents");
-    return response.data;
+    return this.parserService.getAllParserEvents();
   }
 
   async getParserEventById(id: number): Promise<ParserEventDto> {
-    const response = await this.parserEventClient.get<ParserEventDto>(`/parserEvents/${id}`);
-    return response.data;
+    return this.parserService.getParserEventById(id);
   }
-  
+
   async deleteById(id: number): Promise<boolean> {
-    const response = await this.parserEventClient.delete<boolean>(`/parserEvents/${id}`);
-    return response.data;
+    return this.parserService.deleteById(id);
   }
 
   // Auth microservice
   async login(data: LoginUserDTO): Promise<AuthResponseType> {
-    try {
-      const response = await this.authClient.post<AuthResponseType>(
-        "/auth/login",
-        data
-      );
-      return response.data;
-    } catch {
-      return { authenificated: false };
-    }
+    return this.authService.login(data);
   }
 
   async register(data: RegistrationUserDTO): Promise<AuthResponseType> {
-    try {
-      const response = await this.authClient.post<AuthResponseType>(
-        "/auth/register",
-        data
-      );
-      return response.data;
-    } catch {
-      return { authenificated: false };
-    }
+    return this.authService.register(data);
   }
 
   async validateToken(token: string): Promise<{
@@ -145,225 +85,111 @@ export class GatewayService implements IGatewayService {
     isSysAdmin?: boolean;
     error?: string;
   }> {
-    try {
-      const response = await this.siemAuthClient.post<{
-        success: boolean;
-        valid: boolean;
-        isSysAdmin: boolean;
-        user: { user_id: number; username: string; role: number };
-      }>("auth/validate", { token });
-
-      if (!response.data.success || !response.data.valid) {
-        return { valid: false, error: "Token validation failed." };
-      }
-
-      return {
-        valid: true,
-        payload: response.data.user,
-        isSysAdmin: response.data.isSysAdmin,
-      };
-    } catch (error: any) {
-      return { valid: false, error: error };
-    }
+    return this.authService.validateToken(token);
   }
 
   // User microservice
   async getAllUsers(): Promise<UserDTO[]> {
-    const response = await this.userClient.get<UserDTO[]>("/users");
-    return response.data;
+    return this.userService.getAllUsers();
   }
 
   async getUserById(id: number): Promise<UserDTO> {
-    const response = await this.userClient.get<UserDTO>(`/users/${id}`);
-    return response.data;
+    return this.userService.getUserById(id);
   }
-
-  // TODO: ADD MORE API CALLS
 
   // Alert Service
   async getAllAlerts(): Promise<AlertDTO[]> {
-    const response = await this.alertClient.get<AlertDTO[]>("/alerts");
-    return response.data;
+    return this.alertService.getAllAlerts();
   }
 
   async getAlertById(id: number): Promise<AlertDTO> {
-    const response = await this.alertClient.get<AlertDTO>(`/alerts/${id}`);
-    return response.data;
+    return this.alertService.getAlertById(id);
   }
 
   async searchAlerts(query: AlertQueryDTO): Promise<PaginatedAlertsDTO> {
-    const response = await this.alertClient.get<PaginatedAlertsDTO>(
-      "/alerts/search",
-      {
-        params: query,
-      }
-    );
-    return response.data;
+    return this.alertService.searchAlerts(query);
   }
 
-  async resolveAlert(
-    id: number,
-    resolvedBy: string,
-    status: string
-  ): Promise<AlertDTO> {
-    const response = await this.alertClient.put<AlertDTO>(
-      `/alerts/${id}/resolve`,
-      {
-        resolvedBy,
-        status,
-      }
-    );
-    return response.data;
+  async resolveAlert(id: number, resolvedBy: string, status: string): Promise<AlertDTO> {
+    return this.alertService.resolveAlert(id, resolvedBy, status);
   }
 
   async updateAlertStatus(id: number, status: string): Promise<AlertDTO> {
-    const response = await this.alertClient.put<AlertDTO>(
-      `/alerts/${id}/status`,
-      { status }
-    );
-    return response.data;
+    return this.alertService.updateAlertStatus(id, status);
   }
 
   // Query Service
   async searchEvents(query: string): Promise<EventDTO[]> {
-    const response = await this.queryClient.get<any[]>("/query/search", {
-      params: { q: query },
-    });
-    return response.data;
+    return this.queryService.searchEvents(query);
   }
 
   async getOldEvents(hours: number): Promise<EventDTO[]> {
-    const response = await this.queryClient.get<any[]>(
-      `/query/oldEvents/${hours}`
-    );
-    return response.data;
+    return this.queryService.getOldEvents(hours);
   }
 
   async getLastThreeEvents(): Promise<EventDTO[]> {
-    const response = await this.queryClient.get<any[]>(
-      `/query/lastThreeEvents`
-    );
-    return response.data;
+    return this.queryService.getLastThreeEvents();
   }
 
   async getAllEvents(): Promise<EventDTO[]> {
-    const response = await this.queryClient.get<any[]>(
-      "/query/events"
-    );
-    return response.data;
+    return this.queryService.getAllEvents();
   }
 
   async getEventsCount(): Promise<number> {
-    const response = await this.queryClient.get<{ count: number }>(
-      "/query/eventsCount"
-    );
-    return response.data.count;
+    return this.queryService.getEventsCount();
   }
 
   async getInfoCount(): Promise<number> {
-    const response = await this.queryClient.get<{ count: number }>(
-      "/query/infoCount"
-    );
-    return response.data.count;
+    return this.queryService.getInfoCount();
   }
 
   async getWarningCount(): Promise<number> {
-    const response = await this.queryClient.get<{ count: number }>(
-      "/query/warningCount"
-    );
-    return response.data.count;
+    return this.queryService.getWarningCount();
   }
 
   async getErrorCount(): Promise<number> {
-    const response = await this.queryClient.get<{ count: number }>(
-      "/query/errorCount"
-    );
-    return response.data.count;
+    return this.queryService.getErrorCount();
   }
 
-  // Storage 
+  // Storage
   async getAllArchives(): Promise<ArchiveDTO[]> {
-    const response = await this.storageLogClient.get<ArchiveDTO[]>("/storageLog");
-    return response.data;
+    return this.storageService.getAllArchives();
   }
 
   async searchArchives(query: string): Promise<ArchiveDTO[]> {
-    const response = await this.storageLogClient.get<ArchiveDTO[]>("/storageLog/search", {
-      params: { q: query },
-    });
-    return response.data;
+    return this.storageService.searchArchives(query);
   }
 
   async sortArchives(by: "date" | "size" | "name", order: "asc" | "desc"): Promise<ArchiveDTO[]> {
-    const response = await this.storageLogClient.get<ArchiveDTO[]>("/storageLog/sort", {
-      params: { by, order },
-    });
-    return response.data;
+    return this.storageService.sortArchives(by, order);
   }
 
   async runArchiveProcess(): Promise<ArchiveDTO> {
-    const response = await this.storageLogClient.post<ArchiveDTO>("/storageLog/run");
-    return response.data;
+    return this.storageService.runArchiveProcess();
   }
 
   async getArchiveStats(): Promise<ArchiveStatsDTO> {
-    const response = await this.storageLogClient.get<ArchiveStatsDTO>("/storageLog/stats");
-    return response.data;
+    return this.storageService.getArchiveStats();
   }
 
   async downloadArchive(id: string): Promise<ArrayBuffer> {
-    const response = await this.storageLogClient.get(`/storageLog/file/${id}`, {
-      responseType: "arraybuffer"
-    });
-    return response.data;
+    return this.storageService.downloadArchive(id);
   }
 
   async getTopArchives(type: "events" | "alerts", limit: number): Promise<TopArchiveDTO[]> {
-    const response = await this.storageLogClient.get<TopArchiveDTO[]>("/storageLog/top", {
-      params: { type, limit }
-    });
-    return response.data;
+    return this.storageService.getTopArchives(type, limit);
   }
 
   async getArchiveVolume(period: "daily" | "monthly" | "yearly"): Promise<ArchiveVolumeDTO[]> {
-    const response = await this.storageLogClient.get<ArchiveVolumeDTO[]>("/storageLog/volume", {
-      params: { period }
-    });
-    return response.data;
+    return this.storageService.getArchiveVolume(period);
   }
 
-
-  //Analysis Engine
+  // Analysis Engine
   async analysisEngineNormalize(rawMessage: string): Promise<NormalizedEventDTO> {
-    const response = await this.analysisEngineClient.post<{ eventData: NormalizedEventDTO }>(
-      "/AnalysisEngine/processEvent",
-      {
-        message: rawMessage,
-      }
-    );
-
-    return response.data.eventData;
+    return this.analysisService.normalize(rawMessage);
   }
 
-
- async analysisEngineDeleteCorrelationsByEventIds(eventIds: number[]): Promise<number> {
-    const response = await this.analysisEngineClient.post<{
-        deletedCount: number;
-    }>("/AnalysisEngine/correlations/deleteByEventIds", {
-        eventIds,
-    });
-
-    const data = response.data;
-
-    if (
-        !data ||
-        typeof data !== "object" ||
-        typeof data.deletedCount !== "number"
-    ) {
-        console.error("Invalid response from correlation service");
-    }
-
-    return data.deletedCount;
-}
-
+  async analysisEngineDeleteCorrelationsByEventIds(eventIds: number[]): Promise<number> {
+    return this.analysisService.deleteCorrelationsByEventIds(eventIds);
+  }
 }

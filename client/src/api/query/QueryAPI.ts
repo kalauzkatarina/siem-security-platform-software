@@ -9,13 +9,15 @@ import { CountResponseDTO } from "../../models/query/CountResponseDTO";
 export class QueryAPI implements IQueryAPI {
   private readonly client: AxiosInstance;
 
-  constructor() {
-    this.client = axios.create({
-      baseURL: import.meta.env.VITE_GATEWAY_URL,
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+  constructor(client?: AxiosInstance) {
+    this.client =
+      client ??
+      axios.create({
+        baseURL: import.meta.env.VITE_GATEWAY_URL,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
   }
 
   async getAllEvents(token: string): Promise<EventDTO[]> {

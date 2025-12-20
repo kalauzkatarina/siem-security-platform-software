@@ -5,11 +5,13 @@ import { EventDTO } from "../../models/events/EventDTO";
 export class EventAPI implements IEventAPI {
   private readonly client: AxiosInstance;
 
-  constructor() {
-    this.client = axios.create({
-      baseURL: import.meta.env.VITE_GATEWAY_URL, // npr. http://localhost:4000/api/v1
-      headers: { "Content-Type": "application/json" },
-    });
+  constructor(client?: AxiosInstance) {
+    this.client =
+      client ??
+      axios.create({
+        baseURL: import.meta.env.VITE_GATEWAY_URL, // npr. http://localhost:4000/api/v1
+        headers: { "Content-Type": "application/json" },
+      });
   }
 
   async getAllEvents(token: string): Promise<EventDTO[]> {
