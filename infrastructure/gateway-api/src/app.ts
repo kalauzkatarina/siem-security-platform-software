@@ -4,7 +4,14 @@ import dotenv from 'dotenv';
 
 import { IGatewayService } from './Domain/services/IGatewayService';
 import { GatewayService } from './Services/GatewayService';
-import { GatewayController } from './WebAPI/GatewayController';
+import { AuthGatewayController } from './WebAPI/controllers/AuthGatewayController';
+import { UserGatewayController } from './WebAPI/controllers/UserGatewayController';
+import { AlertGatewayController } from './WebAPI/controllers/AlertGatewayController';
+import { QueryGatewayController } from './WebAPI/controllers/QueryGatewayController';
+import { StorageGatewayController } from './WebAPI/controllers/StorageGatewayController';
+import { ParserGatewayController } from './WebAPI/controllers/ParserGatewayController';
+import { AnalysisGatewayController } from './WebAPI/controllers/AnalysisGatewayController';
+import { createAuthMiddleware } from './Middlewares/authentification/AuthMiddleware';
 
 dotenv.config({ quiet: true });
 
@@ -35,10 +42,16 @@ app.get('/health', (req, res) => {
 // Services
 const gatewayService: IGatewayService = new GatewayService();
 
-// WebAPI routes
-const gatewayController = new GatewayController(gatewayService);
+// Auth middleware (reuse across controllers)
+const authenticate = createAuthMiddleware(gatewayService);
 
-// Registering routes
-app.use('/api/v1', gatewayController.getRouter());
+// WebAPI routes
+app.use('/api/v1', new AuthGatewayController(gatewayService).getRouter());
+app.use('/api/v1', new UserGatewayController(gatewayService, authenticate).getRouter());
+app.use('/api/v1', new AlertGatewayController(gatewayService, authenticate).getRouter());
+app.use('/api/v1', new QueryGatewayController(gatewayService, authenticate).getRouter());
+app.use('/api/v1', new StorageGatewayController(gatewayService, authenticate).getRouter());
+app.use('/api/v1', new ParserGatewayController(gatewayService, authenticate).getRouter());
+app.use('/api/v1', new AnalysisGatewayController(gatewayService, authenticate).getRouter());
 
 export default app;
