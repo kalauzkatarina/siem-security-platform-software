@@ -14,12 +14,9 @@ import { TopArchiveDTO } from "../Domain/DTOs/TopArchiveDTO";
 import { ArchiveVolumeDTO } from "../Domain/DTOs/ArchiveVolumeDTO";
 import { ArchiveType } from "../Domain/enums/ArchiveType";
 import { CorrelationDTO } from "../Domain/DTOs/CorrelationDTO";
+import { ARCHIVE_DIR, TEMP_DIR, ARCHIVE_RETENTION_HOURS } from "../Domain/constants/ArchiveConstants";
 
 const execSync = util.promisify(exec);
-
-const ARCHIVE_DIR = process.env.ARCHIVE_PATH || path.join(__dirname, "../../archives");
-const TEMP_DIR = path.join(ARCHIVE_DIR, "tmp");
-const hours = 72;
 
 export class StorageLogService implements IStorageLogService {
     private readonly queryClient: AxiosInstance;
@@ -69,6 +66,8 @@ export class StorageLogService implements IStorageLogService {
         const eventsOk = await this.archiveEvents();
         const alertsOk = await this.archiveAlerts();
 
+        await this.logger.log(`Archive process result: events:${eventsOk}, alerts=${alertsOk}`);
+
         return eventsOk && alertsOk;
     }
 
@@ -77,7 +76,7 @@ export class StorageLogService implements IStorageLogService {
             await this.logger.log("Archiving events started...");
 
             const events = (await this.queryClient.get<EventDTO[]>("/query/oldEvents", 
-                { params: {hours} }
+                { params: {ARCHIVE_RETENTION_HOURS} }
             )).data;
 
             if (events.length === 0){
@@ -123,6 +122,8 @@ export class StorageLogService implements IStorageLogService {
                 fileSize: stats.size
             }));
 
+            await this.logger.log(`Deleting ${events.length} events from Event service`);
+
             await this.eventClient.delete("/events/old", 
                 { data: events.map(e => e.id)}
             );
@@ -141,7 +142,7 @@ export class StorageLogService implements IStorageLogService {
             await this.logger.log("Archiving alerts started...");
             
             const alerts = (await this.queryClient.get<CorrelationDTO[]>("/query/oldAlerts",
-                { params: {hours} }
+                { params: {ARCHIVE_RETENTION_HOURS} }
             )).data;
 
             if (alerts.length === 0) {
@@ -186,6 +187,8 @@ export class StorageLogService implements IStorageLogService {
                 recordCount: alerts.length,
                 fileSize: stats.size
             }));
+
+            await this.logger.log(`Deleting ${alerts.length} events from Analysis Engine service`);
 
             await this.correlationClient.delete("/AnalysisEngine/correlations/deleteByEventIds",
                 { data: alerts.map(a => a.id)}
