@@ -5,6 +5,8 @@ import { ILLMChatAPIService } from "../Domain/Services/ILLMChatAPIService";
 import { Correlation } from "../Domain/models/Correlation";
 import { CorrelationEventMap } from "../Domain/models/CorrelationEventMap";
 import { CorrelationDTO } from "../Domain/types/CorrelationDTO";
+import { createAxiosClient } from "../Infrastructure/helpers/axiosClient";
+import { extractNumericEventIds } from "../Infrastructure/helpers/extractNumericEventIds";
 
 export class CorrelationService implements ICorrelationService {
   private readonly alertClient: AxiosInstance;
@@ -23,17 +25,8 @@ export class CorrelationService implements ICorrelationService {
   ) {
     console.log(`[CorrelationService] started`);
 
-    this.queryClient = axios.create({
-      baseURL: process.env.QUERY_SERVICE_API,
-      headers: { "Content-Type": "application/json" },
-      timeout: 5000,
-    });
-
-    this.alertClient = axios.create({
-      baseURL: process.env.ALERT_SERVICE_API,
-      headers: { "Content-Type": "application/json" },
-      timeout: 5000,
-    });
+    this.queryClient = createAxiosClient(process.env.QUERY_SERVICE_API ?? "");
+    this.alertClient = createAxiosClient(process.env.ALERT_SERVICE_API ?? "");
   }
 
   async findCorrelations(): Promise<void> {
@@ -65,7 +58,7 @@ export class CorrelationService implements ICorrelationService {
       return;
     }
 
-    const inputEventIds = this.extractNumericEventIds(events);
+    const inputEventIds = extractNumericEventIds(events);
 
     // 3. Apply policy + persist
     for (const candidate of candidates) {
@@ -106,27 +99,6 @@ export class CorrelationService implements ICorrelationService {
     }
 
     return true;
-  }
-
-  // ------------------------------------------------------------------
-  // HELPERS
-  // ------------------------------------------------------------------
-
-  private extractNumericEventIds(events: unknown): Set<number> {
-    const ids = new Set<number>();
-
-    if (Array.isArray(events)) {
-      for (const e of events) {
-        if (e && typeof e === "object" && "id" in e) {
-          const v = (e as any).id;
-          if (typeof v === "number" && Number.isFinite(v)) {
-            ids.add(v);
-          }
-        }
-      }
-    }
-
-    return ids;
   }
 
   // ------------------------------------------------------------------
@@ -176,15 +148,15 @@ export class CorrelationService implements ICorrelationService {
 
     //using manager transaction to ensure consistency(delete from both tables or none)
     await this.correlationRepo.manager.transaction(async manager => {
-        await manager.delete(
-            CorrelationEventMap,
-            { correlation_id: In(ids) }
-        );
+      await manager.delete(
+        CorrelationEventMap,
+        { correlation_id: In(ids) }
+      );
 
-        await manager.delete(
-            Correlation,
-            { id: In(ids) }
-        );
+      await manager.delete(
+        Correlation,
+        { id: In(ids) }
+      );
     });
 
     return ids.length;

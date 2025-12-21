@@ -20,7 +20,7 @@ export class AnalysisEngineController {
         try {
             const rawMessage = req.body.message as string;
 
-            if (!rawMessage) {
+            if (!rawMessage || rawMessage.trim().length === 0) {
                 res.status(400).json({ error: "Message is required" });
                 return;
             }
