@@ -5,6 +5,7 @@ import { IEventsService } from "../Domain/services/IEventsService";
 import { Between } from "typeorm"
 import { EventType } from "../Domain/enums/EventType";
 import { toDTO } from "../Utils/Converters/ConvertToDTO";
+import { ArraytoDTO } from "../Utils/Converters/ConvertEventArrayToDTOarray";
 
 export class EventsService implements IEventsService {
     constructor(
@@ -18,7 +19,7 @@ export class EventsService implements IEventsService {
                 timestamp: "DESC",
             },
         });
-        return events.map(e => toDTO(e));
+        return ArraytoDTO(events);
     }
     async getEventPercentagesByEvent(): Promise<Number[]> {
         const total = await this.eventRepository.count();
@@ -64,7 +65,7 @@ export class EventsService implements IEventsService {
 
     async getAll(): Promise<EventDTO[]> {
         const allEvents = await this.eventRepository.find();
-        return allEvents.map(e => toDTO(e));
+        return ArraytoDTO(allEvents);
     }
 
     async getById(id: number): Promise<EventDTO> {
@@ -115,7 +116,7 @@ export class EventsService implements IEventsService {
                 id: "ASC"
             }
         });
-        return events.map(e=>toDTO(e));
+        return ArraytoDTO(events);
     }
 
 
