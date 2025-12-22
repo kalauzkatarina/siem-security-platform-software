@@ -2,7 +2,7 @@ import { Repository, Timestamp } from "typeorm";
 import { EventDTO } from "../Domain/DTOs/EventDTO";
 import { ParserEvent } from "../Domain/models/ParserEvent";
 import { IParserService } from "../Domain/services/IParserService";
-import axios, { AxiosInstance } from "axios";
+import axios, { Axios, AxiosError, AxiosInstance } from "axios";
 import { EventType } from "../Domain/enums/EventType";
 import { parseLoginMessage } from "../Utils/Regex/LoginMessageParser";
 import { parsePermissionChangeMessage } from "../Utils/Regex/PermissionChangeParser";
@@ -15,6 +15,7 @@ import { pareseResourceExplotationMessage } from "../Utils/Regex/ResourceExplota
 import { parseFileChangeMessage } from "../Utils/Regex/FileChangeParser";
 import { parseNetworkAnomalyMessage } from "../Utils/Regex/NetworkAnomalyParser";
 import { ILogerService } from "../Domain/services/ILogerService";
+import { createAxiosClient } from "../Utils/Client/AxiosClient";
 
 export class ParserService implements IParserService {
     private readonly analysisEngineClient: AxiosInstance;
@@ -24,20 +25,8 @@ export class ParserService implements IParserService {
         private parserEventRepository: Repository<ParserEvent>,
         private readonly logger: ILogerService
     ) {
-        const analysisServiceURL = process.env.ANALYSIS_ENGINE_API;
-        const eventServiceURL = process.env.EVENT_SERVICE_API;
-
-        this.analysisEngineClient = axios.create({
-            baseURL: analysisServiceURL,
-            headers: { "Content-Type": "application/json" },
-            timeout: 5000,
-        });
-
-        this.eventClient = axios.create({
-            baseURL: eventServiceURL,
-            headers: { "Content-Type": "application/json" },
-            timeout: 5000,
-        });
+        this.analysisEngineClient = createAxiosClient(process.env.ANALYSIS_ENGINE_API ?? "");
+        this.eventClient = createAxiosClient(process.env.EVENT_SERVICE_API ?? "");
     }
 
     async normalizeAndSaveEvent(eventMessage: string, eventSource: string): Promise<EventDTO> {
