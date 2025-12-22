@@ -9,7 +9,7 @@ interface EventRow {  //at the end,move into a right folders(types)
     source: string;
     time: string;
     type: EventType;
-    description:string;
+    description: string;
 }
 interface RowProps {   //at the end,move into a right folders(types) 
     e: EventRow;
@@ -17,6 +17,7 @@ interface RowProps {   //at the end,move into a right folders(types)
 }
 export default function EventTableRow({ e, index }: RowProps) {
     const [rotateArrow, setRotateArrow] = useState<number | null>(null);
+    const [hoveredRow, setHoveredRow] = useState<number | null>(null);
 
     const tdStyle: React.CSSProperties = {
         padding: "12px 16px",
@@ -27,8 +28,8 @@ export default function EventTableRow({ e, index }: RowProps) {
     const eventIdStyle: React.CSSProperties = {
         ...tdStyle,
         fontFamily: "Consolas, 'Courier New', monospace",
-        fontSize: "13px",
-        color: "#b5b5b5",
+        fontSize: "15px",
+        color: "#dcdcdc",
     };
 
     const badgeBase: React.CSSProperties = {
@@ -56,14 +57,21 @@ export default function EventTableRow({ e, index }: RowProps) {
         },
     };
 
+    const liHoverStyle: React.CSSProperties = {
+        backgroundColor: "#3d3d3d", // gray-400
+    };
     const arrowStyle = (index: number): React.CSSProperties => ({
         transform: rotateArrow === index ? "rotate(180deg)" : "rotate(0deg)",
         transition: "transform 0.3s ease"
     });
-    
+
     return (
         <React.Fragment>
-            <tr className="hover:bg-gray-600">
+            <tr
+                style={hoveredRow === e.id ? liHoverStyle : undefined}
+                onMouseEnter={() => setHoveredRow(e.id)}
+                onMouseLeave={() => setHoveredRow(null)}
+            >
                 <td style={eventIdStyle}>{e.source}</td>
                 <td style={tdStyle}>{e.time}</td>
                 <td style={tdStyle}>
@@ -80,7 +88,7 @@ export default function EventTableRow({ e, index }: RowProps) {
             </tr>
 
             {/* Expanded details row */}
-            <ExpandedRow expanded={rotateArrow===index} e={e}/>
+            <ExpandedRow expanded={rotateArrow === index} e={e} />
         </React.Fragment>
     );
 }

@@ -5,20 +5,20 @@ interface EventRow { //move into a right folders(types)
     source: string;
     time: string;
     type: EventType;
-    description:string;
+    description: string;
 }
-interface ExpandedProps{ //move into a right folders(types)
-    expanded:boolean;
-    e:EventRow;
+interface ExpandedProps { //move into a right folders(types)
+    expanded: boolean;
+    e: EventRow;
 }
 
-export function ExpandedRow({expanded,e}:ExpandedProps){
-    
-    const expandedContainerStyle = (expanded: boolean): React.CSSProperties => ({ 
+export function ExpandedRow({ expanded, e }: ExpandedProps) {
+
+    const expandedContainerStyle = (expanded: boolean): React.CSSProperties => ({
         overflow: "hidden",                             //pomjerice se styles kasnije kad zavrsimo u poseban fajl
         transition: "height 0.3s ease",
-        backgroundColor: "#373737ff", // gray-700
-        height: expanded ? "300px" : "0px",
+        backgroundColor: "#292929", // gray-700
+        height: expanded ? "200px" : "0px",
     });
 
     const expandedContentStyle: React.CSSProperties = {
@@ -36,15 +36,16 @@ export function ExpandedRow({expanded,e}:ExpandedProps){
         width: "16%", // w-1/6
         fontWeight: 600,
         color: "#d1d5db",
-        padding: "14px"
+        padding:"10px"
     };
 
     const valueStyle: React.CSSProperties = {
-        width: "66.6667%", // w-4/6
+        width: "330px", // w-4/6
         backgroundColor: "#1f1f1f", // gray-800
         border: "1px solid #4b5563", // border-gray-600
-        borderRadius: "8px",
-        padding: "12px",
+        borderRadius: "15px",
+        padding: "10px",
+        paddingLeft:"10px",
         color: "#e5e7eb", // gray-200
     };
 
@@ -58,25 +59,27 @@ export function ExpandedRow({expanded,e}:ExpandedProps){
     };
     return (
         <>
-         <tr>
+            <tr>
                 <td colSpan={4} style={{ padding: 0 }}>
                     <div style={expandedContainerStyle(expanded)}>
                         <div style={expandedContentStyle}>
                             <h4 style={detailsHeaderStyle}>Details</h4>
 
-                            <div style={detailRowStyle}>
-                                <span style={labelStyle}>Source:</span>
-                                <span style={{ ...valueStyle, paddingLeft: "16px" }}>{e.source}</span>
-                            </div>
+                            <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)" }}>
+                                <div style={detailRowStyle}>
+                                    <span style={labelStyle}>Source:</span>
+                                    <span style={valueStyle}>{e.source}</span>
+                                </div>
 
-                            <div style={detailRowStyle}>
-                                <span style={labelStyle}>Description:</span>
-                                <span style={{ ...valueStyle, paddingLeft: "16px" }}>{e.description}</span>
-                            </div>
+                                <div style={detailRowStyle}>
+                                    <span style={labelStyle}>Description:</span>
+                                    <span style={{...valueStyle,marginLeft:"25px"}}>{e.description}</span>
+                                </div>
 
-                            <div style={detailRowStyle}>
-                                <span style={labelStyle}>Type:</span>
-                                <span style={{ ...valueStyle, paddingLeft: "16px" }}>{e.type}</span>
+                                <div style={detailRowStyle}>
+                                    <span style={labelStyle}>Type:</span>
+                                    <span style={{...valueStyle,marginLeft:"-15px"}}>{e.type}</span>
+                                </div>
                             </div>
 
                         </div>

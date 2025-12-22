@@ -51,8 +51,8 @@ export default function RecentEventsTable({ events }: { events: EventRow[] }) {
     const eventIdStyle: React.CSSProperties = {
         ...tdStyle,
         fontFamily: "Consolas, 'Courier New', monospace",
-        fontSize: "13px",
-        color: "#b5b5b5",
+        fontSize: "15px",
+        color: "#dcdcdc",
     };
 
     const badgeBase: React.CSSProperties = {

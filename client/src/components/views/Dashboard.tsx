@@ -9,7 +9,13 @@ import { QueryAPI } from "../../api/query/QueryAPI";
 import { EventType } from "../../enums/EventType";
 import { useAuth } from "../../hooks/useAuthHook";
 
+
 export default function Dashboard() {
+   /* const events: EventRow[] = [
+        { id: 1, source: "Auth Service", time: "01:23:33   22/11/2025", type: EventType.INFO, description: "User login successful" },
+        { id: 2, source: "Auth Service", time: "01:25:49   22/11/2025", type: EventType.WARNING, description: "Multiple failed login attempts" },
+        { id: 3, source: "Database", time: "21:03:11   20/11/2025", type: EventType.ERROR, description: "Database connection lost" },
+    ];*/
     const [eventsData, setEventsData] = useState<EventRow[]>([]);
     const [allEventsCount, setEventCount] = useState<number>(0);
     const [infoCount, setInfoCount] = useState<number>(0);
@@ -20,10 +26,10 @@ export default function Dashboard() {
     // Inline styles for now, will be in CSS later
     // types, interfaces and classes will be moved too
     const dashboardRectangleStyle: React.CSSProperties = {
-        border: "2px solid #d0d0d0",
+        border: "2px solid #282A28",
         backgroundColor: "transparent",
         borderRadius: "14px",
-        borderColor: "#d0d0d0",
+        borderColor: "#282A28",
 
     }
     const dashboardDiv: React.CSSProperties = {
@@ -45,13 +51,7 @@ export default function Dashboard() {
         description:string;
     }
 
-    /*
-    const events: EventRow[] = [
-        { id: 1, source: "Auth Service", time: "01:23:33   22/11/2025", type: EventType.INFO, description: "User login successful" },
-        { id: 2, source: "Auth Service", time: "01:25:49   22/11/2025", type: EventType.WARNING, description: "Multiple failed login attempts" },
-        { id: 3, source: "Database", time: "21:03:11   20/11/2025", type: EventType.ERROR, description: "Database connection lost" },
-    ];
-    */
+    
 
     useEffect(() => {
         const fetchData = async () => {
@@ -85,20 +85,20 @@ export default function Dashboard() {
 
     return (
         <div style={dashboardRectangleStyle}>
-            <h3 style={{ marginTop: '3px', padding:"5px", margin: "10px" }}>Analytics</h3>
+            <h2 style={{ marginTop: '3px', padding:"5px", margin: "10px" }}>Analytics</h2>
             <div style={dashboardDiv}>
                 <StatCard title="Total Raw Events" value={allEventsCount} icon={<BsDatabase />} iconColor="black" />
                 <StatCard title="Errors" value={errorCount} icon={<BiError />} iconColor="red" />
                 <StatCard title="Warnings" value={warningCount} icon={<PiShieldWarningBold />} iconColor="yellow" />
                 <StatCard title="Notifications" value={infoCount} icon={<IoShieldCheckmark />} iconColor="blue" />
             </div>
-            <h3 style={{ marginTop: '10px' , padding:"5px" , margin: "10px"  }}>Short review</h3>
+            <h2 style={{ marginTop: '10px' , padding:"5px" , margin: "10px"  }}>Short review</h2>
             <div style={dashboardDiv}>
                 <StatCard title="Top Event Source" subtitle="Auth Service" value={44} valueDescription="events" />
                 <StatCard title="Most Event Type" subtitle="Info" value={200} valueDescription="events" />
                 <StatCard title="Most weight archive" subtitle="logs_2025_11_06_22_00.tar" value={100} valueDescription="MB" />
             </div>
-            <h3 style={{ marginTop: '10px' , padding:"5px", margin: "10px"  }}>Recent Events</h3>
+            <h2 style={{ marginTop: '10px' , padding:"5px", margin: "10px"  }}>Recent Events</h2>
             <RecentEventsTable events={eventsData} />
         </div>
     );

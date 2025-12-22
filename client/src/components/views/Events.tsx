@@ -16,65 +16,66 @@ interface EventRow {
 }
 
 export default function Events() {
+    /*const eventss: EventRow[] = [
+            { id: 1, source: "Auth Service", time: "01:23:33   22/11/2025", type: EventType.INFO, description: "User login successful" },
+            { id: 2, source: "Auth Service", time: "01:25:49   22/11/2025", type: EventType.WARNING, description: "Multiple failed login attempts" },
+            { id: 3, source: "Database", time: "21:03:11   20/11/2025", type: EventType.ERROR, description: "Database connection lost" },
+        ];*/
     const { token } = useAuth();
-
     const [searchText, setSearchText] = useState("");
     const [dateFrom, setDateFrom] = useState<string>("");
     const [dateTo, setDateTo] = useState<string>("");
     const [eventType, setEventType] = useState<string>("all");
 
     const [sortType, setSortType] = useState(0);
-    const [transition, setTransition] = useState(false);
     const [events, setEvents] = useState<EventRow[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
 
     const eventDivStyle: React.CSSProperties = {
-        border: "2px solid #d0d0d0",
+        border: "2px solid #282A28",
         backgroundColor: "transparent",
         borderRadius: "14px",
-        borderColor: "#d0d0d0",
+        borderColor: "#282A28",
     };
 
     const downloadStyle: React.CSSProperties = {
-        backgroundColor: "transparent",
+        backgroundColor: "#d0d0d0",
         borderRadius: "15px",
-        width: "15%",
-        color: "#d0d0d0",
-        transition: transition ? "transform 0.3s ease-in" : "transform 0.3s ease-in",
-        transform: transition ? "scale(1.2)" : "scale(1.0)",
+        width: "200px",
+        color: "#000",
     };
 
     const firstRowStyle: React.CSSProperties = {
         display: "flex",
-        justifyContent: "left",
-        gap: "50px",
-        marginInlineStart: "15px",
+        justifyContent: "right",
+        marginInlineEnd: "10px",
+        gap:"12px"
     };
 
     const elementsStyle: React.CSSProperties = {
         background: "#d0d0d0",
-        color: "#000000ff",
-        width: "15%",
+        color: "#000",
+        width: "200px",
         borderRadius: "15px",
         padding: "4px",
-        height: "40px"
+        height: "40px",
+        fontWeight:500
     };
 
     const searchInputStyle: React.CSSProperties = {
         ...elementsStyle, 
-        width: "250px",  
+        width: "200px",  
     };
 
     const dateInputStyle: React.CSSProperties = {
         ...elementsStyle, 
-        width: "180px",  
-        marginLeft: "15px"
+        width: "200px",  
     };
 
     const selectStyle: React.CSSProperties = {
         ...elementsStyle, 
-        width: "110px",  
+        width: "200px",  
         marginLeft: "15px"
     };
 
@@ -95,10 +96,14 @@ export default function Events() {
 
     const rightSideStyle: React.CSSProperties = {
         display: "flex",
-        gap: "15px",
+        gap: "10px",
         justifyContent: "right",
         width: "100%",
         alignItems: "center",
+    };
+
+    const liHoverStyle: React.CSSProperties = {
+        backgroundColor: "#9ca3af", // gray-400
     };
 
     const formatTime = (iso: string): string => {
@@ -217,11 +222,11 @@ export default function Events() {
 
     return (
         <div style={eventDivStyle}>
-            <h3 style={{ padding: "10px", margin: "10px" }}>Events</h3>
+            <h2 style={{ marginTop: '3px', padding:"5px", margin: "10px" }}>Events</h2>
 
             <div style={firstRowStyle}>
-                <div>
-                    Date from:
+                <div  style={{display:"grid",gridTemplateRows:"repeat(2,1fr)"}}>
+                    <label >Date from:</label>
                     <input
                         style={dateInputStyle}
                         type="datetime-local"
@@ -229,8 +234,8 @@ export default function Events() {
                         onChange={(e) => setDateFrom(e.target.value)}
                     />
                 </div>
-                <div>
-                    Date to:
+                <div style={{display:"grid",gridTemplateRows:"repeat(2,1fr)"}}>
+                    <label >Date to:</label>
                     <input
                         style={dateInputStyle}
                         type="datetime-local"
@@ -239,18 +244,6 @@ export default function Events() {
                     />
                 </div>
 
-                <div>
-                    Type:
-                    <select 
-                        style={selectStyle} 
-                        value={eventType} 
-                        onChange={(e) => setEventType(e.target.value)}>
-                            <option value="all">All types</option>
-                            <option value="info">Informations</option>
-                            <option value="warning">Warnings</option>
-                            <option value="error">Errors</option>
-                    </select>
-                </div>
             </div>
             <div style={secondRowStyle}>
                 <div style={leftSideStyle}>
@@ -263,16 +256,31 @@ export default function Events() {
                     <button
                         style={elementsStyle}
                         onClick={() => loadEventsWithQuery()}
+                        onMouseEnter={(e) => Object.assign(e.currentTarget.style, liHoverStyle)}
+                          onMouseLeave={(e) => Object.assign(e.currentTarget.style,downloadStyle)}
                     >
                         Search
                     </button>
                 </div>
                 <div style={rightSideStyle}>
+                    <div>
+                    <select 
+                        style={selectStyle} 
+                        value={eventType} 
+                        onChange={(e) => setEventType(e.target.value)}
+                         onMouseEnter={(e) => Object.assign(e.currentTarget.style, liHoverStyle)}
+                          onMouseLeave={(e) => Object.assign(e.currentTarget.style,selectStyle)}>
+                            <option value="all">All types</option>
+                            <option value="info">Informations</option>
+                            <option value="warning">Warnings</option>
+                            <option value="error">Errors</option>
+                    </select>
+                </div>
                     <DropDownMenu OnSortTypeChange={(value:number)=>setSortType(value)}/>
                     <button
                         style={downloadStyle}
-                        onMouseEnter={() => setTransition(true)}
-                        onMouseLeave={() => setTransition(false)}
+                         onMouseEnter={(e) => Object.assign(e.currentTarget.style, liHoverStyle)}
+                          onMouseLeave={(e) => Object.assign(e.currentTarget.style,downloadStyle)}
                     >
                         Download report <FiDownload size={20} />
                     </button>

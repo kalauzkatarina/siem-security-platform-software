@@ -64,7 +64,7 @@ export default function StatCard({ title, value, valueDescription, icon, iconCol
                     {title}
                 </h3>
 
-                <p style={{ fontSize: 20, margin: "-10px 0 0 0", color: "#ffffff" }}>
+                <p style={{ fontSize: 18, margin: "-10px 0 0 0", color: "#ffffff" }}>
                     {subtitle}
                 </p>
 

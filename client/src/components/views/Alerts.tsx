@@ -44,7 +44,7 @@ export default function Alerts() {
     : null;
 
   const containerStyle: React.CSSProperties = {
-    border: "2px solid #d0d0d0",
+    border: "2px solid #282A28",
     backgroundColor: "transparent",
     borderRadius: "14px",
     padding: "24px"
