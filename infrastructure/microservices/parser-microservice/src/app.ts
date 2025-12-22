@@ -39,9 +39,9 @@ const parserEventRepository: Repository<ParserEvent> = Db.getRepository(ParserEv
 
 
 // Services
-const parserService: IParserService = new ParserService(parserEventRepository);
-const parserRepositoryService: IParserRepositoryService = new ParserRepositoryService(parserEventRepository);
 const logger: ILogerService = new LogerService();
+const parserService: IParserService = new ParserService(parserEventRepository, logger);
+const parserRepositoryService: IParserRepositoryService = new ParserRepositoryService(parserEventRepository, logger);
 
 // WebAPI routes
 const parserController = new ParserController(parserService, parserRepositoryService, logger);

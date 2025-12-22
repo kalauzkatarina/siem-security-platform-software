@@ -14,12 +14,16 @@ import { parseServiceConfigurationChangeMessage } from "../Utils/Regex/ServiceCo
 import { pareseResourceExplotationMessage } from "../Utils/Regex/ResourceExplotationParser";
 import { parseFileChangeMessage } from "../Utils/Regex/FileChangeParser";
 import { parseNetworkAnomalyMessage } from "../Utils/Regex/NetworkAnomalyParser";
+import { ILogerService } from "../Domain/services/ILogerService";
 
 export class ParserService implements IParserService {
     private readonly analysisEngineClient: AxiosInstance;
     private readonly eventClient: AxiosInstance;
 
-    constructor(private parserEventRepository: Repository<ParserEvent>) {
+    constructor(
+        private parserEventRepository: Repository<ParserEvent>,
+        private readonly logger: ILogerService
+    ) {
         const analysisServiceURL = process.env.ANALYSIS_ENGINE_API;
         const eventServiceURL = process.env.EVENT_SERVICE_API;
 
@@ -53,7 +57,7 @@ export class ParserService implements IParserService {
         const responseEvent = (await this.eventClient.post<EventDTO>("/events", event)).data;    // Saving to the Events table (calling event-collector)
 
         if (responseEvent.id === -1)
-            console.warn("Failed to save event to the database");
+            this.logger.log("Failed to save event to the database. Event: " + event);
 
         const parserEvent: ParserEvent = { parserId: 0, eventId: responseEvent.id, textBeforeParsing: eventMessage, timestamp: timeOfEvent }
         await this.parserEventRepository.insert(parserEvent);   // Saving to the Parser table
@@ -122,7 +126,7 @@ export class ParserService implements IParserService {
         // Extract LLM-generated event JSON
         const eventData = response.data?.eventData;
         if (!eventData || eventData.description === "_NORMALIZATION_FAILED_") {
-            console.warn("[Parser] Skipping empty or invalid normalized event");
+            this.logger.log("LLM failed to normalize event. Raw message: " + message);
 
             const event: EventDTO = {
                 id: -1,
