@@ -62,11 +62,11 @@ export class StorageLogService implements IStorageLogService {
         try {
             await this.logger.log("Archiving events started...");
 
-            const events = (await this.queryClient.get<EventDTO[]>("/query/oldEvents", 
-                { params: { hours: ARCHIVE_RETENTION_HOURS} }
+            const events = (await this.queryClient.get<EventDTO[]>("/query/oldEvents",
+                { params: { hours: ARCHIVE_RETENTION_HOURS } }
             )).data;
 
-            if (events.length === 0){
+            if (events.length === 0) {
                 await this.logger.log("No events to archive.");
                 return true;
             }
@@ -74,12 +74,13 @@ export class StorageLogService implements IStorageLogService {
             const groups: Record<string, string[]> = {};
 
             for (const e of events) {
-                const line = `EVENT | ID = ${e.id} | TYPE = ${e.type} | SOURCE = ${e.source} | ${e.description} | ${e.timestamp.toISOString()}`;
+                const eventDate = new Date(e.timestamp as any);
+                const line = `EVENT | ID = ${e.id} | TYPE = ${e.type} | SOURCE = ${e.source} | ${e.description} | ${eventDate.toISOString()}`;
 
-                const key = getTimeGroup(e.timestamp);
-                if(!groups[key])
+                const key = getTimeGroup(eventDate);
+                if (!groups[key])
                     groups[key] = [];
-                
+
                 groups[key].push(line);
             }
 
@@ -89,7 +90,7 @@ export class StorageLogService implements IStorageLogService {
             const tarPath = path.join(ARCHIVE_DIR, tarName);
 
             await execSync(`tar -cf "${tarPath}" -C "${TEMP_DIR}" ${txtFiles.join(" ")}`);
-            
+
             CleanUpFiles(TEMP_DIR, txtFiles);
 
             const stats = statSync(tarPath);
@@ -103,25 +104,25 @@ export class StorageLogService implements IStorageLogService {
 
             await this.logger.log(`Deleting ${events.length} events from Event service`);
 
-            await this.eventClient.delete("/events/old", 
-                { data: events.map(e => e.id)}
+            await this.eventClient.delete("/events/old",
+                { data: events.map(e => e.id) }
             );
 
             await this.logger.log(`Archived ${events.length} events.`);
             return true;
 
         } catch (err) {
-            await this.logger.log("ERROR archiving events: " + (err as Error).message);
-            return false;
+            console.error("ARCHIVE EVENTS ERROR FULL:", err);
+            await this.logger.log("ERROR archiving events"); return false;
         }
     }
 
     public async archiveAlerts(): Promise<boolean> {
         try {
             await this.logger.log("Archiving alerts started...");
-            
+
             const alerts = (await this.queryClient.get<CorrelationDTO[]>("/query/oldAlerts",
-                { params: { hours: ARCHIVE_RETENTION_HOURS} }
+                { params: { hours: ARCHIVE_RETENTION_HOURS } }
             )).data;
 
             if (alerts.length === 0) {
@@ -132,12 +133,13 @@ export class StorageLogService implements IStorageLogService {
             const groups: Record<string, string[]> = {};
 
             for (const a of alerts) {
-                const line = `ALERT | ID = ${a.id} | SOURCE = ${a.source} | ${a.timestamp.toISOString()}`;
+                const alertDate = new Date(a.timestamp as any);
+                const line = `ALERT | ID = ${a.id} | SOURCE = ${a.source} | ${alertDate.toISOString()}`;
 
-                const key = getTimeGroup(a.timestamp);
-                if(!groups[key])
+                const key = getTimeGroup(alertDate);
+                if (!groups[key])
                     groups[key] = [];
-                
+
                 groups[key].push(line);
             }
 
@@ -147,7 +149,7 @@ export class StorageLogService implements IStorageLogService {
             const tarPath = path.join(ARCHIVE_DIR, tarName);
 
             await execSync(`tar -cf "${tarPath}" -C "${TEMP_DIR}" ${txtFiles.join(" ")}`);
-            
+
             CleanUpFiles(TEMP_DIR, txtFiles);
 
             const stats = statSync(tarPath);
@@ -162,14 +164,15 @@ export class StorageLogService implements IStorageLogService {
             await this.logger.log(`Deleting ${alerts.length} events from Analysis Engine service`);
 
             await this.correlationClient.delete("/AnalysisEngine/correlations/deleteByEventIds",
-                { data: alerts.map(a => a.id)}
+                { data: alerts.map(a => a.id) }
             );
 
             await this.logger.log(`Archived ${alerts.length} alerts.`);
             return true;
 
         } catch (err) {
-            await this.logger.log("ERROR archiving alerts: " + (err as Error).message);
+            console.error("ARCHIVE ALERTS ERROR FULL:", err);
+            await this.logger.log("ERROR archiving alerts");
             return false;
         }
     }
@@ -182,7 +185,7 @@ export class StorageLogService implements IStorageLogService {
 
     public async sortArchives(by: "date" | "size" | "name", order: "asc" | "desc"): Promise<StorageLog[]> {
         const allArchives = await this.getArchives();
-       
+
         return SortArchives(allArchives, by, order);
     }
 
