@@ -1,4 +1,5 @@
 import { EventDTO } from "../DTOs/EventDTO";
+import { DistributionDTO } from "../models/DIstributionDTO";
 import { Event } from "../models/Event";
 
 export interface IEventsService {
@@ -10,5 +11,5 @@ export interface IEventsService {
     getMaxId():Promise<EventDTO>;
     getEventsFromId1ToId2(fromId: number, toId: number): Promise<EventDTO[]>
     getSortedEventsByDate(): Promise<EventDTO[]>
-    getEventPercentagesByEvent(): Promise<number[]>
+    getEventPercentagesByEvent(): Promise<DistributionDTO>
 }

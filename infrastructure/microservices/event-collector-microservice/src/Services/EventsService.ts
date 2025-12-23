@@ -6,6 +6,7 @@ import { Between } from "typeorm"
 import { EventType } from "../Domain/enums/EventType";
 import { toDTO } from "../Utils/Converters/ConvertToDTO";
 import { ArraytoDTO } from "../Utils/Converters/ConvertEventArrayToDTOarray";
+import { DistributionDTO } from "../Domain/models/DIstributionDTO";
 
 export class EventsService implements IEventsService {
     constructor(
@@ -21,11 +22,15 @@ export class EventsService implements IEventsService {
         });
         return ArraytoDTO(events);
     }
-    async getEventPercentagesByEvent(): Promise<number[]> {
+    async getEventPercentagesByEvent(): Promise<DistributionDTO> {
         const total = await this.eventRepository.count();
 
         if (total === 0) {
-            return [0, 0, 0];
+              return {
+            notifications: 0,
+            warnings: 0,
+            errors: 0,
+        };
         }
 
         const infoCount = await this.eventRepository.count({
@@ -40,11 +45,18 @@ export class EventsService implements IEventsService {
             where: { type: EventType.ERROR },
         });
         //ide procenat za info,warning pa error 
-        return [
-            (infoCount / total) * 100,
-            (warningCount / total) * 100,
-            (errorCount / total) * 100,
-        ];
+      
+        const infoPercent = (infoCount / total) * 100
+        const warnPercent = (warningCount / total) * 100
+        const errorPercent = (errorCount / total) * 100
+
+        const Distribution : DistributionDTO = {
+            notifications: infoPercent,
+            warnings: warnPercent ,
+            errors: errorPercent,
+        }
+
+    return Distribution;
     }
 
 
