@@ -124,8 +124,8 @@ export class InvertedIndexStructureForEvents {
         const resultIds: Set<number> = new Set();
 
         for (const token of tokens) {
-            token.trim().toLowerCase();
-            const ids = this.invertedIndex.get(token);
+            const trimmedToken = token.trim().toLowerCase();
+            const ids = this.invertedIndex.get(trimmedToken);
             if (ids) {
                 ids.forEach(id => resultIds.add(id));
             }

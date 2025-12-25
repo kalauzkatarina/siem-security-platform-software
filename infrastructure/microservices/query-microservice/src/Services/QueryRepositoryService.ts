@@ -1,12 +1,9 @@
 import { Between, In, MongoRepository, Repository } from "typeorm";
 import { CacheEntry } from "../Domain/models/CacheEntry";
 import { IQueryRepositoryService } from "../Domain/services/IQueryRepositoryService";
-import axios, { all, AxiosInstance } from "axios";  // brise se
 import { Event } from "../Domain/models/Event";
 import { CacheEntryDTO } from "../Domain/DTOs/CacheEntryDTO";
-import { tokenize } from "../Utils/EventToTokensParser";  // brise se
 import { ILoggerService } from "../Domain/services/ILoggerService";
-import { loadQueryState, saveQueryState } from "../Utils/StateManager";  // brise se
 import { InvertedIndexStructureForEvents } from "../Utils/InvertedIndexStructureForEvents";
 
 // princip pretrage:
@@ -30,12 +27,13 @@ const emptyCacheEntry: CacheEntry = {
 };
 
 export class QueryRepositoryService implements IQueryRepositoryService {    
-    public readonly invertedIndexStructureForEvents: InvertedIndexStructureForEvents = new InvertedIndexStructureForEvents(this);
+    public readonly invertedIndexStructureForEvents: InvertedIndexStructureForEvents;
     constructor(private readonly cacheRepository: MongoRepository<CacheEntry>, 
                 private readonly loggerService: ILoggerService,
-                private readonly eventRepository: Repository<Event>,
+                private readonly eventRepository: Repository<Event>
             ) 
     {
+        this.invertedIndexStructureForEvents = new InvertedIndexStructureForEvents(this);
         this.loggerService.log("QueryRepositoryService initialized.");
         this.loggerService.log("Inverted index structure for events initialized and " + this.invertedIndexStructureForEvents.getEventsCount() + " events indexed.");
     }
@@ -55,18 +53,9 @@ export class QueryRepositoryService implements IQueryRepositoryService {
         return await this.cacheRepository.save(newEntry);
     }
 
-    /*async getAllEvents(): Promise<Event[]> {
+    async getAllEvents(): Promise<Event[]> {
         return this.eventRepository.find();
-    }*/
-
-        async getAllEvents() {
-    if (!this.eventRepository) {
-        console.warn("EventRepository not initialized – Mongo connection failed.");
-        return [];
     }
-    return this.eventRepository.find();
-}
-
 
     async getOldEvents(hours : number): Promise<Event[]> {
         const allEvents = await this.getAllEvents();
@@ -77,6 +66,11 @@ export class QueryRepositoryService implements IQueryRepositoryService {
             this.invertedIndexStructureForEvents.removeEventFromIndex(event.id);
         });
         
+        if (oldEvents.length > 0)
+        {
+            this.cacheRepository.clear();
+            this.loggerService.log("Deleted old events and cleared cache.");
+        }
         return oldEvents;
     }
 

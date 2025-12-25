@@ -24,8 +24,8 @@ export class QueryService implements IQueryService {
     ) {}
 
     async searchEvents(query: string): Promise<EventDTO[]> {
-
         const cacheResult = await this.queryRepositoryService.findByKey(query);
+        
         if (cacheResult.key !== "NOT_FOUND") {
             return cacheResult.result.map((e: {source: string; type: EventType; description: string; timestamp: Date; }) => ({
                 source: e.source,
@@ -48,14 +48,15 @@ export class QueryService implements IQueryService {
         // query je npr. "type=info|date=20/10/2025" ili "type=info|host=server1|dateFrom=2025-11-20|dateTo=2025-11-22"
         // pozivamo parseQueryString da dobijemo parove kljuc-vrednost sa nazivom polja i vrednosti za pretragu
         const filters = parseQueryString(query);
-
         const textQuery = filters["text"] || "";
+        delete filters["text"];
 
         let filteredEvents = allEvents;
 
         if (textQuery !== "") {
-            textQuery.trim().toLowerCase();
-            /*const matchingIds = this.queryRepositoryService.findEvents(textQuery); izbacuje gresku pa je zakomentarisanno
+            const trimmedQuery = textQuery.trim().toLowerCase();
+            const matchingIds = this.queryRepositoryService.findEvents(trimmedQuery);
+            //const matchingIds = this.queryRepositoryService.findEvents(trimmedQuery); 
 
             // ako postoji text filter i nema poklapanja to znaci da nema rezultata
             if (matchingIds.size === 0) {
@@ -64,7 +65,7 @@ export class QueryService implements IQueryService {
                 filteredEvents = allEvents.filter(event =>
                     matchingIds.has(event.id)
                 );
-            }*/
+            }
         }
         
         const result =  filteredEvents.filter(event => {
