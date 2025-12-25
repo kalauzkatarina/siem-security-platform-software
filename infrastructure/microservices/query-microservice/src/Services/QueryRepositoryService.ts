@@ -55,9 +55,18 @@ export class QueryRepositoryService implements IQueryRepositoryService {
         return await this.cacheRepository.save(newEntry);
     }
 
-    async getAllEvents(): Promise<Event[]> {
+    /*async getAllEvents(): Promise<Event[]> {
         return this.eventRepository.find();
+    }*/
+
+        async getAllEvents() {
+    if (!this.eventRepository) {
+        console.warn("EventRepository not initialized – Mongo connection failed.");
+        return [];
     }
+    return this.eventRepository.find();
+}
+
 
     async getOldEvents(hours : number): Promise<Event[]> {
         const allEvents = await this.getAllEvents();
