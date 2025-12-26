@@ -5,11 +5,11 @@ import { LargestArchiveDTO } from "../../models/storage/LargestArchiveDTO";
 import { TopArchiveDTO } from "../../models/storage/TopArchiveDTO";
 
 export interface IStorageAPI {
-  getAllArchives(token: string): Promise<StorageLogResponseDTO[]>;
-  searchArchives(token: string, query: string): Promise<StorageLogResponseDTO[]>;
-  sortArchives(token: string, by: "date" | "size" | "name", order: "asc" | "desc"): Promise<StorageLogResponseDTO[]>;
-  getStats(token: string): Promise<ArchiveStatsDTO>;
-  downloadArchive(token:string, id: number): Promise<ArrayBuffer>;
+  getAllArchives(/*token: string*/): Promise<StorageLogResponseDTO[]>;
+  searchArchives(/*token: string,*/ query: string): Promise<StorageLogResponseDTO[]>;
+  sortArchives(/*token: string, */by: "date" | "size" | "name", order: "asc" | "desc"): Promise<StorageLogResponseDTO[]>;
+  getStats(/*token: string*/): Promise<ArchiveStatsDTO>;
+  downloadArchive(/*token:string,*/ id: number): Promise<ArrayBuffer>;
   getTopArchives(token: string, type: "events" | "alerts", limit: number): Promise<TopArchiveDTO[]>;
   getArchiveVolume(token: string, period: "daily" | "monthly" | "yearly"): Promise<ArchiveVolumeDTO[]>;
   getLargestArchive(token: string):Promise<LargestArchiveDTO>;

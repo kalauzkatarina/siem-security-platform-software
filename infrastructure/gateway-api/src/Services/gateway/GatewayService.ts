@@ -6,7 +6,6 @@ import { UserDTO } from "../../Domain/DTOs/UserDTO";
 import { AlertDTO } from "../../Domain/DTOs/AlertDTO";
 import { AlertQueryDTO } from "../../Domain/DTOs/AlertQueryDTO";
 import { PaginatedAlertsDTO } from "../../Domain/DTOs/PaginatedAlertsDTO";
-import { ArchiveDTO } from "../../Domain/DTOs/ArchiveDTO";
 import { ArchiveStatsDTO } from "../../Domain/DTOs/ArchiveStatsDTO";
 import { EventDTO } from "../../Domain/DTOs/EventDTO";
 import { TopArchiveDTO } from "../../Domain/DTOs/TopArchiveDTO";

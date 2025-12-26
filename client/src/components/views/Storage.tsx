@@ -18,6 +18,13 @@ export default function Storage() {
     const [stats, setStats] = useState<ArchiveStatsDTO | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    const EMPTY_STATS: ArchiveStatsDTO = {
+        totalSize: 0,
+        retentionHours: 72,
+        lastArchiveName: "No archives"
+    };
+
     //const [isLoading, setIsLoading] = useState(true);
 
     /*const mockArchives: ArchiveDTO[] = [
@@ -88,19 +95,19 @@ export default function Storage() {
         }));
 
     useEffect(() => {
-        if(!token)
-            return;
+        // if(!token)
+        //     return;
 
         const fetchStorageData = async () => {
             try {
                 setIsLoading(true);
 
-                const archivesResponse = await storageAPI.getAllArchives(token);
+                const archivesResponse = await storageAPI.getAllArchives(/*token*/);
                 console.log("ARCHIVES RESPONSE: ", archivesResponse);
-                const statsResponse = await storageAPI.getStats(token);
+                const statsResponse = await storageAPI.getStats(/*token*/);
 
                 setArchives(mapToArchiveDTO(archivesResponse));
-                setStats(statsResponse);
+                setStats(statsResponse ?? EMPTY_STATS);
             } catch(err) {
                 console.error(err);
                 setError("Failed to load storageData");
@@ -115,7 +122,7 @@ export default function Storage() {
         if (!token) return;
 
         try {
-            const data = await storageAPI.searchArchives(token, query);
+            const data = await storageAPI.searchArchives(/*token,*/ query);
             setArchives(mapToArchiveDTO(data));
         } catch (err) {
             console.error(err);
@@ -126,7 +133,7 @@ export default function Storage() {
         if (!token) return;
 
         try {
-            const data = await storageAPI.sortArchives(token, by, order);
+            const data = await storageAPI.sortArchives(/*token,*/ by, order);
             setArchives(mapToArchiveDTO(data));
         } catch (err) {
             console.error(err);
@@ -147,7 +154,7 @@ export default function Storage() {
         <div className="border-2 border-[#282A28] bg-transparent rounded-[10px]!">
             <h2 className="mt-[3px]! p-[5px]! m-[10px]!">Storage</h2>
 
-            {stats && <StorageStats stats={stats} />}
+            <StorageStats stats={stats ?? EMPTY_STATS} />
 
             <div className="my-4!">
                 <StorageToolBar onSearch={handleSearchArchives} onSort={handleSortArchives} />

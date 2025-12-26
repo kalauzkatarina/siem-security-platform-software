@@ -10,34 +10,41 @@ type Props = {
     stats: ArchiveStatsDTO;
 }
 
-export default function StorageStats({stats} : Props){
+export default function StorageStats({ stats }: Props) {
 
     const totalSizeGB = (stats.totalSize / (1024 ** 3)).toFixed(2);
 
     return (
-        <div className="flex items-center gap-5 height-[20%] width-[100%] p-[10px]!">
-            <StatCard
-                title="Total archive size"
-                value= { Number(totalSizeGB) }    
-                valueDescription="GB"
-                icon={<BsDatabase />}
-                iconColor="#60cdff"
-            />
+        <div className="grid grid-cols-12 gap-5 p-2!">
 
-            <StatCard 
-                title="Retention Policy"
-                value={stats.retentionHours}
-                valueDescription="h"
-                icon={<MdAccessTime />}
-                iconColor="#ffa500"
-            />
+            <div className="col-span-3">
+                <StatCard
+                    title="Total archive size"
+                    value={Number(totalSizeGB)}
+                    valueDescription="GB"
+                    icon={<BsDatabase />}
+                    iconColor="#60cdff"
+                />
+            </div>
 
-            <StatCard 
-                title="Last archive"
-                value={stats.lastArchiveName ?? "-"}
-                icon={<FiArchive />}
-                iconColor="#4ade80"
-            />
+            <div className="col-span-3">
+                <StatCard
+                    title="Retention Policy"
+                    value={stats.retentionHours}
+                    valueDescription="h"
+                    icon={<MdAccessTime />}
+                    iconColor="#ffa500"
+                />
+            </div>
+
+            <div className="col-span-6">
+                <StatCard
+                    title="Last archive"
+                    value={stats.lastArchiveName ?? "-"}
+                    icon={<FiArchive />}
+                    iconColor="#4ade80"
+                />
+            </div>
         </div>
     );
 }

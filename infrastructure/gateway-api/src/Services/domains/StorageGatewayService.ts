@@ -1,5 +1,4 @@
 import axios, { AxiosInstance } from "axios";
-import { ArchiveDTO } from "../../Domain/DTOs/ArchiveDTO";
 import { ArchiveStatsDTO } from "../../Domain/DTOs/ArchiveStatsDTO";
 import { TopArchiveDTO } from "../../Domain/DTOs/TopArchiveDTO";
 import { ArchiveVolumeDTO } from "../../Domain/DTOs/ArchiveVolumeDTO";
