@@ -32,7 +32,6 @@ export default function Alerts() {
   const [selectedAlertId, setSelectedAlertId] = useState<number | null>(null);
   const [toastAlert, setToastAlert] = useState<AlertDTO | null>(null);
   const [sseConnected, setSseConnected] = useState(false);
-  const [sseService, setSseService] = useState<AlertSSEService | null>(null);
   const [currentQuery, setCurrentQuery] = useState<AlertQueryDTO>({ page: 1, limit: 10 });
 
     /*const testAlerts: AlertDTO[] = [
@@ -122,7 +121,6 @@ export default function Alerts() {
     });
 
     service.connect();
-    setSseService(service);
 
     // Cleanup on unmount
     return () => {
@@ -195,7 +193,7 @@ export default function Alerts() {
       <div className="flex justify-between items-center mb-[24px]!">
         <h2 className="m-0">Alert Dashboard</h2>
         
-        <div className="flex items-center">
+        <div className="flex items-center gap-4">
           {/* SSE STATUS */}
           <div className={`flex items-center gap-2 px-3! py-1.5! rounded-[8px] text-[12px] font-semibold
             ${sseConnected
@@ -210,7 +208,7 @@ export default function Alerts() {
 
           {/* DESKTOP NOTIFICATIONS */}
           {desktopNotification.canShowNotifications() && (
-            <div className="ml-3 flex items-center gap-2 rounded-[8px] border border-[rgba(96,165,250,0.3)] bg-[rgba(96,165,250,0.15)] px-3! py-1.5! text-[12px] text-[#60a5fa]">
+            <div className="flex items-center gap-2 rounded-[8px] border border-[rgba(96,165,250,0.3)] bg-[rgba(96,165,250,0.15)] px-3! py-1.5! text-[12px] text-[#60a5fa]">
               🔔 Desktop Notifications Enabled
             </div>
           )}
