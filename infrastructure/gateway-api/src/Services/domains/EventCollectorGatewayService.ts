@@ -1,6 +1,6 @@
 import axios, { AxiosInstance } from "axios";
-import { serviceConfig } from "../../Infrastructure/config/ServiceConfig";
-import { defaultAxiosClient } from "../../Infrastructure/config/AxiosClient";
+import { serviceConfig } from "../../Domain/constants/ServiceConfig";
+import { defaultAxiosClient } from "../../Domain/constants/AxiosClient";
 import { EventDTO } from "../../Domain/DTOs/EventDTO";
 import { DistributionDTO } from "../../Domain/DTOs/DistributionDTO";
 import { TopSourceDTO } from "../../Domain/DTOs/TopSourceDTO";
