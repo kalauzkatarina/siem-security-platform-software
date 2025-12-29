@@ -1,8 +1,8 @@
 import axios, { AxiosInstance } from "axios";
 import { EventDTO } from "../../Domain/DTOs/EventDTO";
 import { ParserEventDto } from "../../Domain/DTOs/ParserEventDTO";
-import { serviceConfig } from "../../Infrastructure/config/ServiceConfig";
-import { defaultAxiosClient } from "../../Infrastructure/config/AxiosClient";
+import { serviceConfig } from "../../Domain/constants/ServiceConfig";
+import { defaultAxiosClient } from "../../Domain/constants/AxiosClient";
 import { IParserGatewayService } from "../../Domain/services/IParserGatewayService";
 
 export class ParserGatewayService implements IParserGatewayService {

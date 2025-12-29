@@ -1,7 +1,7 @@
 import axios, { AxiosInstance } from "axios";
 import { NormalizedEventDTO } from "../../Domain/DTOs/NormalizedEventDTO";
-import { serviceConfig } from "../../Infrastructure/config/ServiceConfig";
-import { defaultAxiosClient } from "../../Infrastructure/config/AxiosClient";
+import { serviceConfig } from "../../Domain/constants/ServiceConfig";
+import { defaultAxiosClient } from "../../Domain/constants/AxiosClient";
 import { IAnalysisGatewayService } from "../../Domain/services/IAnalysisGatewayService";
 
 export class AnalysisGatewayService implements IAnalysisGatewayService {

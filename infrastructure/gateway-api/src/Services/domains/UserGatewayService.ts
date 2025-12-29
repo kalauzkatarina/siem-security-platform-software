@@ -1,7 +1,7 @@
 import axios, { AxiosInstance } from "axios";
 import { UserDTO } from "../../Domain/DTOs/UserDTO";
-import { serviceConfig } from "../../Infrastructure/config/ServiceConfig";
-import { defaultAxiosClient } from "../../Infrastructure/config/AxiosClient";
+import { serviceConfig } from "../../Domain/constants/ServiceConfig";
+import { defaultAxiosClient } from "../../Domain/constants/AxiosClient";
 import { IUserGatewayService } from "../../Domain/services/IUserGatewayService";
 
 export class UserGatewayService implements IUserGatewayService {

@@ -1,8 +1,8 @@
 import axios, { AxiosInstance } from "axios";
 import { LoginUserDTO } from "../../Domain/DTOs/LoginUserDTO";
 import { AuthResponseType } from "../../Domain/types/AuthResponse";
-import { defaultAxiosClient } from "../../Infrastructure/config/AxiosClient";
-import { serviceConfig } from "../../Infrastructure/config/ServiceConfig";
+import { defaultAxiosClient } from "../../Domain/constants/AxiosClient";
+import { serviceConfig } from "../../Domain/constants/ServiceConfig";
 import { OTPVerificationDTO } from "../../Domain/DTOs/OtpVerificationDTO";
 import { AuthJwtResponse } from "../../Domain/types/AuthJwtResponse";
 import { IAuthGatewayService } from "../../Domain/services/IAuthGatewayService";

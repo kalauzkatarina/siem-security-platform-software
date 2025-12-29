@@ -9,9 +9,9 @@ export function SearchToolBar({ value, onSearchText, value1, onEventType, value2
                 
                 {/* Search Input polje */}
                 <div className="flex flex-col gap-[4px] flex-1 min-w-[400px]">
-                    <label className="opacity-0">Spacing</label> {/* Nevidljivi label radi savršenog poravnanja */}
+                    <label className="ml-[10px]! text-[#a6a6a6] font-medium uppercase mb-[3px]! text-[13px]!">Seacrch source</label> {/* Nevidljivi label radi savršenog poravnanja */}
                     <input
-                        className="px-3 py-2 h-[40px] ml-[10px]! rounded-[10px] w-[400px]! border border-[rgba(255,255,255,0.12)] bg-[rgba(0,0,0,0.3)] text-white text-[13px] outline-none w-full"
+                        className="px-3! py-2 h-[40px] ml-[10px]! rounded-[10px] w-[400px]! border border-[rgba(255,255,255,0.12)] bg-[rgba(0,0,0,0.3)] text-white text-[13px] outline-none w-full"
                         placeholder="Type..."
                         value={value}
                         onChange={(e) => onSearchText(e.target.value)}
@@ -20,7 +20,7 @@ export function SearchToolBar({ value, onSearchText, value1, onEventType, value2
 
                 {/* Type Select */}
                 <div className="flex flex-col gap-[4px]">
-                    <label className="text-white text-[14px]">Type:</label>
+                    <label className="text-[#a6a6a6] font-medium uppercase mb-[3px]! text-[13px]!">Type</label>
                     <select
                         className="border border-[rgba(255,255,255,0.12)] bg-[#2d2d2d] hover:bg-[#3d3d3d] text-white w-[200px]! rounded-[10px]! py-[4px]! h-[40px] font-semibold outline-none"
                         value={value1}
@@ -35,7 +35,7 @@ export function SearchToolBar({ value, onSearchText, value1, onEventType, value2
 
                 {/* Date From */}
                 <div className="flex flex-col gap-[4px]">
-                    <label className="text-white text-[14px]">Date from:</label>
+                    <label className="text-[#a6a6a6] font-medium uppercase mb-[3px]! text-[13px]!">Date from</label>
                     <input
                         className="border border-[rgba(255,255,255,0.12)] bg-[#2d2d2d] text-white w-[200px] rounded-[10px]! px-[8px] h-[40px] font-semibold outline-none"
                         type="date"
@@ -46,7 +46,7 @@ export function SearchToolBar({ value, onSearchText, value1, onEventType, value2
 
                 {/* Date To */}
                 <div className="flex flex-col gap-[4px]">
-                    <label className="text-white text-[14px]">Date to:</label>
+                    <label className="text-[#a6a6a6] font-medium uppercase mb-[3px]! text-[13px]!">Date to</label>
                     <input
                         className="border border-[rgba(255,255,255,0.12)] bg-[#2d2d2d] text-white w-[200px] rounded-[10px] px-[8px] h-[40px] font-semibold outline-none"
                         type="date"
