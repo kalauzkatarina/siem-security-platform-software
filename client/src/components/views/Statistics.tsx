@@ -14,7 +14,7 @@ import { StatisticsProps } from "../../types/props/statistics/StatisticsProps";
 
 export default function Statistics({ queryApi, storageApi }: StatisticsProps) {
     /* =======================
-       TEST DATA 
+       TEST DATA
        ======================= */
 
     const testData: DistributionDTO = {
@@ -114,21 +114,17 @@ export default function Statistics({ queryApi, storageApi }: StatisticsProps) {
        ======================= */
 
     return (
-        <div className="w-full p-6 space-y-6">
-            <h2 className="text-2xl font-semibold text-gray-800">
-                Statistics
-            </h2>
-
+        <div className="w-full p-6 space-y-6 bg-[#181a1b]">
             {/* TOP ROW */}
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-                <div className="flex flex-col min-h-[380px] p-4 rounded-lg border-2 border-[#282A28]">
+                <div className="flex flex-col min-h-[380px] rounded-lg border-2 border-[#282A28] bg-[#1f2123] p-6">
                     <StatisticsChart
                         eventData={testEvent}
                         alertData={testAlert}
                     />
                 </div>
 
-                <div className="flex flex-col min-h-[380px] p-4 rounded-lg border-2 border-[#282A28]">
+                <div className="flex flex-col min-h-[380px] rounded-lg border-2 border-[#282A28] bg-[#1f2123] p-6">
                     <TopArchives
                         data={testTopArchives}
                         type={archiveType}
@@ -139,11 +135,11 @@ export default function Statistics({ queryApi, storageApi }: StatisticsProps) {
 
             {/* BOTTOM ROW */}
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-                <div className="flex flex-col min-h-[380px] p-4 rounded-lg border-2 border-[#282A28]">
+                <div className="flex flex-col min-h-[380px] rounded-lg border-2 border-[#282A28] bg-[#1f2123] p-6">
                     <EventDistribution data={testData} />
                 </div>
 
-                <div className="flex flex-col min-h-[380px] p-4 rounded-lg border-2 border-[#282A28]">
+                <div className="flex flex-col min-h-[380px] rounded-lg border-2 border-[#282A28] bg-[#1f2123] p-6">
                     <ArchiveVolume
                         data={testArchiveVolume}
                         period={volumePeriod}
