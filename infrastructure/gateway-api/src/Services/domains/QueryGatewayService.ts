@@ -3,6 +3,7 @@ import { EventDTO } from "../../Domain/DTOs/EventDTO";
 import { defaultAxiosClient } from "../../Infrastructure/config/AxiosClient";
 import { serviceConfig } from "../../Infrastructure/config/ServiceConfig";
 import { IQueryGatewayService } from "../../Domain/services/IQueryGatewayService";
+import { EventsResultDTO } from "../../Domain/DTOs/EventsResultDTO";
 
 export class QueryGatewayService implements IQueryGatewayService {
   private readonly client: AxiosInstance;
@@ -14,9 +15,9 @@ export class QueryGatewayService implements IQueryGatewayService {
     });
   }
 
-  async searchEvents(query: string): Promise<EventDTO[]> {
-    const response = await this.client.get<any[]>("/query/search", {
-      params: { q: query },
+  async searchEvents(query: string, targetPage: number, limit: number): Promise<EventsResultDTO> {
+    const response = await this.client.get<EventsResultDTO>("/query/search", {
+      params: { q: query, p: targetPage, l: limit },
     });
     return response.data;
   }

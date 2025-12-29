@@ -5,6 +5,7 @@ import { ArchiveStatsDTO } from "../DTOs/ArchiveStatsDTO";
 import { ArchiveVolumeDTO } from "../DTOs/ArchiveVolumeDTO";
 import { DistributionDTO } from "../DTOs/DistributionDTO";
 import { EventDTO } from "../DTOs/EventDTO";
+import { EventsResultDTO } from "../DTOs/EventsResultDTO";
 import { LargestArchiveDTO } from "../DTOs/LargestArchiveDTO";
 import { LoginUserDTO } from "../DTOs/LoginUserDTO";
 import { NormalizedEventDTO } from "../DTOs/NormalizedEventDTO";
@@ -47,7 +48,7 @@ export interface IGatewayService {
   updateAlertStatus(id: number, status: string): Promise<AlertDTO>;
 
   // Query
-  searchEvents(query: string): Promise<EventDTO[]>;
+  searchEvents(query: string, targetPage: number, limit: number): Promise<EventsResultDTO>;
   getOldEvents(hours: number): Promise<EventDTO[]>;
   getLastThreeEvents(): Promise<EventDTO[]>;
   getAllEvents(): Promise<EventDTO[]>;

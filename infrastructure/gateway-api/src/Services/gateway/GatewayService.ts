@@ -15,6 +15,7 @@ import { LargestArchiveDTO } from "../../Domain/DTOs/LargestArchiveDTO";
 import { DistributionDTO } from "../../Domain/DTOs/DistributionDTO";
 import { TopSourceDTO } from "../../Domain/DTOs/TopSourceDTO";
 import { StorageLogResponseDTO } from "../../Domain/DTOs/StorageLogResponseDTO";
+import { EventsResultDTO } from "../../Domain/DTOs/EventsResultDTO";
 import { OTPVerificationDTO } from "../../Domain/DTOs/OtpVerificationDTO";
 import { AuthJwtResponse } from "../../Domain/types/AuthJwtResponse";
 import { IAuthGatewayService } from "../../Domain/services/IAuthGatewayService";
@@ -140,8 +141,8 @@ export class GatewayService implements IGatewayService {
   }
 
   // Query Service
-  async searchEvents(query: string): Promise<EventDTO[]> {
-    return this.queryService.searchEvents(query);
+  async searchEvents(query: string, targetPage: number, limit: number): Promise<EventsResultDTO> {
+    return this.queryService.searchEvents(query, targetPage, limit);
   }
 
   async getOldEvents(hours: number): Promise<EventDTO[]> {
