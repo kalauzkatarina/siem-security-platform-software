@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "../../hooks/useAuthHook";
 import { EventRow } from "../../types/events/EventRow";
 import { DashboardProps } from "../../types/props/dashboard/DashboardProps";
+import { calculateMostEventType } from "../../helpers/calculateMostEvent";
 
 export default function Dashboard({queryApi,storageApi}:DashboardProps) {
     const [eventsData, setEventsData] = useState<EventRow[]>([]);
@@ -25,17 +26,10 @@ export default function Dashboard({queryApi,storageApi}:DashboardProps) {
     const token = "token";      // TODO: DELETE AFTER TESTING!
 
     // types, interfaces and classes will be moved too
-    const getMostEventType=(infoCount:number,errorCount:number,warningCount:number)=>{  //moved this in utils functions like sorting
-        const array=[infoCount,errorCount,warningCount];
-        const max=Math.max(...array);
-        setMostEventValue(max);
-        if(max===infoCount){
-            setMostEventType("Info");
-        }else if(max===errorCount){
-            setMostEventType("Error");
-        }else if(max===warningCount){
-            setMostEventType("Warning");
-        }
+    const getMostEventType=(infoCount:number,errorCount:number,warningCount:number)=>{
+        const result=calculateMostEventType(infoCount,errorCount,warningCount);
+        setMostEventValue(result.max)
+        setMostEventType(result.type);
     }
     useEffect(() => {
         const fetchData = async () => {

@@ -1,13 +1,9 @@
 import React, { useState } from "react";
-import { IAuthAPI } from "../api/auth/IAuthAPI";
 import { LoginForm } from "../components/auth/LoginForm";
 import { OtpForm } from "../components/auth/OtpForm";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuthHook";
-
-type AuthPageProps = {
-  authAPI: IAuthAPI;
-};
+import { AuthPageProps } from "../types/props/pages/AuthPageProps";
 
 export const AuthPage: React.FC<AuthPageProps> = ({ authAPI }) => {
   const [otpRequired, setOtpRequired] = useState<boolean>(false);

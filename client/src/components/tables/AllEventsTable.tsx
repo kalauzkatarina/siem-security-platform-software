@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import EventTableRow from "./AllEventsTableRow";
 import { EventRow } from "../../types/events/EventRow";
 import { EventsTableProps } from "../../types/props/events/EventsTableProps";
+import { sortEvents } from "../../helpers/sortEvents";
 
 
 export default function AllEventsTable({ events, sortType, searchText, parserApi }: EventsTableProps) {
@@ -9,23 +10,8 @@ export default function AllEventsTable({ events, sortType, searchText, parserApi
     // const [rotateArrow, setRotateArrow] = useState<number | null>(null);
 
     useEffect(() => {
-        let copy = [...events];
-
-        if (sortType === 1) {       //maybe move in utils
-            copy.sort((a, b) => a.source.localeCompare(b.source));
-        } else if (sortType === 2) {
-            copy.sort((a, b) => b.source.localeCompare(a.source));
-        } else if (sortType === 3) {
-            copy.sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
-        } else if (sortType === 4) {
-            copy.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
-        } else if (sortType === 5) {
-            copy.sort((a, b) => a.type.localeCompare(b.type));
-        } else if (sortType === 6) {
-            copy.sort((a, b) => b.type.localeCompare(a.type));
-        }
-
-        setSortedEvents(copy);
+        const sort=sortEvents(events,sortType!);
+        setSortedEvents(sort);
     }, [searchText, sortType, events]);
 
     return (

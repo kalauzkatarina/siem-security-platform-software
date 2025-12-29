@@ -3,20 +3,11 @@ import { IoIosArrowDown } from "react-icons/io";
 import { ExpandedRow } from "./ExpandedRow";
 import React from "react";
 import { EventTableRowProps } from "../../types/props/events/EventTableRowProps";
+import { badgeClasses } from "../../constants/badgeClasses";
 
 export default function EventTableRow({ e, index, parserApi }: EventTableRowProps) {
     const [rotateArrow, setRotateArrow] = useState<number | null>(null);
 
-    const arrowStyle = (index: number): React.CSSProperties => ({
-        transform: rotateArrow === index ? "rotate(180deg)" : "rotate(0deg)",
-        transition: "transform 0.3s ease"
-    });
-
-    const badgeClasses: Record<string, string> = {
-        INFO: "bg-[rgba(59,130,246,0.15)] text-[#60a5fa] border border-[rgba(59,130,246,0.3)]",
-        WARNING: "bg-[rgba(234,179,8,0.15)] text-[#facc15] border border-[rgba(234,179,8,0.3)]",
-        ERROR: "bg-[rgba(239,68,68,0.15)] text-[#f87171] border border-[rgba(239,68,68,0.3)]",
-    };
     return (
         <React.Fragment>
             <tr className="transition-colors duration-200 cursor-pointer hover:bg-[#2a2a2a]">
@@ -28,8 +19,8 @@ export default function EventTableRow({ e, index, parserApi }: EventTableRowProp
                     </span>
                 </td>
                 <td>
-                    <IoIosArrowDown className="cursor-pointer"
-                        style={arrowStyle(index)}
+                    <IoIosArrowDown className={`cursor-pointer transition-transform duration-300 ease-in-out ${rotateArrow === index ? "rotate-180" : "rotate-0"
+                        }`}
                         onClick={() => { setRotateArrow(rotateArrow === index ? null : index) }}
                         size={20} />
                 </td>
