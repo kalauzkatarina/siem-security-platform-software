@@ -6,9 +6,9 @@
     // sve ostale metode idu u Utils folder
     // npr konvertovanje rezultata pretrage u JSON i obrnuto
 
-import { EventDTO } from "../DTOs/EventDTO";
+import { EventsResultDTO } from "../DTOs/EventsResultDTO";
 
 export interface IQueryService {
-    searchEvents(query: string): Promise<EventDTO[]>;
+    searchEvents(query: string, page?: number, limit?: number): Promise<EventsResultDTO>;
     generatePdfReport(query: string): Promise<string>;
 }

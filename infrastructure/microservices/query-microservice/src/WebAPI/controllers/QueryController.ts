@@ -28,7 +28,7 @@ export class QueryController {
     private async getOldEvents(req: Request, res: Response): Promise<void> {
         try {
             const hours = Number(req.params.hours);
-            // ovde moze da se premesti validacija u zasebnu funkciju
+
             if (isNaN(hours) || hours <= 0) {
                 res.status(400).json({ message: "Invalid hours parameter." });
                 return;
@@ -44,7 +44,9 @@ export class QueryController {
     private async searchEvents(req: Request, res: Response): Promise<void> {
         try {
             const query = req.query.q as string || "";
-            const results = await this.queryService.searchEvents(query);
+            const page = parseInt(req.query.p as string) || 1;
+            const limit = parseInt(req.query.l as string);
+            const results = await this.queryService.searchEvents(query, page, limit);
             res.status(200).json(results);
         } catch (err) {
             res.status(500).json({ message: "Error while searching events." });
