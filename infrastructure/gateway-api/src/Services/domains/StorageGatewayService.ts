@@ -6,7 +6,7 @@ import { defaultAxiosClient } from "../../Infrastructure/config/AxiosClient";
 import { serviceConfig } from "../../Infrastructure/config/ServiceConfig";
 import { LargestArchiveDTO } from "../../Domain/DTOs/LargestArchiveDTO";
 import { StorageLogResponseDTO } from "../../Domain/DTOs/StorageLogResponseDTO";
-import { IStorageGatewayService } from "../interfaces/IStorageGatewayService";
+import { IStorageGatewayService } from "../../Domain/services/IStorageGatewayService";
 
 export class StorageGatewayService implements IStorageGatewayService {
   private readonly client: AxiosInstance;
@@ -68,8 +68,8 @@ export class StorageGatewayService implements IStorageGatewayService {
     return response.data;
   }
 
-  async getLargestArchive(): Promise<LargestArchiveDTO|null> {
-    const response = await this.client.get<LargestArchiveDTO|null>("/storageLog/largest");
+  async getLargestArchive(): Promise<LargestArchiveDTO | null> {
+    const response = await this.client.get<LargestArchiveDTO | null>("/storageLog/largest");
     return response.data;
   }
 }

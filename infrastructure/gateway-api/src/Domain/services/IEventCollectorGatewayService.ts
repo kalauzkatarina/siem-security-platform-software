@@ -1,6 +1,6 @@
-import { EventDTO } from "../../Domain/DTOs/EventDTO";
-import { DistributionDTO } from "../../Domain/DTOs/DistributionDTO";
-import { TopSourceDTO } from "../../Domain/DTOs/TopSourceDTO";
+import { EventDTO } from "../DTOs/EventDTO";
+import { DistributionDTO } from "../DTOs/DistributionDTO";
+import { TopSourceDTO } from "../DTOs/TopSourceDTO";
 
 export interface IEventCollectorGatewayService {
   getAllEvents(): Promise<EventDTO[]>;

@@ -2,7 +2,7 @@ import axios, { AxiosInstance } from "axios";
 import { EventDTO } from "../../Domain/DTOs/EventDTO";
 import { defaultAxiosClient } from "../../Infrastructure/config/AxiosClient";
 import { serviceConfig } from "../../Infrastructure/config/ServiceConfig";
-import { IQueryGatewayService } from "../interfaces/IQueryGatewayService";
+import { IQueryGatewayService } from "../../Domain/services/IQueryGatewayService";
 
 export class QueryGatewayService implements IQueryGatewayService {
   private readonly client: AxiosInstance;

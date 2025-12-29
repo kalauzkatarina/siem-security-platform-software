@@ -1,4 +1,4 @@
-import { EventDTO } from "../../Domain/DTOs/EventDTO";
+import { EventDTO } from "../DTOs/EventDTO";
 
 export interface IQueryGatewayService {
   searchEvents(query: string): Promise<EventDTO[]>;

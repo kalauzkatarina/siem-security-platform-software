@@ -17,14 +17,14 @@ import { TopSourceDTO } from "../../Domain/DTOs/TopSourceDTO";
 import { StorageLogResponseDTO } from "../../Domain/DTOs/StorageLogResponseDTO";
 import { OTPVerificationDTO } from "../../Domain/DTOs/OtpVerificationDTO";
 import { AuthJwtResponse } from "../../Domain/types/AuthJwtResponse";
-import { IAuthGatewayService } from "../interfaces/IAuthGatewayService";
-import { IUserGatewayService } from "../interfaces/IUserGatewayService";
-import { IAlertGatewayService } from "../interfaces/IAlertGatewayService";
-import { IQueryGatewayService } from "../interfaces/IQueryGatewayService";
-import { IStorageGatewayService } from "../interfaces/IStorageGatewayService";
-import { IParserGatewayService } from "../interfaces/IParserGatewayService";
-import { IAnalysisGatewayService } from "../interfaces/IAnalysisGatewayService";
-import { IEventCollectorGatewayService } from "../interfaces/IEventCollectorGatewayService";
+import { IAuthGatewayService } from "../../Domain/services/IAuthGatewayService";
+import { IUserGatewayService } from "../../Domain/services/IUserGatewayService";
+import { IAlertGatewayService } from "../../Domain/services/IAlertGatewayService";
+import { IQueryGatewayService } from "../../Domain/services/IQueryGatewayService";
+import { IStorageGatewayService } from "../../Domain/services/IStorageGatewayService";
+import { IParserGatewayService } from "../../Domain/services/IParserGatewayService";
+import { IAnalysisGatewayService } from "../../Domain/services/IAnalysisGatewayService";
+import { IEventCollectorGatewayService } from "../../Domain/services/IEventCollectorGatewayService";
 
 /**
  * Facade that delegates to domain-specific gateway services.

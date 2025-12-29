@@ -4,11 +4,11 @@ import { defaultAxiosClient } from "../../Infrastructure/config/AxiosClient";
 import { EventDTO } from "../../Domain/DTOs/EventDTO";
 import { DistributionDTO } from "../../Domain/DTOs/DistributionDTO";
 import { TopSourceDTO } from "../../Domain/DTOs/TopSourceDTO";
-import { IEventCollectorGatewayService } from "../interfaces/IEventCollectorGatewayService";
+import { IEventCollectorGatewayService } from "../../Domain/services/IEventCollectorGatewayService";
 
 export class EventCollectorGatewayService implements IEventCollectorGatewayService {
   private readonly client: AxiosInstance;
-  
+
   constructor() {
     this.client = axios.create({
       baseURL: serviceConfig.event,

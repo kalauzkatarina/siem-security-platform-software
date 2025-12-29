@@ -4,7 +4,7 @@ import { AlertQueryDTO } from "../../Domain/DTOs/AlertQueryDTO";
 import { PaginatedAlertsDTO } from "../../Domain/DTOs/PaginatedAlertsDTO";
 import { defaultAxiosClient } from "../../Infrastructure/config/AxiosClient";
 import { serviceConfig } from "../../Infrastructure/config/ServiceConfig";
-import { IAlertGatewayService } from "../interfaces/IAlertGatewayService";
+import { IAlertGatewayService } from "../../Domain/services/IAlertGatewayService";
 
 export class AlertGatewayService implements IAlertGatewayService {
   private readonly client: AxiosInstance;

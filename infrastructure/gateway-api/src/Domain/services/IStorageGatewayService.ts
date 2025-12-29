@@ -1,8 +1,8 @@
-import { ArchiveStatsDTO } from "../../Domain/DTOs/ArchiveStatsDTO";
-import { TopArchiveDTO } from "../../Domain/DTOs/TopArchiveDTO";
-import { ArchiveVolumeDTO } from "../../Domain/DTOs/ArchiveVolumeDTO";
-import { LargestArchiveDTO } from "../../Domain/DTOs/LargestArchiveDTO";
-import { StorageLogResponseDTO } from "../../Domain/DTOs/StorageLogResponseDTO";
+import { ArchiveStatsDTO } from "../DTOs/ArchiveStatsDTO";
+import { TopArchiveDTO } from "../DTOs/TopArchiveDTO";
+import { ArchiveVolumeDTO } from "../DTOs/ArchiveVolumeDTO";
+import { LargestArchiveDTO } from "../DTOs/LargestArchiveDTO";
+import { StorageLogResponseDTO } from "../DTOs/StorageLogResponseDTO";
 
 export interface IStorageGatewayService {
   getAllArchives(): Promise<StorageLogResponseDTO[]>;

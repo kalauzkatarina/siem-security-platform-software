@@ -1,4 +1,4 @@
-import { UserDTO } from "../../Domain/DTOs/UserDTO";
+import { UserDTO } from "../DTOs/UserDTO";
 
 export interface IUserGatewayService {
   getAllUsers(): Promise<UserDTO[]>;

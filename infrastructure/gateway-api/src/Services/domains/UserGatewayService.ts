@@ -2,7 +2,7 @@ import axios, { AxiosInstance } from "axios";
 import { UserDTO } from "../../Domain/DTOs/UserDTO";
 import { serviceConfig } from "../../Infrastructure/config/ServiceConfig";
 import { defaultAxiosClient } from "../../Infrastructure/config/AxiosClient";
-import { IUserGatewayService } from "../interfaces/IUserGatewayService";
+import { IUserGatewayService } from "../../Domain/services/IUserGatewayService";
 
 export class UserGatewayService implements IUserGatewayService {
   private readonly client: AxiosInstance;

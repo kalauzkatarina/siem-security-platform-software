@@ -1,6 +1,6 @@
-import { AlertDTO } from "../../Domain/DTOs/AlertDTO";
-import { AlertQueryDTO } from "../../Domain/DTOs/AlertQueryDTO";
-import { PaginatedAlertsDTO } from "../../Domain/DTOs/PaginatedAlertsDTO";
+import { AlertDTO } from "../DTOs/AlertDTO";
+import { AlertQueryDTO } from "../DTOs/AlertQueryDTO";
+import { PaginatedAlertsDTO } from "../DTOs/PaginatedAlertsDTO";
 
 export interface IAlertGatewayService {
   getAllAlerts(): Promise<AlertDTO[]>;

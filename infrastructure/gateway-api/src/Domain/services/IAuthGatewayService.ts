@@ -1,7 +1,7 @@
-import { LoginUserDTO } from "../../Domain/DTOs/LoginUserDTO";
-import { OTPVerificationDTO } from "../../Domain/DTOs/OtpVerificationDTO";
-import { AuthJwtResponse } from "../../Domain/types/AuthJwtResponse";
-import { AuthResponseType } from "../../Domain/types/AuthResponse";
+import { LoginUserDTO } from "../DTOs/LoginUserDTO";
+import { OTPVerificationDTO } from "../DTOs/OtpVerificationDTO";
+import { AuthJwtResponse } from "../types/AuthJwtResponse";
+import { AuthResponseType } from "../types/AuthResponse";
 
 export interface IAuthGatewayService {
   login(data: LoginUserDTO): Promise<AuthResponseType>;

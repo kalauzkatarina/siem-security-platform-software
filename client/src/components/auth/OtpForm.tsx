@@ -29,7 +29,7 @@ export const OtpForm: React.FC<OtpFormProps> = ({ authAPI, sessionId, userId, on
                 user_id: userId,
                 otp: otp
             });
-
+            //should we check the token?
             if (response.success && response.token) {
                 onSuccess(response.token);
                 console.log(response.success, response.message, response.token);

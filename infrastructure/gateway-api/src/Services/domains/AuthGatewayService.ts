@@ -5,7 +5,7 @@ import { defaultAxiosClient } from "../../Infrastructure/config/AxiosClient";
 import { serviceConfig } from "../../Infrastructure/config/ServiceConfig";
 import { OTPVerificationDTO } from "../../Domain/DTOs/OtpVerificationDTO";
 import { AuthJwtResponse } from "../../Domain/types/AuthJwtResponse";
-import { IAuthGatewayService } from "../interfaces/IAuthGatewayService";
+import { IAuthGatewayService } from "../../Domain/services/IAuthGatewayService";
 
 export class AuthGatewayService implements IAuthGatewayService {
   private readonly client: AxiosInstance;

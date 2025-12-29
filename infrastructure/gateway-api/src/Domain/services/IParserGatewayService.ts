@@ -1,5 +1,5 @@
-import { EventDTO } from "../../Domain/DTOs/EventDTO";
-import { ParserEventDto } from "../../Domain/DTOs/ParserEventDTO";
+import { EventDTO } from "../DTOs/EventDTO";
+import { ParserEventDto } from "../DTOs/ParserEventDTO";
 
 export interface IParserGatewayService {
   log(eventMessage: string, eventSource: string): Promise<EventDTO>;
