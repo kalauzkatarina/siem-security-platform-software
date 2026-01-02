@@ -1,8 +1,17 @@
+import { useEffect, useState } from "react";
 import { StorageTableProps } from "../../types/props/storage/StorageTableProps";
 import StorageTableRow from "./StorageTableRow";
+import { ArchiveRow } from "../../types/storage/ArchiveRow";
+import { sortArchives } from "../../helpers/sortArchives";
 
 
-export default function StorageTable({ archives, storageApi }: StorageTableProps) {
+export default function StorageTable({ archives, sortType, storageApi }: StorageTableProps) {
+    const [sortedArchives, setSortedArchives] = useState<ArchiveRow[]>(archives);
+
+    useEffect(() => {
+        const sort = sortArchives(archives, sortType!);
+        setSortedArchives(sort);
+    }, [sortType, archives]);
 
     const thClass = "px-4! py-3! text-center text-[#d0d0d0] font-semibold text-[13px] border-b border-[#3a3a3a] uppercase tracking-[0.5px]"
 
@@ -19,14 +28,14 @@ export default function StorageTable({ archives, storageApi }: StorageTableProps
                     </tr>
                 </thead>
                 <tbody>
-                    {archives.length === 0 ? (
+                    {sortedArchives.length === 0 ? (
                         <tr>
                             <td colSpan={5} className="px-10 py-10 text-center border-b border-[#2d2d2d] text-center text-[#a6a6a6]">
                                 No archives found
                             </td>
                         </tr>
                     ) : (
-                        archives.map(a => <StorageTableRow key={a.id} archive={a} storageApi={storageApi} />)
+                        sortedArchives.map(a => <StorageTableRow key={a.id} archive={a} storageApi={storageApi} />)
                     )}
                 </tbody>
             </table>

@@ -17,31 +17,6 @@ export default function StorageToolBar({ onSearch, onSort }: StorageToolBarProps
         }
     };
 
-    const handleSortChange = (value: number) => {
-        switch (value) {
-            case 1:
-                onSort("name", "asc");
-                break;
-            case 2:
-                onSort("name", "desc");
-                break;
-            case 3:
-                onSort("size", "asc");
-                break;
-            case 4:
-                onSort("size", "desc");
-                break;
-            case 5:
-                onSort("date", "asc");
-                break;
-            case 6:
-                onSort("date", "desc");
-                break;
-            default:
-                break;
-        }
-    };
-
     return (
         <div className="grid grid-cols-3 lg:grid-cols-2  w-full px-2! py-2! mb-6">
             <div className="col-span-1" />
@@ -66,7 +41,7 @@ export default function StorageToolBar({ onSearch, onSort }: StorageToolBarProps
                     </button>
 
                     <DropDownMenu
-                        OnSortTypeChange={handleSortChange}
+                        OnSortTypeChange={(value: number) => onSort(value)}
                         sortName1="Name"
                         sortName2="Size"
                         sortName3="Date" />

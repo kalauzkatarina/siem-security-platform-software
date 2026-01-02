@@ -1,4 +1,3 @@
-//jedan red u tabeli
 import { StorageTableRowProps } from "../../types/props/storage/StorageTableRowProps";
 import DownloadArchiveButton from "../storage/DownloadArchiveButton";
 import { AiOutlineFileZip } from "react-icons/ai";

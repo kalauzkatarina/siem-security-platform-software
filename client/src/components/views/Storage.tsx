@@ -9,13 +9,14 @@ import { StorageProps } from "../../types/props/storage/StorageProps";
 import { mapToArchiveDTO } from "../../helpers/mapToArchiveDTO";
 import { emptyStats } from "../../constants/emptyStats";
 
-export default function Storage({storageApi}:StorageProps) {
+export default function Storage({ storageApi }: StorageProps) {
 
     const { token } = useAuth();
     const [archives, setArchives] = useState<ArchiveDTO[]>([]);
     const [stats, setStats] = useState<ArchiveStatsDTO | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [sortType, setSortType] = useState(0);
 
     useEffect(() => {
         // if(!token)
@@ -52,17 +53,6 @@ export default function Storage({storageApi}:StorageProps) {
         }
     }
 
-    const handleSortArchives = async (by: "date" | "size" | "name", order: "asc" | "desc") => {
-        //if (!token) return;
-
-        try {
-            const data = await storageApi.sortArchives(/*token,*/ by, order);
-            setArchives(mapToArchiveDTO(data));
-        } catch (err) {
-            console.error(err);
-        }
-    }
-
     return (
         <div className="border-2 border-[#282A28] bg-transparent rounded-[10px]!">
             <h2 className="mt-[3px]! p-[5px]! m-[10px]!">Storage</h2>
@@ -84,7 +74,7 @@ export default function Storage({storageApi}:StorageProps) {
             <StorageStats stats={stats ?? emptyStats} />
 
             <div className="my-4!">
-                <StorageToolBar onSearch={handleSearchArchives} onSort={handleSortArchives} />
+                <StorageToolBar onSearch={handleSearchArchives} onSort={setSortType} />
             </div>
 
             {isLoading && (
@@ -101,7 +91,7 @@ export default function Storage({storageApi}:StorageProps) {
 
             {!isLoading && !error && (
                 <div className="p-[10px]!">
-                    <StorageTable archives={archives} storageApi={storageApi} />
+                    <StorageTable archives={archives} sortType={sortType} storageApi={storageApi} />
                 </div>
             )}
         </div>

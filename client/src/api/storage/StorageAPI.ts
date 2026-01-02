@@ -33,14 +33,6 @@ export class StorageAPI implements IStorageAPI {
         return response.data;
     }
 
-    async sortArchives(/*token: string,*/ by: "date" | "size" | "name", order: "asc" | "desc"): Promise<StorageLogResponseDTO[]> {
-        const response = await this.client.get<StorageLogResponseDTO[]>("/storageLog/sort", {
-            params: {by, order},
-            //headers: { Authorization: `Bearer ${token}` }
-        });
-        return response.data;
-    }
-
     async getStats(/*token: string*/): Promise<ArchiveStatsDTO> {
         const response = await this.client.get<ArchiveStatsDTO>("/storageLog/stats", {
             //headers: { Authorization: `Bearer ${token}` }
