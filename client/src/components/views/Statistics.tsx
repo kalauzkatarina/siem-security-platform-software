@@ -114,38 +114,38 @@ export default function Statistics({ queryApi, storageApi }: StatisticsProps) {
        ======================= */
 
     return (
-        <div className="w-full p-6 space-y-6 bg-[#181a1b]">
-            {/* TOP ROW */}
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        <div className="p-6">
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-3">
+                
+                {/*Statistics*/}
                 <div className="flex flex-col min-h-[380px] rounded-lg border-2 border-[#282A28] bg-[#1f2123] p-6">
-                    <StatisticsChart
-                        eventData={testEvent}
-                        alertData={testAlert}
-                    />
+                    <StatisticsChart 
+                        eventData={testEvent} 
+                        alertData={testAlert} />
                 </div>
 
+                {/*Top Archives*/}
                 <div className="flex flex-col min-h-[380px] rounded-lg border-2 border-[#282A28] bg-[#1f2123] p-6">
-                    <TopArchives
-                        data={testTopArchives}
-                        type={archiveType}
-                        onTypeChange={setArchiveType}
-                    />
-                </div>
-            </div>
-
-            {/* BOTTOM ROW */}
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-                <div className="flex flex-col min-h-[380px] rounded-lg border-2 border-[#282A28] bg-[#1f2123] p-6">
-                    <EventDistribution data={testData} />
+                    <TopArchives 
+                        data={testTopArchives} 
+                        type={archiveType} 
+                        onTypeChange={setArchiveType} />
                 </div>
 
+                {/*Event Distribution*/}
                 <div className="flex flex-col min-h-[380px] rounded-lg border-2 border-[#282A28] bg-[#1f2123] p-6">
-                    <ArchiveVolume
-                        data={testArchiveVolume}
-                        period={volumePeriod}
-                        onPeriodChange={setVolumePeriod}
-                    />
+                    <EventDistribution 
+                        data={testData} />
                 </div>
+
+                {/*Archive Volume*/}
+                <div className="flex flex-col min-h-[380px] rounded-lg border-2 border-[#282A28] bg-[#1f2123] p-6">
+                    <ArchiveVolume 
+                        data={testArchiveVolume} 
+                        period={volumePeriod} 
+                        onPeriodChange={setVolumePeriod} />
+                </div>
+
             </div>
         </div>
     );

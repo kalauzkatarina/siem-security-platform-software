@@ -70,7 +70,7 @@ export default function EventDistribution({ data }: EventDistributionProps) {
       </div>
 
       {/* CONTENT */}
-      <div className="flex h-[350px] items-center gap-12 p-6 pr-12!">
+      <div className="flex h-[350px] items-center gap-10 p-6 pr-10!">
         {/* PIE */}
         <div className="h-full w-[55%]">
           <ResponsiveContainer width="100%" height="100%">
@@ -79,7 +79,7 @@ export default function EventDistribution({ data }: EventDistributionProps) {
                 data={chartData}
                 cx="50%"
                 cy="50%"
-                outerRadius={112}
+                outerRadius={95}
                 labelLine={false}
                 dataKey="value"
               >
@@ -103,7 +103,7 @@ export default function EventDistribution({ data }: EventDistributionProps) {
                 px-5! py-3!
               "
             >
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
                 <div
                   className="h-5 w-5 rounded-md"
                   style={{ backgroundColor: item.color }}
