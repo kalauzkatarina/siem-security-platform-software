@@ -7,7 +7,6 @@ import { StorageLog } from "../models/StorageLog";
 export interface IStorageLogService {
     runArchiveProcess(): Promise<Boolean>;
     getArchives(): Promise<any[]>;
-    searchArchives(query: string): Promise<StorageLog[]>;
     getStats(): Promise<ArchiveStatsDTO>;
     getArchiveFilePath(id: number): Promise<string|null>;
     getTopArchives(type: "events" | "alerts", limit: number): Promise<TopArchiveDTO[]>;

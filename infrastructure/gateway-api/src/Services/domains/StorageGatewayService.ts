@@ -23,20 +23,6 @@ export class StorageGatewayService implements IStorageGatewayService {
     return response.data;
   }
 
-  async searchArchives(query: string): Promise<StorageLogResponseDTO[]> {
-    const response = await this.client.get<StorageLogResponseDTO[]>("/storageLog/search", {
-      params: { q: query },
-    });
-    return response.data;
-  }
-
-  async sortArchives(by: "date" | "size" | "name", order: "asc" | "desc"): Promise<StorageLogResponseDTO[]> {
-    const response = await this.client.get<StorageLogResponseDTO[]>("/storageLog/sort", {
-      params: { by, order },
-    });
-    return response.data;
-  }
-
   async runArchiveProcess(): Promise<StorageLogResponseDTO> {
     const response = await this.client.post<StorageLogResponseDTO>("/storageLog/run");
     return response.data;

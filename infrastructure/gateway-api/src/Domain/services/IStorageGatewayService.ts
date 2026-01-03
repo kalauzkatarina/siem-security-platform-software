@@ -6,8 +6,6 @@ import { StorageLogResponseDTO } from "../DTOs/StorageLogResponseDTO";
 
 export interface IStorageGatewayService {
   getAllArchives(): Promise<StorageLogResponseDTO[]>;
-  searchArchives(query: string): Promise<StorageLogResponseDTO[]>;
-  sortArchives(by: "date" | "size" | "name", order: "asc" | "desc"): Promise<StorageLogResponseDTO[]>;
   runArchiveProcess(): Promise<StorageLogResponseDTO>;
   getArchiveStats(): Promise<ArchiveStatsDTO>;
   downloadArchive(id: string): Promise<ArrayBuffer>;

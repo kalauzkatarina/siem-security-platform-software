@@ -12,6 +12,7 @@ import { emptyStats } from "../../constants/emptyStats";
 export default function Storage({ storageApi }: StorageProps) {
 
     const { token } = useAuth();
+    const [allArchives, setAllArchives] = useState<ArchiveDTO[]>([]); //originalno svi podaci
     const [archives, setArchives] = useState<ArchiveDTO[]>([]);
     const [stats, setStats] = useState<ArchiveStatsDTO | null>(null);
     const [isLoading, setIsLoading] = useState(false);
@@ -29,8 +30,10 @@ export default function Storage({ storageApi }: StorageProps) {
                 const archivesResponse = await storageApi.getAllArchives(/*token*/);
                 console.log("ARCHIVES RESPONSE: ", archivesResponse);
                 const statsResponse = await storageApi.getStats(/*token*/);
+                const mapped = mapToArchiveDTO(archivesResponse);
 
-                setArchives(mapToArchiveDTO(archivesResponse));
+                setAllArchives(mapped);
+                setArchives(mapped);
                 setStats(statsResponse ?? emptyStats);
             } catch (err) {
                 console.error(err);
@@ -45,21 +48,18 @@ export default function Storage({ storageApi }: StorageProps) {
     const handleSearchArchives = async (query: string) => {
         //if (!token) return;
 
-        try {
-            const data = await storageApi.searchArchives(/*token,*/ query);
-            setArchives(mapToArchiveDTO(data));
-        } catch (err) {
-            console.error(err);
-        }
+       if(!query){
+        setArchives(allArchives);
+        return;
+       }
+
+       const filtered = allArchives.filter(a => a.fileName.toLowerCase().includes(query.toLocaleLowerCase()));
+
+       setArchives(filtered);
     }
 
     const handleResetArchives = async () => {
-        try{
-            const data = await storageApi.getAllArchives(/*token,*/ );
-            setArchives(mapToArchiveDTO(data));
-        } catch (err) {
-            console.error(err);
-        }
+       setArchives(allArchives);
     }
 
     return (

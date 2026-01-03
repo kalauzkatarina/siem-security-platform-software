@@ -11,8 +11,6 @@ export class StorageGatewayController {
 
   private initializeRoutes(): void {
     this.router.get("/storageLog", /*this.authenticate,*/ this.getAllArchives.bind(this));
-    this.router.get("/storageLog/search", /*this.authenticate,*/ this.searchArchives.bind(this));
-    this.router.get("/storageLog/sort", /*this.authenticate,*/ this.sortArchives.bind(this));
     this.router.get("/storageLog/stats", /*this.authenticate,*/ this.getArchiveStats.bind(this));
     this.router.get("/storageLog/file/:id", /*this.authenticate,*/ this.downloadArchive.bind(this));
     this.router.post("/storageLog/run",  /*this.authenticate,*/ this.runArchiveProcess.bind(this));

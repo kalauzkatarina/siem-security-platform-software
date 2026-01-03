@@ -177,12 +177,6 @@ export class StorageLogService implements IStorageLogService {
         }
     }
 
-    public async searchArchives(query: string): Promise<StorageLog[]> {
-        const allArchives = await this.getArchives();
-        const normalized = query.toLowerCase();
-        return allArchives.filter(a => a.fileName.toLowerCase().includes(normalized));
-    }
-
     public async getStats(): Promise<ArchiveStatsDTO> {
         try {
 

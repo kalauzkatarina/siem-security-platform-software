@@ -25,14 +25,6 @@ export class StorageAPI implements IStorageAPI {
         return response.data;
     }
 
-    async searchArchives(/*token: string,*/ query: string): Promise<StorageLogResponseDTO[]> {
-        const response = await this.client.get<StorageLogResponseDTO[]>("/storageLog/search", {
-            params: {q: query},
-            //headers: { Authorization: `Bearer ${token}` }
-        });
-        return response.data;
-    }
-
     async getStats(/*token: string*/): Promise<ArchiveStatsDTO> {
         const response = await this.client.get<ArchiveStatsDTO>("/storageLog/stats", {
             //headers: { Authorization: `Bearer ${token}` }
@@ -47,7 +39,6 @@ export class StorageAPI implements IStorageAPI {
         });
         return response.data;
     }
-
 
     //STATISTICS METODA
     async getTopArchives(token: string, type: "events" | "alerts", limit: number): Promise<TopArchiveDTO[]> {
