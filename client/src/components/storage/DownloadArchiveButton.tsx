@@ -27,6 +27,8 @@ export default function DownloadArchiveButton({ archiveId, fileName, storageApi 
             window.URL.revokeObjectURL(url);
         } catch (err) {
             console.error("Download error: " + err);
+        } finally {
+            setIsDownloading(false);
         }
     }
 

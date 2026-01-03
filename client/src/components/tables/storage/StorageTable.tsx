@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { StorageTableProps } from "../../types/props/storage/StorageTableProps";
+import { StorageTableProps } from "../../../types/props/storage/StorageTableProps";
+import { ArchiveRow } from "../../../types/storage/ArchiveRow";
+import { sortArchives } from "../../../helpers/sortArchives";
 import StorageTableRow from "./StorageTableRow";
-import { ArchiveRow } from "../../types/storage/ArchiveRow";
-import { sortArchives } from "../../helpers/sortArchives";
 
 
 export default function StorageTable({ archives, sortType, storageApi }: StorageTableProps) {

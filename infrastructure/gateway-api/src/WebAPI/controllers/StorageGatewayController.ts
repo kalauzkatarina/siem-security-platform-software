@@ -28,25 +28,6 @@ export class StorageGatewayController {
     }
   }
 
-  private async searchArchives(req: Request, res: Response) {
-    try {
-      const archives = await this.gatewayService.searchArchives(req.query.q as string);
-      res.status(200).json(archives);
-    } catch (err) {
-      res.status(500).json({ message: (err as Error).message });
-    }
-  }
-
-  private async sortArchives(req: Request, res: Response) {
-    try {
-      const { by, order } = req.query;
-      const archives = await this.gatewayService.sortArchives(by as any, order as any);
-      res.status(200).json(archives);
-    } catch (err) {
-      res.status(500).json({ message: (err as Error).message });
-    }
-  }
-
   private async getArchiveStats(req: Request, res: Response) {
     try {
       const stats = await this.gatewayService.getArchiveStats();

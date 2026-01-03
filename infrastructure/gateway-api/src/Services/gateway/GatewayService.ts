@@ -183,14 +183,6 @@ export class GatewayService implements IGatewayService {
     return this.storageService.getAllArchives();
   }
 
-  async searchArchives(query: string): Promise<StorageLogResponseDTO[]> {
-    return this.storageService.searchArchives(query);
-  }
-
-  async sortArchives(by: "date" | "size" | "name", order: "asc" | "desc"): Promise<StorageLogResponseDTO[]> {
-    return this.storageService.sortArchives(by, order);
-  }
-
   async runArchiveProcess(): Promise<StorageLogResponseDTO> {
     return this.storageService.runArchiveProcess();
   }

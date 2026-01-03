@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "../../hooks/useAuthHook";
 import { ArchiveStatsDTO } from "../../models/storage/ArchiveStatsDTO";
 import StorageStats from "../storage/StorageStats";
-import StorageTable from "../tables/StorageTable";
+import StorageTable from "../tables/storage/StorageTable";
 import StorageToolBar from "../storage/StorageToolbar";
 import { ArchiveDTO } from "../../models/storage/ArchiveDTO";
 import { StorageProps } from "../../types/props/storage/StorageProps";

@@ -1,6 +1,5 @@
 import { AlertDTO } from "../DTOs/AlertDTO";
 import { AlertQueryDTO } from "../DTOs/AlertQueryDTO";
-import { ArchiveDTO } from "../DTOs/ArchiveDTO";
 import { ArchiveStatsDTO } from "../DTOs/ArchiveStatsDTO";
 import { ArchiveVolumeDTO } from "../DTOs/ArchiveVolumeDTO";
 import { DistributionDTO } from "../DTOs/DistributionDTO";
@@ -63,8 +62,6 @@ export interface IGatewayService {
   // Storage 
   getAllArchives(): Promise<StorageLogResponseDTO[]>;
   runArchiveProcess(): Promise<StorageLogResponseDTO>;
-  searchArchives(query: string): Promise<StorageLogResponseDTO[]>;
-  sortArchives(by: "date" | "size" | "name", order: "asc" | "desc"): Promise<StorageLogResponseDTO[]>;
   getArchiveStats(): Promise<ArchiveStatsDTO>;
   downloadArchive(id: string): Promise<ArrayBuffer>;
   getTopArchives(type: "events" | "alerts", limit: number): Promise<TopArchiveDTO[]>;

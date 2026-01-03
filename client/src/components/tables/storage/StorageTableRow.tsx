@@ -1,5 +1,5 @@
-import { StorageTableRowProps } from "../../types/props/storage/StorageTableRowProps";
-import DownloadArchiveButton from "../storage/DownloadArchiveButton";
+import { StorageTableRowProps } from "../../../types/props/storage/StorageTableRowProps";
+import DownloadArchiveButton from "../../storage/DownloadArchiveButton";
 import { AiOutlineFileZip } from "react-icons/ai";
 
 
