@@ -53,6 +53,15 @@ export default function Storage({ storageApi }: StorageProps) {
         }
     }
 
+    const handleResetArchives = async () => {
+        try{
+            const data = await storageApi.getAllArchives(/*token,*/ );
+            setArchives(mapToArchiveDTO(data));
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
     return (
         <div className="border-2 border-[#282A28] bg-transparent rounded-[10px]!">
             <h2 className="mt-[3px]! p-[5px]! m-[10px]!">Storage</h2>
@@ -74,7 +83,7 @@ export default function Storage({ storageApi }: StorageProps) {
             <StorageStats stats={stats ?? emptyStats} />
 
             <div className="my-4!">
-                <StorageToolBar onSearch={handleSearchArchives} onSort={setSortType} />
+                <StorageToolBar onSearch={handleSearchArchives} onSort={setSortType} onReset={handleResetArchives} />
             </div>
 
             {isLoading && (
