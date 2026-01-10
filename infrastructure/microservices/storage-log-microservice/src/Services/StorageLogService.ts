@@ -51,20 +51,21 @@ export class StorageLogService implements IStorageLogService {
         await this.logger.log("Starting archive process...");
 
         const eventsOk = await this.archiveEvents();
-        const alertsOk = await this.archiveAlerts();
+        //const alertsOk = await this.archiveAlerts();
+        // zakomentarisano jer ne radimo jos uvek arhiviranje alertova
 
-        await this.logger.log(`Archive process result: events:${eventsOk}, alerts=${alertsOk}`);
+        // stavljeno alerts = true jer nije pozvano arhiviranje alertova
+        await this.logger.log(`Archive process result: events:${eventsOk}, alerts=${true}`);
 
-        return eventsOk && alertsOk;
+        // vracamo true za alertove
+        return eventsOk && true;
     }
 
     public async archiveEvents(): Promise<boolean> {
         try {
             await this.logger.log("Archiving events started...");
 
-            const events = (await this.queryClient.get<EventDTO[]>("/query/oldEvents",
-                { params: { hours: ARCHIVE_RETENTION_HOURS } }
-            )).data;
+            const events = (await this.queryClient.get<EventDTO[]>(`/query/oldEvents/${ARCHIVE_RETENTION_HOURS}`)).data;
 
             if (events.length === 0) {
                 await this.logger.log("No events to archive.");
@@ -84,23 +85,29 @@ export class StorageLogService implements IStorageLogService {
                 groups[key].push(line);
             }
 
-            const txtFiles = WriteGroupedFiles(TEMP_DIR, groups);
+            const hourGroups = WriteGroupedFiles(TEMP_DIR, groups);
 
-            const tarName = `events_${new Date().toISOString().replace(/[:.]/g, "_")}.tar`;
-            const tarPath = path.join(ARCHIVE_DIR, tarName);
+            for (const hourKey of hourGroups) {
 
-            await execSync(`tar -cf "${tarPath}" -C "${TEMP_DIR}" ${txtFiles.join(" ")}`);
+                const hourDir = path.join(TEMP_DIR, hourKey);
+                const tarName = `events_${hourKey}_00.tar`;
+                const tarPath = path.join(ARCHIVE_DIR, tarName);
 
-            CleanUpFiles(TEMP_DIR, txtFiles);
+                // taruje ceo sat
+                await execSync(`tar -cf "${tarPath}" -C "${hourDir}" .`);
 
-            const stats = statSync(tarPath);
+                const stats = statSync(tarPath);
 
-            await this.storageRepo.save(this.storageRepo.create({
-                fileName: tarName,
-                archiveType: ArchiveType.EVENT,
-                recordCount: events.length,
-                fileSize: stats.size
-            }));
+                await this.storageRepo.save(this.storageRepo.create({
+                    fileName: tarName,
+                    archiveType: ArchiveType.EVENT,
+                    recordCount: groups[hourKey].length,
+                    fileSize: stats.size
+                }));
+
+                // brise se folder za taj sat - u njemu su bili .txt fajlovi
+                CleanUpFiles(hourDir);
+            }
 
             await this.logger.log(`Deleting ${events.length} events from Event service`);
 
@@ -121,9 +128,7 @@ export class StorageLogService implements IStorageLogService {
         try {
             await this.logger.log("Archiving alerts started...");
 
-            const alerts = (await this.queryClient.get<CorrelationDTO[]>("/query/oldAlerts",
-                { params: { hours: ARCHIVE_RETENTION_HOURS } }
-            )).data;
+            const alerts = (await this.queryClient.get<CorrelationDTO[]>(`/query/oldAlerts/${ARCHIVE_RETENTION_HOURS}`)).data;
 
             if (alerts.length === 0) {
                 await this.logger.log("No alerts to archive.");
@@ -143,23 +148,27 @@ export class StorageLogService implements IStorageLogService {
                 groups[key].push(line);
             }
 
-            const txtFiles = WriteGroupedFiles(TEMP_DIR, groups);
+            const hourGroups = WriteGroupedFiles(TEMP_DIR, groups);
 
-            const tarName = `alerts_${new Date().toISOString().replace(/[:.]/g, "_")}.tar`;
-            const tarPath = path.join(ARCHIVE_DIR, tarName);
+            for (const hourKey of hourGroups) {
 
-            await execSync(`tar -cf "${tarPath}" -C "${TEMP_DIR}" ${txtFiles.join(" ")}`);
+                const hourDir = path.join(TEMP_DIR, hourKey);
+                const tarName = `alerts_${hourKey}_00.tar`;
+                const tarPath = path.join(ARCHIVE_DIR, tarName);
 
-            CleanUpFiles(TEMP_DIR, txtFiles);
+                await execSync(`tar -cf "${tarPath}" -C "${hourDir}" .`);
 
-            const stats = statSync(tarPath);
+                const stats = statSync(tarPath);
 
-            await this.storageRepo.save(this.storageRepo.create({
-                fileName: tarName,
-                archiveType: ArchiveType.ALERT,
-                recordCount: alerts.length,
-                fileSize: stats.size
-            }));
+                await this.storageRepo.save(this.storageRepo.create({
+                    fileName: tarName,
+                    archiveType: ArchiveType.ALERT,
+                    recordCount: groups[hourKey].length,
+                    fileSize: stats.size
+                }));
+
+                CleanUpFiles(hourDir);
+            }
 
             await this.logger.log(`Deleting ${alerts.length} events from Analysis Engine service`);
 

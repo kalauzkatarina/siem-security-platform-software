@@ -1,16 +1,25 @@
-import { writeFileSync } from "fs";
+import fs from "fs";
 import path from "path";
 
 export function WriteGroupedFiles(
-    baseDir: string,
+    baseTmpDir: string,
     groups: Record<string, string[]>
 ): string[] {
-    const files: string[] = [];
 
-    for(const [slot, content] of Object.entries(groups)){
-         const name = `logs_${slot}.txt`;
-        writeFileSync(path.join(baseDir, name), content.join("\n"));
-        files.push(name);
+    const hourKeys: string[] = [];
+
+    for (const hourKey of Object.keys(groups)) {
+        const hourDir = path.join(baseTmpDir, hourKey);
+        fs.mkdirSync(hourDir, { recursive: true });
+
+        hourKeys.push(hourKey);
+
+        groups[hourKey].forEach((line, index) => {
+            const fileName = `logs_${hourKey}_${(index * 15).toString().padStart(2, "0")}.txt`;
+            const filePath = path.join(hourDir, fileName);
+            fs.writeFileSync(filePath, line + "\n");
+        });
     }
-    return files;
+
+    return hourKeys; 
 }

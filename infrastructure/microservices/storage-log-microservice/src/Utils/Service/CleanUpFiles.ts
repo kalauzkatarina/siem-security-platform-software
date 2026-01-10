@@ -1,8 +1,5 @@
-import { unlinkSync } from "fs";
-import path from "path";
+import fs from "fs";
 
-export function CleanUpFiles(dir: string, files: string[]) {
-    for(const file of files) {
-        unlinkSync(path.join(dir, file));
-    }
+export function CleanUpFiles(dirPath: string) {
+    fs.rmSync(dirPath, { recursive: true, force: true });
 }
