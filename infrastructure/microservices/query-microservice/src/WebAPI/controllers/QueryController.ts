@@ -2,6 +2,8 @@ import { Router, Request, Response } from "express";
 import { IQueryRepositoryService } from "../../Domain/services/IQueryRepositoryService";
 import { CacheEntry } from "../../Domain/models/CacheEntry";
 import { IQueryService } from "../../Domain/services/IQueryService";
+import { DistributionDTO } from "../../Domain/DTOs/DistributionDTO";
+
 
 export class QueryController {
     private readonly router: Router;
@@ -23,7 +25,9 @@ export class QueryController {
         this.router.get("/query/infoCount", this.getInfoCount.bind(this));
         this.router.get("/query/warningCount", this.getWarningCount.bind(this));
         this.router.get("/query/errorCount", this.getErrorCount.bind(this));
+        this.router.get("query/eventDistribution", this.getEventDistribution.bind(this));
         this.router.get("/query/pdfReport", this.getPdfReport.bind(this));
+        
     }
 
     private async getOldEvents(req: Request, res: Response): Promise<void> {
@@ -105,6 +109,25 @@ export class QueryController {
             res.status(200).json({ count: errorCount });
         } catch (err) {
             res.status(500).json({ message: "Error while retrieving error count." });
+        }
+    }
+
+    private async getEventDistribution(req: Request, res: Response): Promise<void> {
+        try {
+            const warningCount = this.queryRepositoryService.getWarningCount();
+            const infoCount = this.queryRepositoryService.getInfoCount();
+            const errorCount = this.queryRepositoryService.getErrorCount();
+
+            const distribution: DistributionDTO = {
+                notifications: infoCount,
+                warnings: warningCount,
+                errors: errorCount
+            };
+            res.status(200).json({
+                distribution
+            });
+        }catch (err) {
+            res.status(500).json({ message: "Error while retrieving event distribution." });
         }
     }
 

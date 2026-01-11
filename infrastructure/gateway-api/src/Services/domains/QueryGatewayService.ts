@@ -4,6 +4,8 @@ import { defaultAxiosClient } from "../../Domain/constants/AxiosClient";
 import { serviceConfig } from "../../Domain/constants/ServiceConfig";
 import { IQueryGatewayService } from "../../Domain/services/IQueryGatewayService";
 import { EventsResultDTO } from "../../Domain/DTOs/EventsResultDTO";
+import { DistributionDTO } from "../../Domain/DTOs/DistributionDTO";
+
 
 export class QueryGatewayService implements IQueryGatewayService {
   private readonly client: AxiosInstance;
@@ -55,5 +57,10 @@ export class QueryGatewayService implements IQueryGatewayService {
   async getErrorCount(): Promise<number> {
     const response = await this.client.get<{ count: number }>("/query/errorCount");
     return response.data.count;
+  }
+
+  async getEventDistribution(): Promise<DistributionDTO> {
+    const response = await this.client.get<DistributionDTO>("/query/eventDistribution");
+    return response.data;
   }
 }

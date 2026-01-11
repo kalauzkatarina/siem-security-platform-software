@@ -178,6 +178,10 @@ export class GatewayService implements IGatewayService {
     return this.queryService.getErrorCount();
   }
 
+  async getEventDistribution(): Promise<DistributionDTO> {
+    return this.queryService.getEventDistribution();
+  }
+
   // Storage
   async getAllArchives(): Promise<StorageLogResponseDTO[]> {
     return this.storageService.getAllArchives();

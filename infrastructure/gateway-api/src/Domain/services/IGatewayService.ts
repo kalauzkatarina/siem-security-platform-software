@@ -57,6 +57,7 @@ export interface IGatewayService {
   getInfoCount(): Promise<number>;
   getWarningCount(): Promise<number>;
   getErrorCount(): Promise<number>;
+  getEventDistribution(): Promise<DistributionDTO>;
 
 
   // Storage 

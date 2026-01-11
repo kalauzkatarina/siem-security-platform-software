@@ -1,3 +1,4 @@
+import { DistributionDTO } from "../DTOs/DistributionDTO";
 import { EventDTO } from "../DTOs/EventDTO";
 import { EventsResultDTO } from "../DTOs/EventsResultDTO";
 
@@ -10,4 +11,5 @@ export interface IQueryGatewayService {
   getInfoCount(): Promise<number>;
   getWarningCount(): Promise<number>;
   getErrorCount(): Promise<number>;
+  getEventDistribution(): Promise<DistributionDTO>;
 }
