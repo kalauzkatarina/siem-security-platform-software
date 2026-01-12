@@ -10,20 +10,62 @@ export default function SearchBar({
   onReset,
   onKeyPress,
   severity,
-  status
-}: SearchBarProps & { severity?: string, status?: string }) {
+  status,
+  dateFrom,
+  dateTo
+}: SearchBarProps & { severity?: string, status?: string, dateFrom?: string, dateTo?: string }) {
 
- const handleDownloadAlertsPdf = () => {
-  const baseUrl = "http://localhost:5790/api/v1/query/alertsPdfReport";
-  
-  const sSeverity = String(severity || 'all');
-  const sStatus = String(status || 'all');
-  const sSource = String(searchText || '');
+  const handleDownloadAlertsPdf = async () => {
+    const baseUrl = "http://localhost:5790/api/v1/query/alertsPdfReport";
 
-  const url = `${baseUrl}?severity=${encodeURIComponent(sSeverity)}&status=${encodeURIComponent(sStatus)}&source=${encodeURIComponent(sSource)}`;
-  
-  window.open(url, '_blank');
-};
+    // Priprema parametara da budu sigurni za slanje (encode)
+    const sSeverity = String(severity || 'all');
+    const sStatus = String(status || 'all');
+    const sSource = String(searchText || '');
+    const sDateFrom = dateFrom ? new Date(dateFrom).toISOString() : "";
+    const sDateTo = dateTo ? new Date(dateTo).toISOString() : "";
+
+    // Pravimo query string
+    const queryParams = new URLSearchParams({
+      severity: sSeverity,
+      status: sStatus,
+      source: sSource,
+      dateFrom: sDateFrom,
+      dateTo: sDateTo
+    });
+
+    try {
+      // 1. Pozivamo backend (Kao što asistent voli - fetch/blob metoda)
+      const response = await fetch(`${baseUrl}?${queryParams.toString()}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/pdf',
+        },
+      });
+
+      if (!response.ok) throw new Error('Neuspešno generisanje PDF-a');
+
+      // 2. Pretvaramo u blob i kreiramo download link
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = url;
+      a.download = `Alerts-Report-${new Date().getTime()}.pdf`; 
+      
+      document.body.appendChild(a);
+      a.click();
+
+      // 3. Čišćenje
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+    } catch (error) {
+      console.error("Greška pri preuzimanju PDF-a:", error);
+      alert("Došlo je do greške prilikom preuzimanja PDF izveštaja.");
+    }
+  };
 
   return (
     <div className="flex flex-col gap-[4px] col-span-4 w-full">
@@ -37,7 +79,7 @@ export default function SearchBar({
           placeholder="Search by..."
           value={searchText}
           onChange={(e) => onSearchTextChange(e.target.value)}
-          onKeyPress={onKeyPress}
+          onKeyDown={onKeyPress} // Promenjeno sa onKeyPress u onKeyDown (moderniji React)
           className={inputClass}
         />
 
@@ -57,6 +99,7 @@ export default function SearchBar({
           </button>
           
           <button 
+            type="button"
             onClick={handleDownloadAlertsPdf}
             className="w-[33.3%] h-[38px] flex items-center justify-center gap-2 rounded-[10px]! bg-[#007a55]! hover:bg-[#009166]! text-white text-[13px] font-semibold cursor-pointer transition-all"
           >
