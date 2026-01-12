@@ -1,28 +1,21 @@
-import path from "path";
-import axios, { AxiosInstance } from "axios";
+import { AxiosInstance } from "axios";
+import { IArchiveProcessService } from "../Domain/services/IArchiveProcessService";
 import { Repository } from "typeorm";
 import { StorageLog } from "../Domain/models/StorageLog";
-import { mkdirSync, statSync, unlinkSync, writeFileSync } from "fs";
-import { IStorageLogService } from "../Domain/services/IStorageLogService";
-import { EventDTO } from "../Domain/DTOs/EventDTO";
-import { exec } from "child_process";
-import { getTimeGroup } from "../Utils/Service/TimeGroup";
 import { ILogerService } from "../Domain/services/ILogerService";
-import util from "util";
-import { ArchiveStatsDTO } from "../Domain/DTOs/ArchiveStatsDTO";
-import { TopArchiveDTO } from "../Domain/DTOs/TopArchiveDTO";
-import { ArchiveVolumeDTO } from "../Domain/DTOs/ArchiveVolumeDTO";
-import { ArchiveType } from "../Domain/enums/ArchiveType";
-import { CorrelationDTO } from "../Domain/DTOs/CorrelationDTO";
-import { ARCHIVE_DIR, TEMP_DIR, ARCHIVE_RETENTION_HOURS } from "../Domain/constants/ArchiveConstants";
-import { SortArchives } from "../Utils/Service/SortArchives";
-import { WriteGroupedFiles } from "../Utils/Service/WriteGroupedFiles";
-import { CleanUpFiles } from "../Utils/Service/CleanUpFiles";
 import { createAxiosClient } from "../Utils/Client/AxiosClient";
-import { LargestArchiveDTO } from "../Domain/DTOs/LargestArchiveDTO";
-const execSync = util.promisify(exec);
+import { mkdirSync, statSync } from "fs";
+import { ARCHIVE_DIR, ARCHIVE_RETENTION_HOURS, TEMP_DIR } from "../Domain/constants/ArchiveConstants";
+import { EventDTO } from "../Domain/DTOs/EventDTO";
+import { getTimeGroup } from "../Utils/Service/TimeGroup";
+import { WriteGroupedFiles } from "../Utils/Service/WriteGroupedFiles";
+import path from "path";
+import { execSync } from "child_process";
+import { ArchiveType } from "../Domain/enums/ArchiveType";
+import { CleanUpFiles } from "../Utils/Service/CleanUpFiles";
+import { CorrelationDTO } from "../Domain/DTOs/CorrelationDTO";
 
-export class StorageLogService implements IStorageLogService {
+export class ArchiveProcessService implements IArchiveProcessService {
     private readonly queryClient: AxiosInstance;
     private readonly eventClient: AxiosInstance;
     private readonly correlationClient: AxiosInstance;
@@ -31,7 +24,6 @@ export class StorageLogService implements IStorageLogService {
         private readonly storageRepo: Repository<StorageLog>,
         private readonly logger: ILogerService
     ) {
-
         this.queryClient = createAxiosClient(process.env.QUERY_SERVICE_API ?? "");
         this.eventClient = createAxiosClient(process.env.EVENT_SERVICE_API ?? "");
         this.correlationClient = createAxiosClient(process.env.ANALYSIS_ENGINE_API ?? "");
@@ -39,12 +31,6 @@ export class StorageLogService implements IStorageLogService {
         //radi proveru 
         mkdirSync(ARCHIVE_DIR, { recursive: true });
         mkdirSync(TEMP_DIR, { recursive: true });
-
-    }
-
-    public async getArchives(): Promise<StorageLog[]> {
-        await this.logger.log("Fetching archive list...");
-        return this.storageRepo.find();
     }
 
     public async runArchiveProcess(): Promise<Boolean> {
@@ -183,119 +169,6 @@ export class StorageLogService implements IStorageLogService {
             console.error("ARCHIVE ALERTS ERROR FULL:", err);
             await this.logger.log("ERROR archiving alerts");
             return false;
-        }
-    }
-
-    public async getStats(): Promise<ArchiveStatsDTO> {
-        try {
-
-            const archives = await this.storageRepo.find();
-
-            const totalSize = archives.reduce((sum, a) => sum + a.fileSize, 0);
-            const lastArchive = archives.sort(
-                (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-            )[0];
-
-            return {
-                totalSize,
-                retentionHours: 72,
-                lastArchiveName: lastArchive ? lastArchive.fileName : null
-            };
-        } catch (err) {
-            await this.logger.log("ERROR fetching archive stats");
-            return {
-                totalSize: 0,
-                retentionHours: 72,
-                lastArchiveName: null
-            }
-        }
-    }
-
-    public async getArchiveFilePath(id: number): Promise<string | null> {
-        try {
-
-            const log = await this.storageRepo.findOne({ where: { storageLogId: id } });
-            if (!log)
-                return null;
-
-            const fullPath = path.join(ARCHIVE_DIR, log.fileName);
-            return fullPath;
-        } catch (err) {
-            await this.logger.log("ERROR getting archive file path for id=" + id);
-            return null;
-        }
-    }
-
-    public async getTopArchives(type: "events" | "alerts", limit: number): Promise<TopArchiveDTO[]> {
-        try {
-
-            const archiveType = type === "events" ? ArchiveType.EVENT : ArchiveType.ALERT;
-
-            const archives = await this.storageRepo.find({
-                where: { archiveType },
-                order: { recordCount: "DESC" },
-                take: limit
-            });
-
-            return archives.map(a => ({
-                id: a.storageLogId,
-                fileName: a.fileName,
-                count: a.recordCount
-            }));
-        } catch (err) {
-            await this.logger.log("ERROR fetching top archives");
-            return []; //prazan niz, znaci nema podataka
-        }
-    }
-
-    public async getArchiveVolume(period: "daily" | "monthly" | "yearly"): Promise<ArchiveVolumeDTO[]> {
-        try {
-
-            const archives = await this.storageRepo.find();
-            const volumeMap: Record<string, number> = {};
-
-            archives.forEach(a => {
-                const date = new Date(a.createdAt);
-                let key: string;
-
-                switch (period) {
-                    case "daily":
-                        key = date.toISOString().split("T")[0];
-                        break;
-                    case "monthly":
-                        key = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, "0")}`;
-                        break;
-                    case "yearly":
-                        key = `${date.getFullYear()}`;
-                        break;
-                }
-
-                volumeMap[key] = (volumeMap[key] || 0) + a.recordCount;
-            });
-
-            return Object.entries(volumeMap).map(([label, size]) => ({ label, size })).sort((a, b) => a.label.localeCompare(b.label));
-        } catch (err) {
-            await this.logger.log("ERROR calculating archive volume.");
-            return []; //vracam opet prazan niz, jer se desila greska
-        }
-    }
-
-    public async getLargestArchive(): Promise<LargestArchiveDTO|null> {
-        try {
-            const archives = await this.storageRepo.find();
-
-            if(archives.length === 0)
-                return null;
-
-            const largest = archives.reduce((max, curr) => curr.fileSize > max.fileSize ? curr : max);
-
-            return {
-                archiveName: largest.fileName,
-                size: largest.fileSize
-            };
-        } catch (err) {
-            await this.logger.log("ERROR fetching largest archive");
-            return null;
         }
     }
 }

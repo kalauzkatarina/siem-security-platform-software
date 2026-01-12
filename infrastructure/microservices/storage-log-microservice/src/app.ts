@@ -3,15 +3,17 @@ import cors from 'cors';
 import "reflect-metadata";
 import { initialize_database } from './Database/InitializeConnection';
 import dotenv from 'dotenv';
-import { Repository } from 'typeorm';
 import { StorageLog } from './Domain/models/StorageLog';
 import { Db } from './Database/DbConnectionPool';
-import { StorageLogService } from './Services/StorageLogService';
-import axios from 'axios';
 import { StorageLogController } from './WebAPI/controllers/StorageLogController';
-import { IStorageLogService } from './Domain/services/IStorageLogService';
 import { ILogerService } from './Domain/services/ILogerService';
 import { LogerService } from './Services/LogerService';
+import { IArchiveProcessService } from './Domain/services/IArchiveProcessService';
+import { ArchiveProcessService } from './Services/ArchiveProcessService';
+import { IArchiveQueryService } from './Domain/services/IArchiveQueryService';
+import { ArchiveQueryService } from './Services/ArchiveQueryService';
+import { IArchiveStatsService } from './Domain/services/IArchiveStatsService';
+import { ArchiveStatsService } from './Services/ArchiveStatsService';
 
 dotenv.config({ quiet: true });
 
@@ -39,9 +41,11 @@ void (async () => {
 const storageRepo = Db.getRepository(StorageLog);
 
 const logerService : ILogerService = new LogerService();
-const storageLogService : IStorageLogService = new StorageLogService(storageRepo, logerService);
+const archiveProcessService: IArchiveProcessService = new ArchiveProcessService(storageRepo, logerService);
+const archiveQueryService: IArchiveQueryService = new ArchiveQueryService(storageRepo, logerService);
+const archiveStatsService: IArchiveStatsService = new ArchiveStatsService(storageRepo, logerService);
 
-const storageController = new StorageLogController(storageLogService);
+const storageController = new StorageLogController(archiveProcessService, archiveQueryService, archiveStatsService);
 
 app.use("/api/v1", storageController.getRouter());
 
@@ -53,7 +57,7 @@ setInterval(async () => {
   console.log("Starting automatic StorageLog archiving...");
 
   try{
-    await storageLogService.runArchiveProcess();
+    await archiveProcessService.runArchiveProcess();
     console.log("Archiving completed.");
   } catch (err){
     console.error("Error in archiving: ", err);
@@ -61,7 +65,7 @@ setInterval(async () => {
 }, FIFTEEN_MINUTES);
 
 //odmah pokrene jednom kada servis startuje
-storageLogService.runArchiveProcess()
+archiveProcessService.runArchiveProcess()
   .then(() => console.log("First archiving complete."))
   .catch(err => console.error("Error while first archiving: ", err));
   
