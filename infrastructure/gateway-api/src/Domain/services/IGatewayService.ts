@@ -5,6 +5,7 @@ import { ArchiveVolumeDTO } from "../DTOs/ArchiveVolumeDTO";
 import { DistributionDTO } from "../DTOs/DistributionDTO";
 import { EventDTO } from "../DTOs/EventDTO";
 import { EventsResultDTO } from "../DTOs/EventsResultDTO";
+import { HourlyStatisticsDTO } from "../DTOs/HourlyStatisticsDTO";
 import { LargestArchiveDTO } from "../DTOs/LargestArchiveDTO";
 import { LoginUserDTO } from "../DTOs/LoginUserDTO";
 import { NormalizedEventDTO } from "../DTOs/NormalizedEventDTO";
@@ -58,6 +59,8 @@ export interface IGatewayService {
   getWarningCount(): Promise<number>;
   getErrorCount(): Promise<number>;
   getEventDistribution(): Promise<DistributionDTO>;
+  getEventStatistics(): Promise<HourlyStatisticsDTO[]>;
+  getAlertStatistics(): Promise<HourlyStatisticsDTO[]>;
 
 
   // Storage 

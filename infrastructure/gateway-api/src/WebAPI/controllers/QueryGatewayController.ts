@@ -60,10 +60,24 @@ export class QueryGatewayController {
       this.getErrorCount.bind(this)
     );
     this.router.get(
-      "/siem//query/distribution",
+      "/siem/query/distribution",
       // this.authenticate,
       // requireSysAdmin,
       this.getEventDistribution.bind(this)
+    );
+
+    this.router.get(
+      "/siem/query/statistics/events",
+      // this.authenticate,
+      // requireSysAdmin,
+      this.getEventStatistics.bind(this)
+    );
+
+    this.router.get(
+      "/siem/query/statistics/alerts",
+      // this.authenticate,
+      // requireSysAdmin,
+      this.getAlertStatistics.bind(this)
     );
   }
 
@@ -147,6 +161,24 @@ export class QueryGatewayController {
     try {
       const distribution = await this.gatewayService.getEventDistribution();
       res.status(200).json(distribution);
+    } catch (err) {
+      res.status(500).json({ message: (err as Error).message });
+    }
+  }
+
+  private async getEventStatistics(req: Request, res: Response): Promise<void> {
+    try {
+      const statistics = await this.gatewayService.getEventStatistics();
+      res.status(200).json(statistics);
+    } catch (err) {
+      res.status(500).json({ message: (err as Error).message });
+    }
+  }
+
+  private async getAlertStatistics(req: Request, res: Response): Promise<void> {
+    try {
+      const statistics = await this.gatewayService.getAlertStatistics();
+      res.status(200).json(statistics);
     } catch (err) {
       res.status(500).json({ message: (err as Error).message });
     }

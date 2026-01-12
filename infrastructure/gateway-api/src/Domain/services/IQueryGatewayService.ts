@@ -1,6 +1,7 @@
 import { DistributionDTO } from "../DTOs/DistributionDTO";
 import { EventDTO } from "../DTOs/EventDTO";
 import { EventsResultDTO } from "../DTOs/EventsResultDTO";
+import { HourlyStatisticsDTO } from "../DTOs/HourlyStatisticsDTO";
 
 export interface IQueryGatewayService {
   searchEvents(query: string, page: number, limit: number): Promise<EventsResultDTO>;
@@ -12,4 +13,7 @@ export interface IQueryGatewayService {
   getWarningCount(): Promise<number>;
   getErrorCount(): Promise<number>;
   getEventDistribution(): Promise<DistributionDTO>;
+  getEventStatistics(): Promise<HourlyStatisticsDTO[]>;
+  getAlertStatistics(): Promise<HourlyStatisticsDTO[]>;
+
 }

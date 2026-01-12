@@ -27,6 +27,7 @@ import { IParserGatewayService } from "../../Domain/services/IParserGatewayServi
 import { IAnalysisGatewayService } from "../../Domain/services/IAnalysisGatewayService";
 import { IEventCollectorGatewayService } from "../../Domain/services/IEventCollectorGatewayService";
 import { OTPResendDTO } from "../../Domain/DTOs/OTPResendDTO";
+import { HourlyStatisticsDTO } from "../../Domain/DTOs/HourlyStatisticsDTO";
 
 /**
  * Facade that delegates to domain-specific gateway services.
@@ -182,6 +183,13 @@ export class GatewayService implements IGatewayService {
     return this.queryService.getEventDistribution();
   }
 
+  async getEventStatistics(): Promise<HourlyStatisticsDTO[]> {
+    return this.queryService.getEventStatistics();
+  }
+
+  async getAlertStatistics(): Promise<HourlyStatisticsDTO[]> {
+    return this.queryService.getAlertStatistics();
+  }
   // Storage
   async getAllArchives(): Promise<StorageLogResponseDTO[]> {
     return this.storageService.getAllArchives();

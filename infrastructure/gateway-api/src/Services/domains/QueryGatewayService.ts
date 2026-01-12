@@ -5,6 +5,7 @@ import { serviceConfig } from "../../Domain/constants/ServiceConfig";
 import { IQueryGatewayService } from "../../Domain/services/IQueryGatewayService";
 import { EventsResultDTO } from "../../Domain/DTOs/EventsResultDTO";
 import { DistributionDTO } from "../../Domain/DTOs/DistributionDTO";
+import { HourlyStatisticsDTO } from "../../Domain/DTOs/HourlyStatisticsDTO";
 
 
 export class QueryGatewayService implements IQueryGatewayService {
@@ -61,6 +62,16 @@ export class QueryGatewayService implements IQueryGatewayService {
 
   async getEventDistribution(): Promise<DistributionDTO> {
     const response = await this.client.get<DistributionDTO>("/query/eventDistribution");
+    return response.data;
+  }
+
+  async getEventStatistics(): Promise<HourlyStatisticsDTO[]> {
+    const response = await this.client.get<HourlyStatisticsDTO[]>("/query/statistics/events");
+    return response.data;
+  }
+
+  async getAlertStatistics(): Promise<HourlyStatisticsDTO[]> {
+    const response = await this.client.get<HourlyStatisticsDTO[]>("/query/statistics/alerts");
     return response.data;
   }
 }
