@@ -2,7 +2,6 @@ import { Router, Request, Response } from "express";
 import axios, { Method } from "axios";
 import { IFirewallService } from "../../Domain/services/IFirewallService";
 import { ILogerService } from "../../Domain/services/ILogerService";
-import { env } from "process";
 import { microserviceUrls } from "../../Domain/constants/MicroserviceUrls";
 
 export class FirewallProxyController {
@@ -17,12 +16,12 @@ export class FirewallProxyController {
     }
 
     private initializeRoutes(): void {
-        this.router.all("/proxy/*", this.proxyRequest.bind(this));
+        this.router.post("/proxy", this.proxyRequest.bind(this));
     }
 
     private async proxyRequest(req: Request, res: Response): Promise<void> {
         try {
-            const sourceIp = req.ip;
+            let sourceIp = req.ip;
             const sourcePort = req.socket.remotePort;
 
             if (!sourceIp || !sourcePort) {
@@ -31,49 +30,67 @@ export class FirewallProxyController {
                 return;
             }
 
-            const allowed = await this.firewallService.checkAndLogAccess(sourceIp, sourcePort);
-            if (!allowed) {
+            if (sourceIp === "::1")         // IPv6 localhost
+                sourceIp = "127.0.0.1";
+            else if (sourceIp.startsWith("::ffff:"))    // IPv6 mapping of IPv4
+                sourceIp = sourceIp.replace("::ffff:", "");
+
+            const sourceAllowed = await this.firewallService.checkAndLogAccess(sourceIp, sourcePort);
+            if (!sourceAllowed) {
                 await this.logger.log(`Blocked request from ${sourceIp}:${sourcePort}`);
                 res.status(403).json({ message: "Access blocked by firewall (source)" });
                 return;
             }
 
-            // Extract service key from request URL (e.g. "/analysis-engine/process" -> "analysis-engine")
-            const serviceKey = req.originalUrl.split("/")[1];
-            const destinationUrl = microserviceUrls[serviceKey];
-            if (!destinationUrl) {
-                await this.logger.log(`Unknown destination service for path: ${req.originalUrl}`);
-                res.status(400).json({ message: "Unknown destination service" });
+            const { url, method = "GET", headers, data, params } = req.body;
+
+            if (!url) {
+                res.status(400).json({ message: "Destination URL/path is required in body" });
                 return;
             }
 
-            const urlObj = new URL(destinationUrl);
-            const destinationIp = urlObj.hostname;
-            const destinationPort = Number(urlObj.port);
+            // Extract service key from URL path (e.g. "/analysis-engine/process" -> "analysis-engine")
+            const serviceKey = url.replace(/^\/+/, "").split("/")[0];
+            const destinationUrl = microserviceUrls[serviceKey];
+
+            if (!destinationUrl) {
+                await this.logger.log(`Unknown destination service for path: ${url}`);
+                res.status(400).json({ message: `Unknown destination service: ${serviceKey}` });
+                return;
+            }
+
+            const destinationUrlObj = new URL(destinationUrl);
+            const destinationIp = destinationUrlObj.hostname;
+            const destinationPort = Number(destinationUrlObj.port);
 
             const destinationAllowed = await this.firewallService.checkAndLogAccess(destinationIp, destinationPort);
             if (!destinationAllowed) {
-                await this.logger.log(`Blocked request from ${sourceIp}:${sourcePort} to ${destinationIp}:${destinationPort}`);
-                res.status(403).json({ message: "Access blocked by firewall (destination)" });
+                await this.logger.log(`Blocked request from ${sourceIp}:${sourcePort} to ${destinationIp}:${destinationPort} (microservice: ${serviceKey})`);
+                res.status(403).json({ message: `Access blocked by firewall (destination microservice: ${serviceKey})` });
                 return;
             }
 
-            const destinationPath = req.originalUrl.replace(/^\/proxy\/?/, "");     // Deleting "proxy" from URI
-            const targetUrl = `${process.env.GATEWAY_URL}/${destinationPath}`;
+            const targetUrl = `${process.env.GATEWAY_URL}/${url}`;
 
             const response = await axios({
                 url: targetUrl,
-                method: req.method as Method,
-                headers: req.headers,
-                data: req.body,
-                params: req.query,
+                method: method as Method,
+                headers,
+                data,
+                params,
                 validateStatus: () => true
             });
 
-            res.status(response.status).json(response.data);
+            res.status(response.status).json({
+                response: response.data
+            });
         } catch (err) {
             await this.logger.log(`Error proxying request: ${(err as Error).message}`);
-            res.status(500).json({ message: "Internal firewall proxy error" });
+            res.status(500).json({
+                success: false,
+                message: "Internal firewall proxy error",
+                error: (err as Error).message
+            });
         }
     }
 

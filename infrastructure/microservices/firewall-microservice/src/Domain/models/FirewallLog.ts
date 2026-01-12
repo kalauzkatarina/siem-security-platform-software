@@ -6,7 +6,7 @@ export class FirewallLog {
     @PrimaryGeneratedColumn({ name: "log_id" })
     logId!: number;
 
-    @Column({ name: "ip_address", type: "varchar", length: 15 })
+    @Column({ name: "ip_address", type: "varchar", length: 45 })
     ipAddress!: string;
 
     @Column({ name: "port", type: "int" })

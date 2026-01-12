@@ -21,19 +21,19 @@ export class FirewallController {
 
     private initializeRoutes(): void {
         // Rules
-        this.router.get("/rules", this.getAllRules.bind(this));
-        this.router.post("/rules", this.addRule.bind(this));
-        this.router.delete("/rules/:id", this.deleteRule.bind(this));
+        this.router.get("/firewall/rules", this.getAllRules.bind(this));
+        this.router.post("/firewall/rules", this.addRule.bind(this));
+        this.router.delete("/firewall/rules/:id", this.deleteRule.bind(this));
 
         // Mode
-        this.router.get("/mode", this.getMode.bind(this));
-        this.router.put("/mode", this.setMode.bind(this));
+        this.router.get("/firewall/mode", this.getMode.bind(this));
+        this.router.put("/firewall/mode", this.setMode.bind(this));
 
         // Test connection
-        this.router.get("/testConnection", this.testConnection.bind(this));
+        this.router.get("/firewall/testConnection", this.testConnection.bind(this));
 
         // Logs
-        this.router.get("/logs", this.getAllLogs.bind(this));
+        this.router.get("/firewall/logs", this.getAllLogs.bind(this));
     }
 
     // Rules

@@ -5,7 +5,7 @@ export class FirewallRule {
     @PrimaryGeneratedColumn({ name: "rule_id" })
     ruleId!: number;
 
-    @Column({ name: "ip_address", type: "varchar", length: 15 })
+    @Column({ name: "ip_address", type: "varchar", length: 45 })
     ipAddress!: string;
 
     @Column({ name: "port", type: "int" })
