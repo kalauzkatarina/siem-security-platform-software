@@ -2,6 +2,9 @@ import { Router, Request, Response } from "express";
 import { IQueryRepositoryService } from "../../Domain/services/IQueryRepositoryService";
 import { CacheEntry } from "../../Domain/models/CacheEntry";
 import { IQueryService } from "../../Domain/services/IQueryService";
+import { DistributionDTO } from "../../Domain/DTOs/DistributionDTO";
+import { IQueryAlertRepositoryService } from "../../Domain/services/IQueryAlertRepositoryService";
+
 
 export class QueryController {
     private readonly router: Router;
@@ -9,6 +12,7 @@ export class QueryController {
     constructor(
         private readonly queryService: IQueryService,
         private readonly queryRepositoryService: IQueryRepositoryService,
+        private readonly queryAlertRepositoryService: IQueryAlertRepositoryService
     ) {
         this.router = Router();
         this.initializeRoutes();
@@ -23,8 +27,15 @@ export class QueryController {
         this.router.get("/query/infoCount", this.getInfoCount.bind(this));
         this.router.get("/query/warningCount", this.getWarningCount.bind(this));
         this.router.get("/query/errorCount", this.getErrorCount.bind(this));
+        this.router.get("/query/eventDistribution", this.getEventDistribution.bind(this));
+        this.router.get("/query/statistics/events", this.getEventStatistics.bind(this));
+        this.router.get("/query/statistics/alerts", this.getAlertStatistics.bind(this));
         this.router.get("/query/pdfReport", this.getPdfReport.bind(this));
+<<<<<<< HEAD
         this.router.get("/query/alertsPdfReport", this.getAlertsPdfReport.bind(this));
+=======
+
+>>>>>>> c911f976b5ff22e881896a86c4a3702f9b125037
     }
 
     private async getOldEvents(req: Request, res: Response): Promise<void> {
@@ -97,7 +108,7 @@ export class QueryController {
             res.status(200).json({ count: warningCount });
         } catch (err) {
             res.status(500).json({ message: "Error while retrieving warning count." });
-        }   
+        }
     }
 
     private async getErrorCount(req: Request, res: Response): Promise<void> {
@@ -109,31 +120,67 @@ export class QueryController {
         }
     }
 
-    private async getPdfReport(req: Request, res: Response): Promise<void> {
-    try {
-        const dateFrom = req.query.dateFrom as string;
-        const dateTo = req.query.dateTo as string;
-        const eventType = req.query.eventType as string;
+    private async getEventDistribution(req: Request, res: Response): Promise<void> {
+        try {
+            const warningCount = this.queryRepositoryService.getWarningCount();
+            const infoCount = this.queryRepositoryService.getInfoCount();
+            const errorCount = this.queryRepositoryService.getErrorCount();
 
-        const base64String = await this.queryService.generatePdfReport(dateFrom, dateTo, eventType);
-
-        if (!base64String) {
-            res.status(404).json({ message: "No events found for the selected filters." });
-            return;
+            const distribution: DistributionDTO = {
+                notifications: infoCount,
+                warnings: warningCount,
+                errors: errorCount
+            };
+            res.status(200).json({
+                distribution
+            });
+        } catch (err) {
+            res.status(500).json({ message: "Error while retrieving event distribution." });
         }
-
-        const pdfBuffer = Buffer.from(base64String, 'base64');
-
-        res.setHeader("Content-Type", "application/pdf");
-        res.setHeader("Content-Disposition", `attachment; filename=SIEM-Report-${Date.now()}.pdf`);
-        res.setHeader("Content-Length", pdfBuffer.length.toString());
-
-        res.status(200).send(pdfBuffer);
-    } catch (err) {
-        console.error("PDF Error:", err);
-        res.status(500).json({ message: "Error while generating PDF report." });
     }
-}
+    private async getEventStatistics(req: Request, res: Response): Promise<void> {
+        try {
+            const data = await this.queryRepositoryService.getHourlyEventStatistics();
+            res.status(200).json(data);
+        } catch (err) {
+            res.status(500).json({ message: "Error while retrieving event statistics." });
+        }
+    }
+
+    private async getAlertStatistics(req: Request, res: Response): Promise<void> {
+        try {
+            const data = await this.queryAlertRepositoryService.getHourlyAlertStatistics();
+            res.status(200).json(data);
+        } catch (err) {
+            res.status(500).json({ message: "Error while retrieving alert statistics." });
+        }
+    }
+
+    private async getPdfReport(req: Request, res: Response): Promise<void> {
+        try {
+            const dateFrom = req.query.dateFrom as string;
+            const dateTo = req.query.dateTo as string;
+            const eventType = req.query.eventType as string;
+
+            const base64String = await this.queryService.generatePdfReport(dateFrom, dateTo, eventType);
+
+            if (!base64String) {
+                res.status(404).json({ message: "No events found for the selected filters." });
+                return;
+            }
+
+            const pdfBuffer = Buffer.from(base64String, 'base64');
+
+            res.setHeader("Content-Type", "application/pdf");
+            res.setHeader("Content-Disposition", `attachment; filename=SIEM-Report-${Date.now()}.pdf`);
+            res.setHeader("Content-Length", pdfBuffer.length.toString());
+
+            res.status(200).send(pdfBuffer);
+        } catch (err) {
+            console.error("PDF Error:", err);
+            res.status(500).json({ message: "Error while generating PDF report." });
+        }
+    }
 
 private async getAlertsPdfReport(req: Request, res: Response): Promise<void> {
     try {
