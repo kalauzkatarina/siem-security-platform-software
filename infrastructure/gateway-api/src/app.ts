@@ -17,6 +17,8 @@ import { LogerService } from './Services/output/LogerService';
 import { ILogerService } from './Domain/services/ILogerService';
 import { EventCollectorGatewayController } from './WebAPI/controllers/EventCollectorGatewayController';
 import { GatewayServiceFactory } from "./Services/gateway/GatewayServiceFactory";
+import { SimulatorGatewayService } from "./Services/domains/SimulatorGatewayService";
+import { SimulatorGatewayController } from "./WebAPI/controllers/SimulatorGatewayController";
 
 
 const app = express();
@@ -45,6 +47,7 @@ app.get('/health', (req, res) => {
 
 // Services
 const gatewayService = GatewayServiceFactory.create();
+const simulatorService = new SimulatorGatewayService(process.env.SIMULATOR_SERVICE_API);
 const loggerService: ILogerService = new LogerService();
 
 // Auth middleware (reuse across controllers)
@@ -59,5 +62,6 @@ app.use('/api/v1', new StorageGatewayController(gatewayService, authenticate).ge
 app.use('/api/v1', new EventCollectorGatewayController(gatewayService, authenticate,loggerService).getRouter());
 app.use('/api/v1', new ParserGatewayController(gatewayService).getRouter());
 app.use('/api/v1', new AnalysisGatewayController(gatewayService, authenticate,loggerService).getRouter());
+app.use('/api/v1', new SimulatorGatewayController(simulatorService, authenticate).getRouter());
 
 export default app;

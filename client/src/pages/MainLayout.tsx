@@ -5,9 +5,10 @@ import Events from '../components/views/Events';
 import Statistics from '../components/views/Statistics';
 import Storage from '../components/views/Storage';
 import Alert from '../components/views/Alerts';
+import Simulator from '../components/views/Simulator';
 import { MainLayoutProps } from '../types/props/pages/MainLayoutProps';
 
-export default function MainLayout({ alertsAPI, parserAPI, queryAPI, storageAPI, desktopNotification }: MainLayoutProps) {
+export default function MainLayout({ alertsAPI, parserAPI, queryAPI, storageAPI, simulatorAPI, desktopNotification }: MainLayoutProps) {
     const [sideMenuPage, setSideMenuPage] = useState<number>(0);
 
     return (
@@ -20,6 +21,7 @@ export default function MainLayout({ alertsAPI, parserAPI, queryAPI, storageAPI,
                 {sideMenuPage === 2 && <Statistics queryApi={queryAPI} storageApi={storageAPI} />}
                 {sideMenuPage === 3 && <Storage storageApi={storageAPI} />}
                 {sideMenuPage === 4 && <Alert alertsApi={alertsAPI} desktopNotification={desktopNotification}/>}
+                {sideMenuPage === 5 && <Simulator simulatorApi={simulatorAPI} />}
             </div>
         </div>
     );

@@ -3,7 +3,7 @@ import { TbLayoutDashboardFilled } from "react-icons/tb";
 import { BsCalendarFill } from "react-icons/bs";
 import { VscGraph } from "react-icons/vsc";
 import { LuLayers3 } from "react-icons/lu";
-import { MdKeyboardArrowRight } from "react-icons/md";
+import { MdKeyboardArrowRight, MdOutlineScience } from "react-icons/md";
 import { BiError } from "react-icons/bi";
 import { useState } from "react";
 import { TbSquareLetterS } from "react-icons/tb";
@@ -107,6 +107,20 @@ export default function Sidebar({ setSideMenuPage }: SidebarProps) {
                     >
                         <BiError size={23} />
                         Alerts
+                        <MdKeyboardArrowRight size={20} />
+                    </button>
+
+                    <button
+                        className={itemClass(5)} style={{ marginLeft: '20px', borderRadius: '0.75rem' }}
+                        onClick={() => {
+                            setSideMenuPage(5);
+                            setSelectedButton(5);
+                        }}
+                        onMouseEnter={() => setHover(5)}
+                        onMouseLeave={() => setHover(null)}
+                    >
+                        <MdOutlineScience size={22} />
+                        Simulator
                         <MdKeyboardArrowRight size={20} />
                     </button>
                 </div>
