@@ -74,3 +74,4 @@ dist
 package.json
 package-lock.json
 queryState.json
+queryAlertState.json
