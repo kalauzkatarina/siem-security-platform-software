@@ -10,16 +10,16 @@ export default function AllEventsTable({ events, sortType, searchText, parserApi
     const [sortedEvents, setSortedEvents] = useState<EventRow[]>(events);
     // const [rotateArrow, setRotateArrow] = useState<number | null>(null);
     const [openDialog, setOpenDialog] = useState(false);
-    const onSelectEvent = () => {
-        setOpenDialog(!openDialog);
-    }
+    const [selectedEvent, setSelectedEvent] = useState<EventRow | null>(null);
+
     const closeDialog = () => {
         setOpenDialog(!openDialog);
+        setSelectedEvent(null);
     }
-    const [selectedEventId, setSelectedEventId] = useState<number | null>(null);
 
-    const handleSelectEvent = () => {
-        onSelectEvent();
+    const handleSelectEvent = (event: EventRow) => {
+        setSelectedEvent(event);
+        setOpenDialog(true);
     };
 
     useEffect(() => {
@@ -50,12 +50,14 @@ export default function AllEventsTable({ events, sortType, searchText, parserApi
                             key={e.id}
                             e={e}
                             index={index}
-                            parserApi={parserApi} onSelect={handleSelectEvent} />
+                            parserApi={parserApi} 
+                            onSelect={handleSelectEvent} />
                     )))}
                 </tbody>
             </table>
-            {openDialog && (
+            {openDialog && selectedEvent && (
                 <EventDetailsPanel
+                    e={selectedEvent}
                    // e={sortedEvents.find(ev => ev.id === selectedEventId)!} // ! jer sigurno postoji
                     parserApi={parserApi}
                     onClose={closeDialog}

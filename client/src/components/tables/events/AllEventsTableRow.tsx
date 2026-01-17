@@ -1,13 +1,10 @@
-import { useState } from "react";
 import React from "react";
 import { EventTableRowProps } from "../../../types/props/events/EventTableRowProps";
 import { badgeClasses } from "../../../constants/badgeClasses";
 import { PiInfoBold } from "react-icons/pi";
 import EventDetailsPanel from "../../events/EventDetailsPanel";
 
-export default function EventTableRow({ e,index, parserApi,onSelect }: EventTableRowProps) {
-    const [openDialog, setOpenDialog] = useState(false);
-  
+export default function EventTableRow({ e, index, parserApi,onSelect }: EventTableRowProps) {
     return (
         <React.Fragment>
             <tr className="transition-colors duration-200 cursor-pointer hover:bg-[#2a2a2a]">
@@ -20,7 +17,7 @@ export default function EventTableRow({ e,index, parserApi,onSelect }: EventTabl
                 </td>
                 <td className="px-4! py-3! border-b border-[#2d2d2d] text-[#dcdcdc] text-center">
                     <button
-                        onClick={() =>onSelect()}
+                        onClick={() =>onSelect(e)}
                         className="bg-transparent border! border-blue-400 text-blue-400 px-3! py-1.5! rounded-[6px]! cursor-pointer text-[12px]! font-semibold transition-all duration-200"
                         onMouseEnter={(e) => {
                             e.currentTarget.style.background = "#60a5fa22";

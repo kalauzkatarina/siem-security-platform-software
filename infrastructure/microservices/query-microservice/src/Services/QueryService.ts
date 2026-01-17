@@ -74,6 +74,7 @@ export class QueryService implements IQueryService {
         const paginatedEvents = fullyFilteredEvents.slice((page - 1) * limit, page * limit);
 
         const data: EventDTO[] = paginatedEvents.map(e => ({
+            id: e.id,
             source: e.source,
             type: e.type,
             description: e.description,
@@ -105,6 +106,7 @@ export class QueryService implements IQueryService {
         }
 
         const data: EventDTO[] = eventsToReport.map(e => ({
+            id: e.id,
             source: e.source,
             type: e.type,
             description: e.description,

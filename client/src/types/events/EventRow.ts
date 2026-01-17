@@ -6,4 +6,5 @@ export type EventRow = {
     time: string;
     type: EventType;
     description: string;
+    ipAddress?: string;
 }

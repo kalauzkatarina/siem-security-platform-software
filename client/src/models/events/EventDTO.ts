@@ -6,4 +6,5 @@ export interface EventDTO {
   type: EventType;
   description: string;
   timestamp: string;
+  ipAddress?: string;
 }

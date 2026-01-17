@@ -3,6 +3,7 @@ import { EventDTO } from "../models/events/EventDTO";
 import { EventRow } from "../types/events/EventRow";
 
 export function mapEventDTO(e: EventDTO): EventRow {
+    console.log("Mapping EventDTO to EventRow:", e);
     let type: EventRow["type"];
     switch (e.type) {
         case "ERROR":
@@ -22,5 +23,6 @@ export function mapEventDTO(e: EventDTO): EventRow {
         time: e.timestamp,
         type,
         description: e.description.toString(),
+        ipAddress: e.ipAddress,
     };
 }
