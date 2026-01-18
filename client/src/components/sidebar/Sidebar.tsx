@@ -5,6 +5,7 @@ import { VscGraph } from "react-icons/vsc";
 import { LuLayers3 } from "react-icons/lu";
 import { MdKeyboardArrowRight, MdOutlineScience } from "react-icons/md";
 import { BiError } from "react-icons/bi";
+import { PiShieldWarningFill } from "react-icons/pi"; 
 import { useState } from "react";
 import { TbSquareLetterS } from "react-icons/tb";
 import { TbSquareLetterI } from "react-icons/tb";
@@ -121,6 +122,20 @@ export default function Sidebar({ setSideMenuPage }: SidebarProps) {
                     >
                         <MdOutlineScience size={22} />
                         Simulator
+                        <MdKeyboardArrowRight size={20} />
+                    </button>
+
+                    <button
+                        className={itemClass(6)} style={{ marginLeft: '20px', borderRadius: '0.75rem' }}
+                        onClick={() => {
+                            setSideMenuPage(6);
+                            setSelectedButton(6);
+                        }}
+                        onMouseEnter={() => setHover(6)}
+                        onMouseLeave={() => setHover(null)}
+                    >
+                        <PiShieldWarningFill size={22} />
+                        Insider Threats
                         <MdKeyboardArrowRight size={20} />
                     </button>
                 </div>
