@@ -79,6 +79,69 @@ export class QueryGatewayController {
       // requireSysAdmin,
       this.getAlertStatistics.bind(this)
     );
+
+    this.router.get(
+      "/siem/query/totalEventCount",
+      // this.authenticate,
+      // requireSysAdmin,
+      this.getTotalEventCount.bind(this)
+    );
+
+    this.router.get(
+      "/siem/query/errorEventCount",
+      // this.authenticate,
+      // requireSysAdmin,
+      this.getErrorEventCount.bind(this)
+    );
+
+    this.router.get(
+      "/siem/query/eventRate",
+      // this.authenticate,
+      // requireSysAdmin,
+      this.getEventRate.bind(this)
+    );
+
+    this.router.get(
+      "/siem/query/alertsCountBySeverity",
+      // this.authenticate,
+      // requireSysAdmin,
+      this.getAlertsCountBySeverity.bind(this)
+    );
+
+    this.router.get(
+      "/siem/query/criticalAlertsCount",
+      // this.authenticate,
+      // requireSysAdmin,
+      this.getCriticalAlertsCount.bind(this)
+    );
+
+    this.router.get(
+      "/siem/query/anomalyRate",
+      // this.authenticate,
+      // requireSysAdmin,
+      this.getAnomalyRate.bind(this)
+    );
+
+    this.router.get(
+      "/siem/query/burstAnomaly",
+      // this.authenticate,
+      // requireSysAdmin,
+      this.getBurstAnomaly.bind(this)
+    );
+
+    this.router.get(
+      "/siem/query/uniqueServicesCount",
+      // this.authenticate,
+      // requireSysAdmin,
+      this.getUniqueServicesCount.bind(this)
+    );
+
+    this.router.get(
+      "/siem/query/uniqueIpsCount",
+      // this.authenticate,
+      // requireSysAdmin,
+      this.getUniqueIpsCount.bind(this)
+    );
   }
 
   private async searchEvents(req: Request, res: Response): Promise<void> {
@@ -182,6 +245,107 @@ export class QueryGatewayController {
     } catch (err) {
       res.status(500).json({ message: (err as Error).message });
     }
+  }
+
+  private async getTotalEventCount(req: Request, res: Response): Promise<void> {
+    try {
+      const entityType = req.query.entityType as string;
+      const entityId = req.query.entityId as string;
+      const count = await this.gatewayService.getTotalEventCount(entityType as any, entityId);
+      res.status(200).json({ count });
+    } catch (err) {
+      res.status(500).json({ message: (err as Error).message });
+    }
+  }
+
+  private async getErrorEventCount(req: Request, res: Response): Promise<void> {
+    try {
+      const entityType = req.query.entityType as string;
+      const entityId = req.query.entityId as string;
+      const durationMinutes = Number(req.query.durationMinutes);
+      const count = await this.gatewayService.getErrorEventCount(entityType as any, entityId, durationMinutes);
+      res.status(200).json({ count });
+    } catch (err) {
+      res.status(500).json({ message: (err as Error).message });
+    } 
+  }
+
+  private async getEventRate(req: Request, res: Response): Promise<void> {
+    try {
+      const entityType = req.query.entityType as string;
+      const entityId = req.query.entityId as string;
+      const durationMinutes = Number(req.query.durationMinutes);
+      const rate = await this.gatewayService.getEventRate(entityType as any, entityId, durationMinutes);
+      res.status(200).json({ rate });
+    } catch (err) {
+      res.status(500).json({ message: (err as Error).message });
+    } 
+  }
+
+  private async getAlertsCountBySeverity(req: Request, res: Response): Promise<void> { 
+    try {
+      const entityType = req.query.entityType as string;
+      const entityId = req.query.entityId as string;
+      const counts = await this.gatewayService.getAlertsCountBySeverity(entityType as any, entityId);
+      res.status(200).json(Object.fromEntries(counts));
+    } catch (err) {
+      res.status(500).json({ message: (err as Error).message });
+    } 
+  }
+
+  private async getCriticalAlertsCount(req: Request, res: Response): Promise<void> {
+    try {
+      const entityType = req.query.entityType as string;
+      const entityId = req.query.entityId as string;
+      const count = await this.gatewayService.getCriticalAlertsCount(entityType as any, entityId);
+      res.status(200).json({ count });
+    } catch (err) {
+      res.status(500).json({ message: (err as Error).message });
+    }
+  }
+
+  private async getAnomalyRate(req: Request, res: Response): Promise<void> {
+    try {
+      const entityType = req.query.entityType as string;
+      const entityId = req.query.entityId as string;
+      const durationMinutes = Number(req.query.durationMinutes);
+      const rate = await this.gatewayService.getAnomalyRate(entityType as any, entityId, durationMinutes);
+      res.status(200).json({ rate });
+    } catch (err) {
+      res.status(500).json({ message: (err as Error).message });
+    } 
+  }
+
+  private async getBurstAnomaly(req: Request, res: Response): Promise<void> {
+    try {
+      const entityType = req.query.entityType as string;
+      const entityId = req.query.entityId as string;
+      const durationMinutes = Number(req.query.durationMinutes);
+      const isBurst = await this.gatewayService.getBurstAnomaly(entityType as any, entityId, durationMinutes);
+      res.status(200).json({ isBurst });
+    } catch (err) {
+      res.status(500).json({ message: (err as Error).message });
+    } 
+  }
+
+  private async getUniqueServicesCount(req: Request, res: Response): Promise<void> {
+    try {
+      const ipAddress = req.query.ipAddress as string;    
+      const count = await this.gatewayService.getUniqueServicesCount(ipAddress);
+      res.status(200).json({ count });
+    } catch (err) {
+      res.status(500).json({ message: (err as Error).message });
+    }
+  }
+
+  private async getUniqueIpsCount(req: Request, res: Response): Promise<void> {
+    try {
+      const serviceName = req.query.serviceName as string;
+      const count = await this.gatewayService.getUniqueIpsCount(serviceName);
+      res.status(200).json({ count });
+    } catch (err) {
+      res.status(500).json({ message: (err as Error).message });
+    } 
   }
 
   public getRouter(): Router {

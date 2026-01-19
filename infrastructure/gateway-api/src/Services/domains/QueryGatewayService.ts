@@ -6,6 +6,7 @@ import { IQueryGatewayService } from "../../Domain/services/IQueryGatewayService
 import { EventsResultDTO } from "../../Domain/DTOs/EventsResultDTO";
 import { DistributionDTO } from "../../Domain/DTOs/DistributionDTO";
 import { HourlyStatisticsDTO } from "../../Domain/DTOs/HourlyStatisticsDTO";
+import { RiskEntityType } from "../../Domain/enums/RiskEntityType";
 
 
 export class QueryGatewayService implements IQueryGatewayService {
@@ -72,6 +73,70 @@ export class QueryGatewayService implements IQueryGatewayService {
 
   async getAlertStatistics(): Promise<HourlyStatisticsDTO[]> {
     const response = await this.client.get<HourlyStatisticsDTO[]>("/query/statistics/alerts");
+    return response.data;
+  }
+
+  async getTotalEventCount(entityType: RiskEntityType, entityId: string): Promise<number> {
+    const response = await this.client.get<number>("/query/statistics/totalEventCount", {
+      params: { entityType: entityType, entityId: entityId },
+    });
+    return response.data;
+  }
+
+  async getErrorEventCount(entityType: RiskEntityType, entityId: string, durationMinutes: number): Promise<number> {
+    const response = await this.client.get<number>("/query/statistics/errorEventCount", {
+      params: { entityType: entityType, entityId: entityId, durationMinutes: durationMinutes },
+    });
+    return response.data;
+  }
+  
+  async getEventRate(entityType: RiskEntityType, entityId: string, durationMinutes: number): Promise<number> {
+    const response = await this.client.get<number>("/query/statistics/eventRate", {
+      params: { entityType: entityType, entityId: entityId, durationMinutes: durationMinutes },
+    });
+    return response.data;
+  }
+  
+  async getAlertsCountBySeverity(entityType: RiskEntityType, entityId: string): Promise<Map<string, number>> {
+    const response = await this.client.get<Map<string, number>>("/query/statistics/alertsCountBySeverity", {
+      params: { entityType: entityType, entityId: entityId },
+    });
+    const obj = response.data;
+    return new Map(Object.entries(obj));;
+  }
+  
+  async getCriticalAlertsCount(entityType: RiskEntityType, entityId: string): Promise<number> {
+    const response = await this.client.get<number>("/query/statistics/criticalAlertsCount", {
+      params: { entityType: entityType, entityId: entityId },
+    });
+    return response.data;
+  }
+  
+  async getAnomalyRate(entityType: RiskEntityType, entityId: string, durationMinutes: number): Promise<number> {
+    const response = await this.client.get<number>("/query/statistics/anomalyRate", {
+      params: { entityType: entityType, entityId: entityId, durationMinutes: durationMinutes },
+    });
+    return response.data;
+  }
+  
+  async getBurstAnomaly(entityType: RiskEntityType, entityId: string, durationMinutes: number): Promise<boolean> {
+    const response = await this.client.get<boolean>("/query/statistics/burstAnomaly", {
+      params: { entityType: entityType, entityId: entityId, durationMinutes: durationMinutes },
+    });
+    return response.data;
+  }
+  
+  async getUniqueServicesCount(ipAddress: string): Promise<number> {
+    const response = await this.client.get<number>("/query/statistics/uniqueServicesCount", {
+      params: { ipAddress: ipAddress },
+    });
+    return response.data;
+  }
+  
+  async getUniqueIpsCount(serviceName: string): Promise<number> {
+    const response = await this.client.get<number>("/query/statistics/uniqueIpsCount", {
+      params: { serviceName: serviceName },
+    });
     return response.data;
   }
 }

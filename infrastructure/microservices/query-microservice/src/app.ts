@@ -17,6 +17,8 @@ import { QueryAlertRepositoryService } from './Services/QueryAlertRepositoryServ
 import { CacheAlertEntry } from './Domain/models/CacheAlertEntry';
 import { QueryAlertService } from './Services/QueryAlertService';
 import { saveQueryAlertState } from './Utils/StateAlertManager';
+import { QueryStatisticsService } from './Services/QueryStatisticsService';
+import { QueryStatisticsController } from './WebAPI/controllers/QueryStatisticsController';
 
 
 dotenv.config({ quiet: true });
@@ -65,13 +67,16 @@ void (async () => {
   queryAlertRepositoryService = new QueryAlertRepositoryService(cacheAlertRepository, loggerService, alertRepository);
   const queryService = new QueryService(queryRepositoryService, queryAlertRepositoryService);  
   const queryAlertService = new QueryAlertService(queryAlertRepositoryService);
+  const queryStatisticsService = new QueryStatisticsService(loggerService, eventRepository, alertRepository);
 
   // WebAPI rute
 
   const queryController = new QueryController(queryService, queryRepositoryService, queryAlertRepositoryService);
+  const queryStatisticsController = new QueryStatisticsController(queryStatisticsService);
 
   // Registracija ruta
   app.use('/api/v1', queryController.getRouter());
+  app.use('/api/v1', queryStatisticsController.getRouter());
 })();
 
 process.on('SIGINT', async () => {

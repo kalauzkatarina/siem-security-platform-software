@@ -31,8 +31,8 @@ export function loadQueryAlertState(): {
     }
 
     const alertTokenMap = new Map<number, string[]>();
-    for (const key of Object.keys(parsedData.eventTokenMap)) {
-        alertTokenMap.set(Number(key), parsedData.eventTokenMap[key]);
+    for (const key of Object.keys(parsedData.alertTokenMap)) {
+        alertTokenMap.set(Number(key), parsedData.alertTokenMap[key]);
     }
 
     return {

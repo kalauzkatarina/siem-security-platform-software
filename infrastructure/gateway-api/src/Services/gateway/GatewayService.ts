@@ -35,6 +35,7 @@ import { InsiderThreatDTO } from "../../Domain/DTOs/InsiderThreatDTO";
 import { PaginatedThreatsDTO, ThreatQueryDTO } from "../../Domain/DTOs/ThreatQueryDTO";
 import { UserRiskProfileDTO } from "../../Domain/DTOs/UserRiskProfileDTO";
 import { UserRiskAnalysisDTO } from "../../Domain/DTOs/UserRiskAnalysisDTO";
+import { RiskEntityType } from "../../Domain/enums/RiskEntityType";
 
 /**
  * Facade that delegates to domain-specific gateway services.
@@ -189,6 +190,43 @@ export class GatewayService implements IGatewayService {
   async getAlertStatistics(): Promise<HourlyStatisticsDTO[]> {
     return this.queryService.getAlertStatistics();
   }
+
+  async getTotalEventCount(entityType: RiskEntityType, entityId: string): Promise<number> {
+    return this.queryService.getTotalEventCount(entityType, entityId);
+  }
+
+  async getErrorEventCount(entityType: RiskEntityType, entityId: string, durationMinutes: number): Promise<number> {
+    return this.queryService.getErrorEventCount(entityType, entityId, durationMinutes);
+  }
+
+  async getEventRate(entityType: RiskEntityType, entityId: string, durationMinutes: number): Promise<number> {
+    return this.queryService.getEventRate(entityType, entityId, durationMinutes);
+  }
+
+  async getAlertsCountBySeverity(entityType: RiskEntityType, entityId: string): Promise<Map<string, number>> {
+    return this.queryService.getAlertsCountBySeverity(entityType, entityId);
+  }
+
+  async getCriticalAlertsCount(entityType: RiskEntityType, entityId: string): Promise<number> {
+    return this.queryService.getCriticalAlertsCount(entityType, entityId);
+  }
+
+  async getAnomalyRate(entityType: RiskEntityType, entityId: string, durationMinutes: number): Promise<number> {
+    return this.queryService.getAnomalyRate(entityType, entityId, durationMinutes);
+  }
+
+  async getBurstAnomaly(entityType: RiskEntityType, entityId: string, durationMinutes: number): Promise<boolean> {
+    return this.queryService.getBurstAnomaly(entityType, entityId, durationMinutes);
+  }
+
+  async getUniqueServicesCount(ipAddress: string): Promise<number> {
+    return this.queryService.getUniqueServicesCount(ipAddress);
+  }
+
+  async getUniqueIpsCount(serviceName: string): Promise<number> {
+    return this.queryService.getUniqueIpsCount(serviceName);
+  }
+
   // Storage
   async getAllArchives(): Promise<StorageLogResponseDTO[]> {
     return this.storageService.getAllArchives();
