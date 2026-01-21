@@ -5,7 +5,7 @@ export function parseEventDTO(raw: unknown): EventDTO | null {
 
   const obj = raw as any;
 
-  if (typeof obj.type !== "string" || typeof obj.description !== "string") {
+  if (typeof obj.type !== "string" || typeof obj.description !== "string" || obj.description.trim().length === 0) {
     return null;
   }
 
