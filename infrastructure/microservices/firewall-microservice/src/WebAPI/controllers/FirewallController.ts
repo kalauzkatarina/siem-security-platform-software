@@ -4,6 +4,7 @@ import { IFirewallRuleRepository } from "../../Domain/services/IFirewallRuleRepo
 import { IFirewallModeRepository } from "../../Domain/services/IFirewallModeRepository";
 import { IFirewallLogRepository } from "../../Domain/services/IFirewallLogRepository";
 import { ILogerService } from "../../Domain/services/ILogerService";
+import { ValidateIpAndPort } from "../validators/FirewallValidator";
 
 export class FirewallController {
     private readonly router: Router;
@@ -51,10 +52,13 @@ export class FirewallController {
     private async addRule(req: Request, res: Response): Promise<void> {
         try {
             const { ipAddress, port } = req.body;
-            if (!ipAddress || !port) {
-                res.status(400).json({ message: "IP address and port are required" });
+
+            const validation = ValidateIpAndPort(ipAddress, Number(port));
+            if (!validation.success) {
+                res.status(400).json({ success: false, message: validation.message });
                 return;
             }
+
             const rule = await this.ruleRepo.add(ipAddress, port);
             res.status(200).json(rule);
         } catch (err) {
@@ -114,8 +118,9 @@ export class FirewallController {
             const ipAddress = req.query.ipAddress as string;
             const port = Number(req.query.port);
 
-            if (!ipAddress || isNaN(port)) {
-                res.status(400).json({ message: "IP address and port are required" });
+            const validation = ValidateIpAndPort(ipAddress, Number(port));
+            if (!validation.success) {
+                res.status(400).json({ success: false, message: validation.message });
                 return;
             }
 

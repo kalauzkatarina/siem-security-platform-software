@@ -16,6 +16,18 @@ export default function FirewallRuleManager({ addRule }: FirewallRuleManagerProp
             return;
         }
 
+        const ipRegex = /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+        if (!ipRegex.test(ipAddress.trim())) {
+            setMessage({ text: "Invalid IP address format.", isError: true });
+            return;
+        }
+
+        const portNum = Number(port);
+        if (isNaN(portNum) || portNum < 1 || portNum > 65535) {
+            setMessage({ text: "Port must be a number between 1 and 65535.", isError: true });
+            return;
+        }
+
         setIsSaving(true);
         setMessage(null);
 
@@ -42,6 +54,8 @@ export default function FirewallRuleManager({ addRule }: FirewallRuleManagerProp
                 type="text"
                 placeholder="IP Address"
                 value={ipAddress}
+                required
+                title="Enter valid IP address (e.g. 192.168.1.1)"
                 onChange={(e) => setIpAddress(e.target.value)}
                 className="w-full px-4 py-2 rounded-[10px] border-2 border-[#333] bg-[#1f1f1f] text-white placeholder:text-[#a6a6a6] focus:outline-none focus:border-[#007a55] transition-colors duration-200"
             />
@@ -50,6 +64,9 @@ export default function FirewallRuleManager({ addRule }: FirewallRuleManagerProp
                 type="number"
                 placeholder="Port"
                 value={port}
+                min="1"
+                max="65535"
+                title="Port must be between 1 and 65535"
                 onChange={(e) => setPort(e.target.value ? Number(e.target.value) : "")}
                 className="w-full px-4 py-2 rounded-[10px] border-2 border-[#333] bg-[#1f1f1f] text-white placeholder:text-[#a6a6a6] focus:outline-none focus:border-[#007a55] transition-colors duration-200"
             />
@@ -64,7 +81,7 @@ export default function FirewallRuleManager({ addRule }: FirewallRuleManagerProp
             </button>
 
             {message && (
-                <div className="text-sm text-green-500 mt-2">
+                <div className={`font-semibold text-sm ${message.isError ? "text-red-500" : "text-[#00ff88]"}`}>
                     {message.text}
                 </div>
             )}

@@ -58,7 +58,7 @@ export default function FirewallLogsTable({ logs }: FirewallLogsTableProps) {
                                     <td className="w-1/5 px-4 py-2 text-center border-b border-[#2d2d2d]">
                                         <button
                                             className={`bg-transparent border-0 p-0 text-sm font-semibold underline-offset-2 hover:underline pointer-events-none
-                                                ${log.decision === "ALLOWED" ? "text-[#00ff88]" : "text-red-400"}`}
+                                                ${log.decision === "ALLOWED" ? "text-[#00ff88]" : "text-red-500"}`}
                                         >
                                             {log.decision}
                                         </button>

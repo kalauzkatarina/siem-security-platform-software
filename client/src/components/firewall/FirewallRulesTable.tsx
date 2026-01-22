@@ -70,7 +70,7 @@ export default function FirewallRulesTable({ rules, deleteRule }: FirewallRulesT
                                             <button
                                                 onClick={() => handleDelete(rule.id)}
                                                 disabled={isLoading}
-                                                className={`bg-transparent border-0 p-0 text-red-400 text-sm font-semibold underline-offset-2 hover:underline ${isLoading ? "cursor-not-allowed opacity-60" : ""
+                                                className={`bg-transparent border-0 p-0 text-red-500 text-sm font-semibold underline-offset-2 hover:underline ${isLoading ? "cursor-not-allowed opacity-60" : ""
                                                     }`}
                                             >
                                                 {isLoading ? "Deleting..." : "Delete"}
