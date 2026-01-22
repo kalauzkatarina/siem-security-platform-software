@@ -8,7 +8,7 @@ import {
   JoinColumn,
 } from "typeorm";
 import { AlertCategory } from "../types/AlertCategory";
-import { KpiSnapshot } from "./KPISnapshot";
+import { KpiSnapshot } from "./KpiSnapshot";
 
 @Entity("kpi_snapshot_category_counts")
 @Index("idx_kpi_cat_snapshot", ["snapshotId"])

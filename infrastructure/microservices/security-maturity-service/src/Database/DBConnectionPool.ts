@@ -1,6 +1,8 @@
 import dotenv from 'dotenv';
 import "reflect-metadata";
 import { DataSource } from "typeorm";
+import { KpiSnapshotCategoryCount } from '../Domain/models/KpiSnapshotCategoryCount';
+import { KpiSnapshot } from '../Domain/models/KpiSnapshot';
 
 dotenv.config();
 
@@ -14,6 +16,6 @@ export const Db = new DataSource({
     ssl: { rejectUnauthorized: false },
     synchronize: true,
     logging: false,
-    entities: [],
+    entities: [KpiSnapshot, KpiSnapshotCategoryCount],
 });
 
