@@ -6,76 +6,76 @@ import { EventDTO } from "../../Domain/DTOs/EventDTO";
 import { ReqParams } from "../../Domain/types/ReqParams";
 
 
-export class EventCollectorGatewayController{
+export class EventCollectorGatewayController {
     private readonly router: Router;
-    
-      constructor(private readonly gatewayService: IGatewayService, 
-                  private readonly authenticate: any,
-                  private readonly loggerService:ILogerService) {
+
+    constructor(private readonly gatewayService: IGatewayService,
+        private readonly authenticate: any,
+        private readonly loggerService: ILogerService) {
         this.router = Router();
         this.initializeRoutes();
-      }
+    }
 
-       private initializeRoutes(): void {
-          this.router.get(
-            "/siem/events",
-           /* this.authenticate,
-            requireSysAdmin,*/
+    private initializeRoutes(): void {
+        this.router.get(
+            "/events",
+            /* this.authenticate,
+             requireSysAdmin,*/
             this.getAllEvents.bind(this)
         );
         this.router.get(
-           "/siem/events/topSource",
-          //  this.authenticate, TODO WHEN IMPLEMENT AUTHENTICATE WITH TOKEN
-          //  requireSysAdmin,
-           this.getTopSourceEvent.bind(this)
+            "/events/topSource",
+            //  this.authenticate, TODO WHEN IMPLEMENT AUTHENTICATE WITH TOKEN
+            //  requireSysAdmin,
+            this.getTopSourceEvent.bind(this)
         );
 
-           this.router.get(
-            "/siem/events/sortedEventsByDate",
+        this.router.get(
+            "/events/sortedEventsByDate",
             /*this.authenticate,
             requireSysAdmin,*/
             this.getSortedEventsByDate.bind(this)
-          );
+        );
 
-          this.router.get(
-            "/siem/events/percentages",
+        this.router.get(
+            "/events/percentages",
             /*this.authenticate,
             requireSysAdmin,*/
             this.getEventPercentagesByEvent.bind(this)
-          );
+        );
 
-          this.router.get(
-            "/siem/events/:id",
+        this.router.get(
+            "/events/:id",
             /*this.authenticate,
             requireSysAdmin,*/
             this.getEventById.bind(this)
-          );
+        );
 
-          this.router.get(
-            "/siem/events/from/:fromId/to/:toId",
+        this.router.get(
+            "/events/from/:fromId/to/:toId",
             /*this.authenticate,
             requireSysAdmin,*/
             this.getEventsFromId1ToId2.bind(this)
-          );
+        );
 
-          this.router.get(
-            "/siem/events",
+        this.router.get(
+            "/events",
             /*this.authenticate,
             requireSysAdmin,*/
             this.createEvent.bind(this)
-          );
+        );
 
-          this.router.delete(
-            "/siem/events/:id",
-           /* this.authenticate,
-            requireSysAdmin,*/
+        this.router.delete(
+            "/events/:id",
+            /* this.authenticate,
+             requireSysAdmin,*/
             this.deleteEvent.bind(this)
-          );
+        );
 
-        }
+    }
 
 
-            private async createEvent(req: Request, res: Response): Promise<void> {
+    private async createEvent(req: Request, res: Response): Promise<void> {
         try {
             const dto = req.body as EventDTO;
 
@@ -83,7 +83,7 @@ export class EventCollectorGatewayController{
             res.status(201).json(created);
         } catch (err) {
             const message = (err as Error).message;
-            
+
             res.status(500).json({ message });
         }
     }
@@ -94,7 +94,7 @@ export class EventCollectorGatewayController{
             res.status(200).json(events);
         } catch (err) {
             const message = (err as Error).message;
-           
+
             res.status(500).json({ message });
         }
     }
@@ -104,9 +104,9 @@ export class EventCollectorGatewayController{
             const id = parseInt(req.params.id, 10);
 
             const event = await this.gatewayService.getById(id);
-           
-                res.status(200).json(event);
-           
+
+            res.status(200).json(event);
+
         } catch (err) {
             res.status(404).json({ message: (err as Error).message });
         }
@@ -128,14 +128,14 @@ export class EventCollectorGatewayController{
         }
     }
 
-    
+
 
     private async getMaxId(req: Request, res: Response): Promise<void> {
         try {
             //const created = await this.gatewayService.getMaxId();
-            
-                res.status(404).json({ message: "Event with this ID not found" })
-            
+
+            res.status(404).json({ message: "Event with this ID not found" })
+
         }
         catch (err) {
             const message = (err as Error).message;
@@ -179,7 +179,7 @@ export class EventCollectorGatewayController{
         }
     }
 
-    private async getTopSourceEvent(req: Request, res: Response): Promise<void>{
+    private async getTopSourceEvent(req: Request, res: Response): Promise<void> {
         try {
             const result = await this.gatewayService.getTopSourceEvent()
             res.status(200).json(result)

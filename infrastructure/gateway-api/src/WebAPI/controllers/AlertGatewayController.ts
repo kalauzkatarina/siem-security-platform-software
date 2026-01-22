@@ -9,9 +9,9 @@ import { ReqParams } from "../../Domain/types/ReqParams";
 export class AlertGatewayController {
   private readonly router: Router;
 
-  constructor(private readonly gatewayService: IGatewayService, 
-              private readonly authenticate: any,
-              private readonly loggerService:ILogerService) {
+  constructor(private readonly gatewayService: IGatewayService,
+    private readonly authenticate: any,
+    private readonly loggerService: ILogerService) {
     this.router = Router();
     this.initializeRoutes();
   }
@@ -19,7 +19,7 @@ export class AlertGatewayController {
   private initializeRoutes(): void {
     // SSE Stream za real-time notifikacije
     this.router.get(
-      "/siem/alerts/notifications/stream",
+      "/alerts/notifications/stream",
       /*this.authenticate,
       requireSysAdmin,*/
       this.streamAlertNotifications.bind(this)
@@ -27,31 +27,31 @@ export class AlertGatewayController {
 
     // Alert CRUD operacije
     this.router.get(
-      "/siem/alerts/search",
+      "/alerts/search",
       /*this.authenticate,
       requireSysAdmin,*/
       this.searchAlerts.bind(this)
     );
     this.router.get(
-      "/siem/alerts",
+      "/alerts",
       /*this.authenticate,
       requireSysAdmin,*/
       this.getAllAlerts.bind(this)
     );
     this.router.get(
-      "/siem/alerts/:id",
+      "/alerts/:id",
       /*this.authenticate,
       requireSysAdmin,*/
       this.getAlertById.bind(this)
     );
     this.router.put(
-      "/siem/alerts/:id/resolve",
+      "/alerts/:id/resolve",
       /*this.authenticate,
       requireSysAdmin,*/
       this.resolveAlert.bind(this)
     );
     this.router.put(
-      "/siem/alerts/:id/status",
+      "/alerts/:id/status",
       /*this.authenticate,
       requireSysAdmin,*/
       this.updateAlertStatus.bind(this)

@@ -12,146 +12,146 @@ export class QueryGatewayController {
 
   private initializeRoutes(): void {
     this.router.get(
-      "/siem/query/search",
+      "/query/search",
       // this.authenticate,     // TODO: DELETE COMMENTS AFTER TESTING!
       // requireSysAdmin,
       this.searchEvents.bind(this)
     );
     this.router.get(
-      "/siem/query/oldEvents/:hours",
+      "/query/oldEvents/:hours",
       // this.authenticate,
       // requireSysAdmin,
       this.getOldEvents.bind(this)
     );
     this.router.get(
-      "/siem/query/lastThreeEvents",
+      "/query/lastThreeEvents",
       // this.authenticate,
       // requireSysAdmin,
       this.getLastThreeEvents.bind(this)
     );
     this.router.get(
-      "/siem/query/events",
+      "/query/events",
       // this.authenticate,
       // requireSysAdmin,
       this.getAllEvents.bind(this)
     );
     this.router.get(
-      "/siem/query/eventsCount",
+      "/query/eventsCount",
       // this.authenticate,
       // requireSysAdmin,
       this.getEventsCount.bind(this)
     );
     this.router.get(
-      "/siem/query/infoCount",
+      "/query/infoCount",
       // this.authenticate,
       // requireSysAdmin,
       this.getInfoCount.bind(this)
     );
     this.router.get(
-      "/siem/query/warningCount",
+      "/query/warningCount",
       // this.authenticate,
       // requireSysAdmin,
       this.getWarningCount.bind(this)
     );
     this.router.get(
-      "/siem/query/errorCount",
+      "/query/errorCount",
       // this.authenticate,
       // requireSysAdmin,
       this.getErrorCount.bind(this)
     );
     this.router.get(
-      "/siem/query/distribution",
+      "/query/distribution",
       // this.authenticate,
       // requireSysAdmin,
       this.getEventDistribution.bind(this)
     );
 
     this.router.get(
-      "/siem/query/statistics/events",
+      "/query/statistics/events",
       // this.authenticate,
       // requireSysAdmin,
       this.getEventStatistics.bind(this)
     );
 
     this.router.get(
-      "/siem/query/statistics/alerts",
+      "/query/statistics/alerts",
       // this.authenticate,
       // requireSysAdmin,
       this.getAlertStatistics.bind(this)
     );
 
     this.router.get(
-      "/siem/query/totalEventCount",
+      "/query/totalEventCount",
       // this.authenticate,
       // requireSysAdmin,
       this.getTotalEventCount.bind(this)
     );
 
     this.router.get(
-      "/siem/query/errorEventCount",
+      "/query/errorEventCount",
       // this.authenticate,
       // requireSysAdmin,
       this.getErrorEventCount.bind(this)
     );
 
     this.router.get(
-      "/siem/query/eventRate",
+      "/query/eventRate",
       // this.authenticate,
       // requireSysAdmin,
       this.getEventRate.bind(this)
     );
 
     this.router.get(
-      "/siem/query/alertsCountBySeverity",
+      "/query/alertsCountBySeverity",
       // this.authenticate,
       // requireSysAdmin,
       this.getAlertsCountBySeverity.bind(this)
     );
 
     this.router.get(
-      "/siem/query/criticalAlertsCount",
+      "/query/criticalAlertsCount",
       // this.authenticate,
       // requireSysAdmin,
       this.getCriticalAlertsCount.bind(this)
     );
 
     this.router.get(
-      "/siem/query/anomalyRate",
+      "/query/anomalyRate",
       // this.authenticate,
       // requireSysAdmin,
       this.getAnomalyRate.bind(this)
     );
 
     this.router.get(
-      "/siem/query/burstAnomaly",
+      "/query/burstAnomaly",
       // this.authenticate,
       // requireSysAdmin,
       this.getBurstAnomaly.bind(this)
     );
 
     this.router.get(
-      "/siem/query/uniqueServicesCount",
+      "/query/uniqueServicesCount",
       // this.authenticate,
       // requireSysAdmin,
       this.getUniqueServicesCount.bind(this)
     );
 
     this.router.get(
-      "/siem/query/uniqueIpsCount",
+      "/query/uniqueIpsCount",
       // this.authenticate,
       // requireSysAdmin,
       this.getUniqueIpsCount.bind(this)
     );
 
     this.router.get(
-      "/siem/query/uniqueServices",
+      "/query/uniqueServices",
       // this.authenticate,
       // requireSysAdmin,
       this.getUniqueServices.bind(this)
     );
 
     this.router.get(
-      "/siem/query/uniqueIps",
+      "/query/uniqueIps",
       // this.authenticate,
       // requireSysAdmin,
       this.getUniqueIps.bind(this)
@@ -281,7 +281,7 @@ export class QueryGatewayController {
       res.status(200).json({ count });
     } catch (err) {
       res.status(500).json({ message: (err as Error).message });
-    } 
+    }
   }
 
   private async getEventRate(req: Request, res: Response): Promise<void> {
@@ -293,10 +293,10 @@ export class QueryGatewayController {
       res.status(200).json({ rate });
     } catch (err) {
       res.status(500).json({ message: (err as Error).message });
-    } 
+    }
   }
 
-  private async getAlertsCountBySeverity(req: Request, res: Response): Promise<void> { 
+  private async getAlertsCountBySeverity(req: Request, res: Response): Promise<void> {
     try {
       const entityType = req.query.entityType as string;
       const entityId = req.query.entityId as string;
@@ -304,7 +304,7 @@ export class QueryGatewayController {
       res.status(200).json(Object.fromEntries(counts));
     } catch (err) {
       res.status(500).json({ message: (err as Error).message });
-    } 
+    }
   }
 
   private async getCriticalAlertsCount(req: Request, res: Response): Promise<void> {
@@ -327,7 +327,7 @@ export class QueryGatewayController {
       res.status(200).json({ rate });
     } catch (err) {
       res.status(500).json({ message: (err as Error).message });
-    } 
+    }
   }
 
   private async getBurstAnomaly(req: Request, res: Response): Promise<void> {
@@ -339,12 +339,12 @@ export class QueryGatewayController {
       res.status(200).json({ isBurst });
     } catch (err) {
       res.status(500).json({ message: (err as Error).message });
-    } 
+    }
   }
 
   private async getUniqueServicesCount(req: Request, res: Response): Promise<void> {
     try {
-      const ipAddress = req.query.ipAddress as string;    
+      const ipAddress = req.query.ipAddress as string;
       const count = await this.gatewayService.getUniqueServicesCount(ipAddress);
       res.status(200).json({ count });
     } catch (err) {
@@ -359,7 +359,7 @@ export class QueryGatewayController {
       res.status(200).json({ count });
     } catch (err) {
       res.status(500).json({ message: (err as Error).message });
-    } 
+    }
   }
 
   private async getUniqueServices(req: Request, res: Response): Promise<void> {
@@ -377,7 +377,7 @@ export class QueryGatewayController {
       res.status(200).json(result);
     } catch (err) {
       res.status(500).json({ message: (err as Error).message });
-    } 
+    }
   }
 
   public getRouter(): Router {

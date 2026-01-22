@@ -1,9 +1,13 @@
-export const microserviceUrls: Record<string, string> = {       // TODO: Fix later to work for all microservices
+export const microserviceUrls: Record<string, string> = {
     "events": process.env.EVENT_SERVICE_API!,
     "parserEvents": process.env.PARSER_SERVICE_API!,
     "alerts": process.env.ALERT_SERVICE_API!,
     "query": process.env.QUERY_SERVICE_API!,
     "siem-auth": process.env.SIEM_AUTH_SERVICE_API!,
     "storageLog": process.env.STORAGE_LOG_SERVICE_API!,
-    "analysis-engine": process.env.ANALYSIS_ENGINE_SERVICE_API!
+    "analysis-engine": process.env.ANALYSIS_ENGINE_SERVICE_API!,
+    "simulator": process.env.SIMULATOR_SERVICE_API!,
+    "backup": process.env.BACKUP_SERVICE_API!,
+    "insider-threats": process.env.INSIDER_THREAT_SERVICE_API!,
+    "riskScore": process.env.RISK_SCORE_API!
 };

@@ -5,7 +5,7 @@ import { AlertQueryDTO, PaginatedAlertsDTO } from "../../models/alerts/AlertQuer
 
 export class AlertAPI implements IAlertAPI {
   private readonly client: AxiosInstance;
-  private readonly basePath = "/siem/alerts";
+  private readonly basePath = "/alerts";
 
   constructor() {
     this.client = axios.create({
@@ -38,7 +38,7 @@ export class AlertAPI implements IAlertAPI {
   }
 
   async resolveAlert(id: number, resolvedBy: string, status: string, token: string): Promise<AlertDTO> {
-    const response = await this.client.put<AlertDTO>(`${this.basePath}/${id}/resolve`, 
+    const response = await this.client.put<AlertDTO>(`${this.basePath}/${id}/resolve`,
       { resolvedBy, status },
       { headers: { Authorization: `Bearer ${token}` } }
     );
@@ -46,7 +46,7 @@ export class AlertAPI implements IAlertAPI {
   }
 
   async updateAlertStatus(id: number, status: string, token: string): Promise<AlertDTO> {
-    const response = await this.client.put<AlertDTO>(`${this.basePath}/${id}/status`, 
+    const response = await this.client.put<AlertDTO>(`${this.basePath}/${id}/status`,
       { status },
       { headers: { Authorization: `Bearer ${token}` } }
     );

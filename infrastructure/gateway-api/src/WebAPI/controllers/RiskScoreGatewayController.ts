@@ -5,37 +5,36 @@ import { RiskEntityType } from "../../Domain/enums/RiskEntityType";
 export class RiskScoreGatwayController {
     private readonly router: Router;
 
-    constructor(private readonly gatewayService: IGatewayService, 
-                private readonly authenticate: any)
-    {
+    constructor(private readonly gatewayService: IGatewayService,
+        private readonly authenticate: any) {
         this.router = Router();
         this.initializeRoutes();
     }
 
     private initializeRoutes(): void {
         this.router.post(
-        "/siem/riskScore/calculateScore",
-        // this.authenticate,     // TODO: DELETE COMMENTS AFTER TESTING!
-        // requireSysAdmin,
-        this.calculateScore.bind(this)
+            "/riskScore/calculateScore",
+            // this.authenticate,     // TODO: DELETE COMMENTS AFTER TESTING!
+            // requireSysAdmin,
+            this.calculateScore.bind(this)
         );
         this.router.get(
-        "/siem/riskScore/getLatestScore",
-        // this.authenticate,
-        // requireSysAdmin,
-        this.getLatestScore.bind(this)
+            "/riskScore/getLatestScore",
+            // this.authenticate,
+            // requireSysAdmin,
+            this.getLatestScore.bind(this)
         );
         this.router.get(
-        "/siem/riskScore/getScoreHistory",
-        // this.authenticate,
-        // requireSysAdmin,
-        this.getScoreHistory.bind(this)
+            "/riskScore/getScoreHistory",
+            // this.authenticate,
+            // requireSysAdmin,
+            this.getScoreHistory.bind(this)
         );
         this.router.get(
-        "/siem/riskScore/getGlobalScore",
-        // this.authenticate,
-        // requireSysAdmin,
-        this.getGlobalScore.bind(this)
+            "/riskScore/getGlobalScore",
+            // this.authenticate,
+            // requireSysAdmin,
+            this.getGlobalScore.bind(this)
         );
     }
 
@@ -62,8 +61,8 @@ export class RiskScoreGatwayController {
 
             const result = await this.gatewayService.getLatestScore(entityType, entityId);
             res.status(200).json(result);
-        } catch(err) {
-            res.status(500).json({message: "Error while retreiving latest risk score."});
+        } catch (err) {
+            res.status(500).json({ message: "Error while retreiving latest risk score." });
         }
     }
 
@@ -75,8 +74,8 @@ export class RiskScoreGatwayController {
 
             const result = await this.gatewayService.getScoreHistory(entityType, entityId, hours);
             res.status(200).json(result);
-        } catch(err) {
-            res.status(500).json({message: "Error while retreiving risk score history."});
+        } catch (err) {
+            res.status(500).json({ message: "Error while retreiving risk score history." });
         }
     }
 
@@ -84,8 +83,8 @@ export class RiskScoreGatwayController {
         try {
             const result = await this.gatewayService.getGlobalScore();
             res.status(200).json(result);
-        } catch(err) {
-            res.status(500).json({message: "Error while retreiving global risk score."});
+        } catch (err) {
+            res.status(500).json({ message: "Error while retreiving global risk score." });
         }
     }
 

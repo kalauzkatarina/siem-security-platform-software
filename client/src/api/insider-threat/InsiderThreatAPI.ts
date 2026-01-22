@@ -7,7 +7,7 @@ import { UserRiskAnalysisDTO } from "../../models/insider-threat/UserRiskAnalysi
 
 export class InsiderThreatAPI implements IInsiderThreatAPI {
   private readonly client: AxiosInstance;
-  private readonly basePath = "/siem/insider-threats";
+  private readonly basePath = "/insider-threats";
   private readonly riskPath = "/siem/user-risk";
 
   constructor() {

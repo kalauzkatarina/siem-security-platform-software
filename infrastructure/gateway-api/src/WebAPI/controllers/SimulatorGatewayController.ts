@@ -15,25 +15,25 @@ export class SimulatorGatewayController {
 
   private initializeRoutes(): void {
     this.router.get(
-      "/siem/simulator",
+      "/simulator",
       this.authenticate,
       requireSysAdmin,
       this.listSimulations.bind(this)
     );
     this.router.get(
-      "/siem/simulator/:id",
+      "/simulator/:id",
       this.authenticate,
       requireSysAdmin,
       this.getSimulation.bind(this)
     );
     this.router.post(
-      "/siem/simulator/start",
+      "/simulator/start",
       this.authenticate,
       requireSysAdmin,
       this.startSimulation.bind(this)
     );
     this.router.post(
-      "/siem/simulator/:id/stop",
+      "/simulator/:id/stop",
       this.authenticate,
       requireSysAdmin,
       this.stopSimulation.bind(this)

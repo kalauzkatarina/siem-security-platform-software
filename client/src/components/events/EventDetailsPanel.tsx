@@ -22,7 +22,7 @@ export default function EventDetailsPanel({
         //if (!token) return;       // TODO: DELETE COMMENT AFTER TESTING!
 
         const loadEventRawMessage = async () => {
-            if(!e || !e.id) return;
+            if (!e || !e.id) return;
             try {
                 console.log(e.id);
                 const res = await parserApi.getParserEventById(e.id, token);
@@ -92,7 +92,7 @@ export default function EventDetailsPanel({
                     </div>
 
                     {/* IP address */}
-                    { e.ipAddress &&
+                    {e.ipAddress &&
                         <div className="mb-5">
                             <label className="block text-base text-gray-400 mb-1">IP address</label>
                             <div className="text-white text-m">{e.ipAddress}</div>

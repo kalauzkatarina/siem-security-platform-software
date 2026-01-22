@@ -22,21 +22,21 @@ export class QueryAPI implements IQueryAPI {
       });
   }
   async getTopEventSource(token: string): Promise<TopSourceDTO> {
-    const response = await this.client.get<TopSourceDTO>("/siem/events/topSource", { //CHANGE ROUTE WITH QUERY 
+    const response = await this.client.get<TopSourceDTO>("/events/topSource", { //CHANGE ROUTE WITH QUERY 
       headers: { Authorization: `Bearer ${token}` },
     });
     return response.data;
   }
 
   async getAllEvents(token: string): Promise<EventDTO[]> {
-    const response = await this.client.get<EventDTO[]>("/siem/query/events", {
+    const response = await this.client.get<EventDTO[]>("/query/events", {
       headers: { Authorization: `Bearer ${token}` },
     });
     return response.data;
   }
 
   async getEventsByQuery(query: string, token: string, targetPage: number, limit: number): Promise<EventsResultDTO> {
-    const response = await this.client.get<EventsResultDTO>("/siem/query/search", {
+    const response = await this.client.get<EventsResultDTO>("/query/search", {
       params: { q: query, p: targetPage, l: limit },
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -45,7 +45,7 @@ export class QueryAPI implements IQueryAPI {
 
   async getLastThreeEvents(token: string): Promise<EventDTO[]> {
     const response = await this.client.get<EventDTO[]>(
-      "/siem/query/lastThreeEvents",
+      "/query/lastThreeEvents",
       {
         headers: { Authorization: `Bearer ${token}` },
       }
@@ -54,28 +54,28 @@ export class QueryAPI implements IQueryAPI {
   }
 
   async getEventsCount(token: string): Promise<number> {
-    const response = await this.client.get<CountResponseDTO>("/siem/query/eventsCount", {
+    const response = await this.client.get<CountResponseDTO>("/query/eventsCount", {
       headers: { Authorization: `Bearer ${token}` },
     });
     return response.data.count;
   }
 
   async getInfoCount(token: string): Promise<number> {
-    const response = await this.client.get<CountResponseDTO>("/siem/query/infoCount", {
+    const response = await this.client.get<CountResponseDTO>("/query/infoCount", {
       headers: { Authorization: `Bearer ${token}` },
     });
     return response.data.count;
   }
 
   async getWarningCount(token: string): Promise<number> {
-    const response = await this.client.get<CountResponseDTO>("/siem/query/warningCount", {
+    const response = await this.client.get<CountResponseDTO>("/query/warningCount", {
       headers: { Authorization: `Bearer ${token}` },
     });
     return response.data.count;
   }
 
   async getErrorCount(token: string): Promise<number> {
-    const response = await this.client.get<CountResponseDTO>("/siem/query/errorCount", {
+    const response = await this.client.get<CountResponseDTO>("/query/errorCount", {
       headers: { Authorization: `Bearer ${token}` },
     });
     return response.data.count;
@@ -84,7 +84,7 @@ export class QueryAPI implements IQueryAPI {
   //statistics:
   async getEventStatistics(token: string): Promise<HourlyStatisticsDTO[]> {
     const response = await this.client.get<HourlyStatisticsDTO[]>(
-      "/siem/query/statistics/events",
+      "/query/statistics/events",
       { headers: { Authorization: `Bearer ${token}` } }
     );
 
@@ -93,7 +93,7 @@ export class QueryAPI implements IQueryAPI {
 
   async getAlertStatistics(token: string): Promise<HourlyStatisticsDTO[]> {
     const response = await this.client.get<HourlyStatisticsDTO[]>(
-      "/siem/query/statistics/alerts",
+      "/query/statistics/alerts",
       { headers: { Authorization: `Bearer ${token}` } }
     );
 
@@ -101,7 +101,7 @@ export class QueryAPI implements IQueryAPI {
   }
 
   async getEventDistribution(token: string): Promise<DistributionDTO> {
-    const response = await this.client.get<DistributionResponse>("/siem/query/distribution", {
+    const response = await this.client.get<DistributionResponse>("/query/distribution", {
       headers: { Authorization: `Bearer ${token}` },
     });
 
@@ -110,7 +110,7 @@ export class QueryAPI implements IQueryAPI {
 
   async getUniqueServices(token: string): Promise<string[]> {
     const response = await this.client.get<string[]>(
-      "/siem/query/uniqueServices",
+      "/query/uniqueServices",
       { headers: { Authorization: `Bearer ${token}` } }
     );
 
@@ -118,7 +118,7 @@ export class QueryAPI implements IQueryAPI {
   }
 
   async getUniqueIps(token: string): Promise<string[]> {
-    const response = await this.client.get<string[]>("/siem/query/uniqueIps", {
+    const response = await this.client.get<string[]>("/query/uniqueIps", {
       headers: { Authorization: `Bearer ${token}` },
     });
 

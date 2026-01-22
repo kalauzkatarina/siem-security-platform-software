@@ -20,32 +20,32 @@ export class InsiderThreatGatewayController {
   private initializeRoutes(): void {
     // Threat endpoints
     this.router.get(
-      "/siem/insider-threats/search",
+      "/insider-threats/search",
       /*this.authenticate, requireSysAdmin,*/
       this.searchThreats.bind(this)
     );
     this.router.get(
-      "/siem/insider-threats/unresolved",
+      "/insider-threats/unresolved",
       /*this.authenticate, requireSysAdmin,*/
       this.getUnresolvedThreats.bind(this)
     );
     this.router.get(
-      "/siem/insider-threats",
+      "/insider-threats",
       /*this.authenticate, requireSysAdmin,*/
       this.getAllThreats.bind(this)
     );
     this.router.get(
-      "/siem/insider-threats/:id",
+      "/insider-threats/:id",
       /*this.authenticate, requireSysAdmin,*/
       this.getThreatById.bind(this)
     );
     this.router.get(
-      "/siem/insider-threats/user/:userId",
+      "/insider-threats/user/:userId",
       /*this.authenticate, requireSysAdmin,*/
       this.getThreatsByUserId.bind(this)
     );
     this.router.put(
-      "/siem/insider-threats/:id/resolve",
+      "/insider-threats/:id/resolve",
       /*this.authenticate, requireSysAdmin,*/
       this.resolveThreat.bind(this)
     );

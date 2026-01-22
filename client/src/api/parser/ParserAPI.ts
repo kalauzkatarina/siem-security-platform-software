@@ -7,7 +7,7 @@ export class ParserAPI implements IParserAPI {
 
     constructor() {
         this.axiosInstance = axios.create({
-            baseURL: import.meta.env.VITE_GATEWAY_URL,
+            baseURL: import.meta.env.VITE_FIREWALL_URL,
             headers: {
                 "Content-Type": "application/json",
             },
@@ -15,9 +15,14 @@ export class ParserAPI implements IParserAPI {
     }
 
     async getParserEventById(id: number, token: string): Promise<ParserEventDTO> {
-        const response: AxiosResponse<ParserEventDTO> = await this.axiosInstance.get(`/parserEvents/${id}`, {
-            headers: { Authorization: `Bearer ${token}` },
+        const response: AxiosResponse<any> = await this.axiosInstance.post("", {
+            url: `parserEvents/${id}`,
+            method: "GET",
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
         });
-        return response.data;
+
+        return response.data.response;  // Response of firewall includes response of gateway
     }
 }

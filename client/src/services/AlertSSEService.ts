@@ -22,7 +22,7 @@ export class AlertSSEService {
   private onConnectionStatusCallback?: (connected: boolean) => void;
   private onErrorCallback?: (error: string) => void;
 
-  constructor(private readonly gatewayUrl: string) {}
+  constructor(private readonly gatewayUrl: string) { }
 
   connect() {
     if (this.eventSource) {
@@ -30,11 +30,11 @@ export class AlertSSEService {
       return;
     }
 
-    const url = `${this.gatewayUrl}/siem/alerts/notifications/stream`;
+    const url = `${this.gatewayUrl}/alerts/notifications/stream`;
 
     try {
       this.eventSource = new EventSource(url, {
-        withCredentials: true, 
+        withCredentials: true,
       });
 
       this.eventSource.onopen = () => {

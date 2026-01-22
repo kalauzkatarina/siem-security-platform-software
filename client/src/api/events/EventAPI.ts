@@ -15,7 +15,7 @@ export class EventAPI implements IEventAPI {
   }
 
   async getAllEvents(token: string): Promise<EventDTO[]> {
-    const response = await this.client.get<EventDTO[]>("/siem/query/search", {
+    const response = await this.client.get<EventDTO[]>("/query/search", {
       params: { q: "" }, // prazan query => Query service vrati sve evente
       headers: {
         Authorization: `Bearer ${token}`,
