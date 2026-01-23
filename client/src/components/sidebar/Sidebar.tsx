@@ -2,7 +2,7 @@ import { IoIosMenu } from "react-icons/io";
 import { TbLayoutDashboardFilled } from "react-icons/tb";
 import { BsCalendarFill } from "react-icons/bs";
 import { VscGraph } from "react-icons/vsc";
-import { LuLayers3 } from "react-icons/lu";
+import { LuDatabaseBackup, LuLayers3 } from "react-icons/lu";
 import { MdKeyboardArrowRight, MdOutlineScience } from "react-icons/md";
 import { BiError } from "react-icons/bi";
 import { PiShieldCheck, PiShieldWarningFill, PiSpeedometerFill } from "react-icons/pi";
@@ -165,6 +165,20 @@ export default function Sidebar({ setSideMenuPage }: SidebarProps) {
                         <PiShieldCheck size={22} />
                         Firewall
                         <MdKeyboardArrowRight size={20} />
+                    </button>
+
+                    <button
+                        className={itemClass(9)}
+                        style={{ marginLeft: '20px', borderRadius: '0.75rem'}}
+                        onClick={() => {
+                            setSideMenuPage(9);
+                            setSelectedButton(9);
+                        }}
+                        onMouseEnter={() => setHover(9)}
+                        onMouseLeave={() => setHover(null)}>
+                            <LuDatabaseBackup size={22}/>
+                            Backup
+                            <MdKeyboardArrowRight size={20}/>
                     </button>
                 </div>
             )}

@@ -6,6 +6,7 @@ import { ISimulatorAPI } from "../../../api/simulator/ISimulatorAPI";
 import { DesktopNotificationService } from "../../../services/DesktopNotificationService";
 import { IRiskScoreAPI } from "../../../api/risk-score/IRiskScoreAPI";
 import { IFirewallAPI } from "../../../api/firewall/IFirewallAPI";
+import { IBackupValidationAPI } from "../../../api/backup/IBackupValdationAPI";
 
 export interface MainLayoutProps {
     alertsAPI: IAlertAPI;
@@ -16,4 +17,5 @@ export interface MainLayoutProps {
     desktopNotification: DesktopNotificationService;
     riskScoreApi: IRiskScoreAPI;
     firewallApi: IFirewallAPI;
+    backupApi: IBackupValidationAPI;
 }

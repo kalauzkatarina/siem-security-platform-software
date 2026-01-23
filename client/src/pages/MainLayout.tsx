@@ -10,6 +10,7 @@ import InsiderThreats from '../components/views/InsiderThreats';
 import { MainLayoutProps } from '../types/props/pages/MainLayoutProps';
 import RiskScore from '../components/views/RiskScore';
 import Firewall from '../components/views/Firewall';
+import Backup from '../components/views/Backup';
 
 interface ExtendedMainLayoutProps extends MainLayoutProps {
   //insiderThreatAPI: InsiderThreatAPI;
@@ -24,7 +25,8 @@ export default function MainLayout({
   insiderThreatAPI,
   desktopNotification,
   riskScoreApi,
-  firewallApi
+  firewallApi,
+  backupApi
 }: ExtendedMainLayoutProps) {
   const [sideMenuPage, setSideMenuPage] = useState<number>(0);
 
@@ -60,6 +62,9 @@ export default function MainLayout({
         )}
         {sideMenuPage === 8 && (
           <Firewall firewallApi={firewallApi} />
+        )}
+        {sideMenuPage === 9 && (
+          <Backup backupApi={backupApi}/>
         )}
       </div>
     </div>

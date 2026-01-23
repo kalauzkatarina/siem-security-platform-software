@@ -18,6 +18,8 @@ import { IRiskScoreAPI } from "./api/risk-score/IRiskScoreAPI";
 import { RiskScoreAPI } from "./api/risk-score/RiskScoreAPI";
 import { IFirewallAPI } from "./api/firewall/IFirewallAPI";
 import { FirewallAPI } from "./api/firewall/FirewallAPI";
+import { IBackupValidationAPI } from "./api/backup/IBackupValdationAPI";
+import { BackupValidationAPI } from "./api/backup/BackupValidationAPI";
 
 const auth_api: IAuthAPI = new AuthAPI();
 const alerts_api: IAlertAPI = new AlertAPI();
@@ -28,6 +30,7 @@ const simulator_api: ISimulatorAPI = new SimulatorAPI();
 const desktopNotification = new DesktopNotificationService();
 const risk_score_api: IRiskScoreAPI = new RiskScoreAPI();
 const firewall_api: IFirewallAPI = new FirewallAPI();
+const backup_api: IBackupValidationAPI = new BackupValidationAPI();
 
 function App() {
   return (
@@ -47,7 +50,7 @@ function App() {
         <Route path="/mainLayout" element={<MainLayout alertsAPI={alerts_api}
           parserAPI={parser_api} queryAPI={query_api} storageAPI={storage_api}
           simulatorAPI={simulator_api} desktopNotification={desktopNotification}
-          riskScoreApi={risk_score_api} firewallApi={firewall_api} />} />
+          riskScoreApi={risk_score_api} firewallApi={firewall_api} backupApi={backup_api}/>} />
       </Routes>
     </>
   );

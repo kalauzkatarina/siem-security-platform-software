@@ -1,4 +1,4 @@
-import { BackupValidationStatus } from "../enums/BackupValidationStatus";
+import { BackupValidationStatus } from "../../enums/BackupValidationStatus";
 
 export interface BackupValidationResultDTO {
     totalRuns: number;
