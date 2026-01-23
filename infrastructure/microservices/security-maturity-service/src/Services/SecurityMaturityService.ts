@@ -1,11 +1,13 @@
-import { SecurityMaturityDTO } from "../Domain/DTOs/SecurityMaturityDTO";
 import { ISecurityMaturityService } from "../Domain/services/ISecurityMaturityService";
 import { mapScoreToLevel } from "../Utils/MapScoreToLevel";
 import { calculateScore } from "../Utils/ScoreCalculator";
+import { ScoreInput } from "../Domain/types/ScoreInput";
+import { SMScore } from "../Domain/types/SMScore";
+import { MaturityLevel } from "../Domain/enums/MaturityLevel";
 
 export class SecurityMaturityService implements ISecurityMaturityService {
-  async calculateCurrentMaturity(): Promise<SecurityMaturityDTO> {
-    const score = calculateScore({
+  async calculateCurrentMaturity(input: ScoreInput): Promise<SMScore> {
+    const score = calculateScore({//ScoreInput
       mttdMinutes: 45,
       mttrMinutes: 90,
       falseAlarmRate: 0.2,
@@ -14,6 +16,11 @@ export class SecurityMaturityService implements ISecurityMaturityService {
 
     const level = mapScoreToLevel(score);
 
-    return { score, level };
+      const result: SMScore = {
+      scoreValue: score,
+      maturityLevel: level
+    };
+
+    return result;
   }
 }

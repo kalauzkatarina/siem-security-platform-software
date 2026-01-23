@@ -1,5 +1,5 @@
-import { SecurityMaturityDTO } from "../DTOs/SecurityMaturityDTO";
-
+import { ScoreInput } from "../types/ScoreInput";
+import { SMScore } from "../types/SMScore";
 export interface ISecurityMaturityService {
-  calculateCurrentMaturity(): Promise<SecurityMaturityDTO>;
+  calculateCurrentMaturity(input: ScoreInput): Promise<SMScore>;
 }

@@ -3,6 +3,6 @@ export type AlertForKpi = {
   createdAt: Date;
   resolvedAt: Date | null;
   oldestCorrelatedEventAt: Date | null;
-  category: string | null;
+  category: "string";
   isFalseAlarm: boolean;
 };

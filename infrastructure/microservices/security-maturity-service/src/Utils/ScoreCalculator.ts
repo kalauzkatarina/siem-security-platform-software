@@ -1,9 +1,4 @@
-export interface ScoreInput {
-  mttdMinutes: number | null;
-  mttrMinutes: number | null;
-  falseAlarmRate: number;
-  totalAlerts: number;
-}
+import { ScoreInput } from "../Domain/types/ScoreInput";
 
 export function calculateScore(input: ScoreInput): number {
   let score = 100;
