@@ -2,7 +2,7 @@ import { AlertPayloadDto } from "../../Domain/types/AlertPayloadDto";
 import { AlertForKpi } from "../../Domain/types/AlertForKpi";
 import { isValidDate } from "../utils/dateUtils";
 import { validateAlertPayloadDto } from "../validators/alertPayloadValidator";
-import { parseAlertCategory } from "../clients/parseAlertCategory";
+import { parseAlertCategory } from "../parsers/parseAlertCategory";
 
 export function mapAlertPayloadToDomain(payload: AlertPayloadDto, log?: (msg: string, meta?: unknown) => void): AlertForKpi | null {
   const errs = validateAlertPayloadDto(payload);

@@ -1,4 +1,6 @@
+import { AlertCategory } from "../enums/AlertCategory";
+
 export type IncidentsByCategoryDto = {
-  category: string;
+  category: AlertCategory;
   count: number;
 };

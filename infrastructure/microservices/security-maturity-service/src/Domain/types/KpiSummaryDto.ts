@@ -1,14 +1,13 @@
+import { AlertCategory } from "../enums/AlertCategory";
+import { MaturityLevel } from "../enums/MaturityLevel";
 export type KpiSummaryDto = {
-  mttdMinutes: number | null;
-  mttrMinutes: number | null;
-  falseAlarmRate: number | null;
-
+  mttdMinutes: number;
+  mttrMinutes: number;
+  falseAlarmRate: number;
   totalAlerts: number;
   resolvedAlerts: number;
   openAlerts: number;
-
-  categoryCounts: Record<string, number>;
-
-  scoreValue: number | null;
-  maturityLevel: string | null;
+  categoryCounts: Partial<Record<AlertCategory, number>>;
+  scoreValue: number;
+  maturityLevel: MaturityLevel; 
 };

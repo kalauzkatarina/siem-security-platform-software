@@ -1,5 +1,5 @@
 export type TrendPointDto = {
   bucketStart: string;
-  value: number | null;
-  sampleCount?: number;
+  value: number;
+  sampleCount: number;
 };

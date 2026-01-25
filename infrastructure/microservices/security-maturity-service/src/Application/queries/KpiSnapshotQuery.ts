@@ -1,174 +1,177 @@
+import { AlertCategory } from "../../Domain/enums/AlertCategory";
+import { MaturityLevel } from "../../Domain/enums/MaturityLevel";
 import { TrendMetricType } from "../../Domain/enums/TrendMetricType";
 import { TrendPeriod } from "../../Domain/enums/TrendPeriod";
 import { KpiSnapshot } from "../../Domain/models/KpiSnapshot";
+import { IKpiAggregationService } from "../../Domain/services/IKpiAggregationService";
 import { IKpiRepositoryService } from "../../Domain/services/IKpiRepositoryService";
 import { IncidentsByCategoryDto } from "../../Domain/types/IncidentsByCategoryDto";
 import { KpiSummaryDto } from "../../Domain/types/KpiSummaryDto";
 import { TrendPointDto } from "../../Domain/types/TrendPointDto";
+import { parseAlertCategory } from "../../Infrastructure/parsers/parseAlertCategory";
+import { mapScoreToLevel } from "../../Utils/MapScoreToLevel";
 
 export class KpiSnapshotQuery {
-  constructor(private readonly kpiRepository: IKpiRepositoryService) {}
+  private readonly kpiRepository: IKpiRepositoryService;
+  private readonly kpiAggregation: IKpiAggregationService;
+
+  constructor(repoService: IKpiRepositoryService, aggregationService: IKpiAggregationService) {
+    this.kpiRepository = repoService;
+    this.kpiAggregation = aggregationService;
+  }
 
   async getCurrent(): Promise<KpiSummaryDto> {
     const now = new Date();
-    const from = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+    const to = new Date(now);
+    to.setUTCMinutes(0, 0, 0);
 
-    const snapshots = await this.kpiRepository.getSnapshots(from, now);
-    const latest = snapshots.at(-1);
+    const from = new Date(to.getTime() - 24 * 60 * 60 * 1000);
 
-    if (!latest) {
+    const snapshots = await this.kpiRepository.getSnapshots(from, to);
+
+    if (snapshots.length === 0) {
       return {
-        mttdMinutes: null,
-        mttrMinutes: null,
-        falseAlarmRate: null,
+        mttdMinutes: -1,
+        mttrMinutes: -1,
+        falseAlarmRate: -1,
         totalAlerts: 0,
         resolvedAlerts: 0,
         openAlerts: 0,
         categoryCounts: {},
-        scoreValue: null,
-        maturityLevel: null,
+        scoreValue: -1,
+        maturityLevel: MaturityLevel.UNKNOWN,
       };
     }
 
+    let totalAlerts = 0;
+    let resolvedAlerts = 0;
+    let openAlerts = 0;
+    let falseAlarms = 0;
+
+    for (const s of snapshots) {
+      totalAlerts += s.totalAlerts;
+      resolvedAlerts += s.resolvedAlerts;
+      openAlerts += s.openAlerts;
+      falseAlarms += s.falseAlarms;
+    }
+
+    const falseAlarmRate = totalAlerts === 0 ? -1 : falseAlarms / totalAlerts;
+
+    const mttdMinutes = this.kpiAggregation.weightedAverageMetric(
+      snapshots,
+      TrendMetricType.MTTD,
+    );
+
+    const mttrMinutes = this.kpiAggregation.weightedAverageMetric(
+      snapshots,
+      TrendMetricType.MTTR,
+    );
+
+    const scoreValue = this.kpiAggregation.weightedAverageMetric(
+      snapshots,
+      TrendMetricType.SMS,
+    );
+
+    const maturityLevel =
+      scoreValue === -1 ? MaturityLevel.UNKNOWN : mapScoreToLevel(scoreValue);
+
+    const rawCounts = await this.kpiRepository.getCategoryCounts(from, to);
+    const categoryCounts: Partial<Record<AlertCategory, number>> = {};
+
+    for (const c of rawCounts) {
+      const cat = parseAlertCategory(c.category);
+      categoryCounts[cat] = (categoryCounts[cat] ?? 0) + c.count;
+    }
+
     return {
-      mttdMinutes: latest.mttdMinutes,
-      mttrMinutes: latest.mttrMinutes,
-      falseAlarmRate: latest.falseAlarmRate,
-      totalAlerts: latest.totalAlerts,
-      resolvedAlerts: latest.resolvedAlerts,
-      openAlerts: latest.openAlerts,
-      categoryCounts: {},
-      scoreValue: latest.scoreValue,
-      maturityLevel: latest.maturityLevel,
+      mttdMinutes,
+      mttrMinutes,
+      falseAlarmRate,
+      totalAlerts,
+      resolvedAlerts,
+      openAlerts,
+      categoryCounts,
+      scoreValue,
+      maturityLevel,
     };
   }
 
-  async getIncidentsByCategory(
-    period: TrendPeriod,
-  ): Promise<IncidentsByCategoryDto[]> {
+  async getIncidentsByCategory(period: TrendPeriod): Promise<IncidentsByCategoryDto[]> {
     const { from, to } = this.resolvePeriod(period);
     const counts = await this.kpiRepository.getCategoryCounts(from, to);
 
-    const aggregated: Record<string, number> = {};
+    const aggregated: Partial<Record<AlertCategory, number>> = {};
 
     for (const c of counts) {
-      aggregated[c.category] = (aggregated[c.category] ?? 0) + c.count;
+      const category = parseAlertCategory(c.category);
+      aggregated[category] = (aggregated[category] ?? 0) + c.count;
     }
 
-    const result: IncidentsByCategoryDto[] = [];
-
-    for (const category in aggregated) {
-      result.push({
-        category,
-        count: aggregated[category],
-      });
-    }
-
-    return result;
+    return (Object.entries(aggregated) as Array<[AlertCategory, number]>)
+      .map(([category, count]) => ({ category, count }))
+      .sort((a, b) => b.count - a.count);
   }
 
-  async getTrend(
-    metric: TrendMetricType,
-    period: TrendPeriod,
-  ): Promise<TrendPointDto[]> {
+  async getTrend(metric: TrendMetricType, period: TrendPeriod): Promise<TrendPointDto[]> {
     const { from, to, bucket } = this.resolvePeriod(period);
     const snapshots = await this.kpiRepository.getSnapshots(from, to);
 
-    // po satu
     if (bucket === "hour") {
       const result: TrendPointDto[] = [];
 
       for (const s of snapshots) {
         result.push({
           bucketStart: s.windowFrom.toISOString(),
-          value: this.resolveMetricValue(s, metric),
-          sampleCount: s.mttdSampleCount,
+          value: this.kpiAggregation.resolveMetricValue(s, metric),
+          sampleCount: this.kpiAggregation.sumSampleCount([s], metric),
         });
       }
 
       return result;
     }
 
-    // po danu
     const grouped: Record<string, KpiSnapshot[]> = {};
 
     for (const s of snapshots) {
       const dayKey = s.windowFrom.toISOString().slice(0, 10);
-
-      if (!grouped[dayKey]) {
-        grouped[dayKey] = [];
-      }
-
-      grouped[dayKey].push(s);
+      (grouped[dayKey] ??= []).push(s);
     }
 
     const result: TrendPointDto[] = [];
 
-    for (const day in grouped) {
+    for (const day of Object.keys(grouped).sort()) {
       const items = grouped[day];
 
       result.push({
         bucketStart: `${day}T00:00:00.000Z`,
-        value: this.averageMetric(items, metric),
-        sampleCount: items.length,
+        value: this.kpiAggregation.weightedAverageMetric(items, metric),
+        sampleCount: this.kpiAggregation.sumSampleCount(items, metric),
       });
     }
 
     return result;
   }
 
-  private resolveMetricValue(
-    snapshot: any,
-    metric: TrendMetricType,
-  ): number | null {
-    switch (metric) {
-      case TrendMetricType.SMS:
-        return snapshot.scoreValue;
-      case TrendMetricType.MTTD:
-        return snapshot.mttdMinutes;
-      case TrendMetricType.MTTR:
-        return snapshot.mttrMinutes;
-      case TrendMetricType.FALSE_ALARM_RATE:
-        return snapshot.falseAlarmRate;
-      default:
-        return null;
-    }
-  }
-
-  private averageMetric(
-    snapshots: KpiSnapshot[],
-    metric: TrendMetricType,
-  ): number | null {
-    let sum = 0;
-    let count = 0;
-
-    for (const s of snapshots) {
-      const value = this.resolveMetricValue(s, metric);
-      if (value !== null) {
-        sum += value;
-        count++;
-      }
-    }
-
-    if (count === 0) return null;
-
-    return Math.round(sum / count);
-  }
-
   private resolvePeriod(period: TrendPeriod) {
     const now = new Date();
 
+    const toHour = new Date(now);
+    toHour.setUTCMinutes(0, 0, 0);
+
     if (period === TrendPeriod.D7) {
+      const toDay = new Date(toHour);
+      toDay.setUTCHours(0, 0, 0, 0);
+
       return {
-        from: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000),
-        to: now,
+        from: new Date(toDay.getTime() - 7 * 24 * 60 * 60 * 1000),
+        to: toDay,
         bucket: "day" as const,
       };
     }
 
     return {
-      from: new Date(now.getTime() - 24 * 60 * 60 * 1000),
-      to: now,
+      from: new Date(toHour.getTime() - 24 * 60 * 60 * 1000),
+      to: toHour,
       bucket: "hour" as const,
     };
   }
