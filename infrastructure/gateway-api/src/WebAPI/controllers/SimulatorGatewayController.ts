@@ -4,6 +4,7 @@ import {
   SimulationRequestDTO,
   SimulatorGatewayService,
 } from "../../Services/domains/SimulatorGatewayService";
+import { ReqParams } from "../../Domain/types/ReqParams";
 
 export class SimulatorGatewayController {
   private readonly router: Router;
@@ -49,7 +50,7 @@ export class SimulatorGatewayController {
     }
   }
 
-  private async getSimulation(req: Request, res: Response): Promise<void> {
+  private async getSimulation(req: Request<ReqParams<'id'>>, res: Response): Promise<void> {
     try {
       const result = await this.simulatorService.getSimulation(req.params.id);
       res.status(200).json(result);
@@ -68,7 +69,7 @@ export class SimulatorGatewayController {
     }
   }
 
-  private async stopSimulation(req: Request, res: Response): Promise<void> {
+  private async stopSimulation(req: Request<ReqParams<'id'>>, res: Response): Promise<void> {
     try {
       const result = await this.simulatorService.stopSimulation(req.params.id);
       res.status(200).json(result);

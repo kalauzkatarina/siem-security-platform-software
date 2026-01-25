@@ -1,5 +1,6 @@
 import { Request, Response, Router } from "express";
 import { IGatewayService } from "../../Domain/services/IGatewayService";
+import { ReqParams } from "../../Domain/types/ReqParams";
 
 export class StorageGatewayController {
   private readonly router: Router;
@@ -46,7 +47,7 @@ export class StorageGatewayController {
     }
   }
 
-  private async downloadArchive(req: Request, res: Response) {
+  private async downloadArchive(req: Request<ReqParams<'id'>>, res: Response) {
     try {
       const id = req.params.id;
       const fileBuffer = await this.gatewayService.downloadArchive(id);
