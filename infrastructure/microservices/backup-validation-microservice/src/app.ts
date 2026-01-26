@@ -44,8 +44,6 @@ void (async () => {
 
   app.use("/api/v1", backupController.getRouter());
 
-  await backupValidationService.runValidation();
-
   setInterval(async () => {
     console.log("Starting automatic Backup Validation...");
     await backupValidationService.runValidation();

@@ -13,7 +13,7 @@ export class BackupGatewayController {
     }
 
     private initializeRoutes(): void {
-        this.router.get("/backup/run", /*this.authenticate,*/ this.runValidation.bind(this));
+        this.router.post("/backup/validate", /*this.authenticate,*/ this.runValidation.bind(this));
         this.router.get("/backup/logs", /*this.authenticate,*/ this.getAllLogs.bind(this));
         this.router.get("/backup/last", /*this.authenticate,*/ this.getLastValidation.bind(this));
         this.router.get("/backup/summary", /*this.authenticate,*/ this.getSummary.bind(this));
