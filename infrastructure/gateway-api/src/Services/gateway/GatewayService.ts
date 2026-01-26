@@ -91,8 +91,8 @@ export class GatewayService implements IGatewayService {
   }
 
   // Parser
-  async log(eventMessage: string, eventSource: string): Promise<EventDTO> {
-    return this.parserService.log(eventMessage, eventSource);
+  async log(eventMessage: string, eventSource: string, ipAddress?: string): Promise<EventDTO> {
+    return this.parserService.log(eventMessage, eventSource, ipAddress);
   }
 
   async getAllParserEvents(): Promise<ParserEventDto[]> {
