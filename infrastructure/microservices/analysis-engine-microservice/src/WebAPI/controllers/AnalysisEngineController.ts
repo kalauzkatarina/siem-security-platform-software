@@ -18,7 +18,7 @@ export class AnalysisEngineController {
 
     private async processEvent(req: Request, res: Response): Promise<void> {
         try {
-            // const rawMessage = req.body.message as string;
+             const rawMessage = req.body.message as string;
 
             // if (!rawMessage || rawMessage.trim().length === 0) {
             //     res.status(400).json({ error: "Message is required" });
@@ -48,7 +48,7 @@ export class AnalysisEngineController {
                 return;
             }
 
-            const deletedCount = await this.correlationService.deleteCorrelationsByEventIds(eventIds);
+            const deletedCount = 0//await this.correlationService.deleteCorrelationsByEventIds(eventIds);
 
             if (deletedCount === 0) {
                 res.status(204).send();

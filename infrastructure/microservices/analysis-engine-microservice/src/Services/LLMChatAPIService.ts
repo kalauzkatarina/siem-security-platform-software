@@ -1,12 +1,9 @@
-// src/Services/LLMChatAPIService.ts
-
 import axios, { AxiosError } from "axios";
 import dotenv from "dotenv";
 import { ILLMChatAPIService } from "../Domain/services/ILLMChatAPIService";
 import { ILoggerService } from "../Domain/services/ILoggerService";
 import { ChatMessage } from "../Domain/types/ChatMessage";
 import { EventDTO } from "../Domain/types/EventDTO";
-import { CorrelationDTO } from "../Domain/types/CorrelationDTO";
 import { Result } from "../Domain/types/Result";
 import { JsonObject, JsonValue } from "../Domain/types/JsonValue";
 import { extractJson } from "../Infrastructure/parsers/extractJson";
@@ -16,6 +13,7 @@ import { EventResponseSchema } from "../Infrastructure/schemas/EventResponse.sch
 import { CorrelationResponseSchema } from "../Infrastructure/schemas/CorrelationResponse.schema";
 import { NORMALIZATION_PROMPT } from "../Infrastructure/prompts/normalization.prompt";
 import { CORRELATION_PROMPT } from "../Infrastructure/prompts/correlation.prompt";
+import { CorrelationCandidate } from "../Domain/types/CorrelationCandidate";
 
 dotenv.config();
 
@@ -94,7 +92,7 @@ export class LLMChatAPIService implements ILLMChatAPIService {
   // =========================================================
   // CORRELATION (CorrelationDTO[])
   // =========================================================
-  public async sendCorrelationPrompt(rawMessage: string): Promise<CorrelationDTO[]> {
+  public async sendCorrelationPrompt(rawMessage: string): Promise<CorrelationCandidate[]> {
     const input = typeof rawMessage === "string" ? rawMessage.trim() : "";
     if (input.length === 0) {
       await this.loggerService.warn("[LLM] Correlation skipped: empty input");

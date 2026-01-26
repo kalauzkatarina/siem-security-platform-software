@@ -61,8 +61,6 @@ const correlationMapRepo: Repository<CorrelationEventMap> = Db.getRepository(Cor
 const llmChatAPIService: ILLMChatAPIService = new LLMChatAPIService(loggerService);
 
 const correlationService: ICorrelationService = new CorrelationService(
-  correlationRepo,
-  correlationMapRepo,
   llmChatAPIService,
   loggerService
 );
@@ -80,7 +78,7 @@ app.use("/api/v1", analysisEngineController.getRouter());
 
 export function startRecurringJobs(): void {
   const recurringCorrelationJob = new RecurringCorrelationJob(correlationService, loggerService);
-  const intervalMs = 15 * 60 * 1000;
+  const intervalMs = 60 * 60 * 1000;
 
   const intervalScheduler = new IntervalScheduler(recurringCorrelationJob, intervalMs, loggerService);
   intervalScheduler.start();

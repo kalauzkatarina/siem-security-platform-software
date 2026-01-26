@@ -22,6 +22,11 @@ export const CorrelationResponseSchema = {
         enum: ["LOW", "MEDIUM", "HIGH", "CRITICAL"],
         description: "Assessed severity level.",
       },
+      category: {
+        type: "string",
+        description:
+          "Correlation category. Must be one of: DDOS, BRUTE_FORCE, MALWARE, PHISHING, EXPLOITATION, DATA_EXFILTRATION, MISCONFIGURATION, POLICY_VIOLATION, OTHER.",
+      },
       correlatedEventIds: {
         type: "array",
         items: { type: "integer" },
@@ -33,6 +38,7 @@ export const CorrelationResponseSchema = {
       "confidence",
       "description",
       "severity",
+      "category",
       "correlatedEventIds",
     ],
   },

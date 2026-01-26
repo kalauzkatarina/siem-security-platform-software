@@ -1,202 +1,222 @@
-import { In, Repository } from "typeorm";
+// src/Services/CorrelationService.ts
+
 import { AxiosInstance } from "axios";
 import { ICorrelationService } from "../Domain/services/ICorrelationService";
 import { ILLMChatAPIService } from "../Domain/services/ILLMChatAPIService";
-import { Correlation } from "../Domain/models/Correlation";
-import { CorrelationEventMap } from "../Domain/models/CorrelationEventMap";
+import { ILoggerService } from "../Domain/services/ILoggerService";
 import { CorrelationDTO } from "../Domain/types/CorrelationDTO";
 import { QueryEventDTO } from "../Domain/types/QueryEventDTO";
-import { createAxiosClient } from "../Infrastructure/helpers/axiosClient";
-import { extractNumericEventIds } from "../Infrastructure/helpers/extractNumericEventIds";
-import { parseQueryEvents } from "../Infrastructure/parsers/QueryEventParser";
-import { ILoggerService } from "../Domain/services/ILoggerService";
 import { JsonValue } from "../Domain/types/JsonValue";
+import { Result } from "../Domain/types/Result";
+import { createAxiosClient } from "../Infrastructure/helpers/axiosClient";
+import { parseQueryEvents } from "../Infrastructure/parsers/QueryEventParser";
+import { CorrelationCandidate } from "../Domain/types/CorrelationCandidate";
 
 export class CorrelationService implements ICorrelationService {
-  private readonly alertClient: AxiosInstance;
   private readonly queryClient: AxiosInstance;
+  private readonly alertClient: AxiosInstance;
 
-  private readonly confidenceThreshold =
-    Number(process.env.CORRELATION_CONFIDENCE_THRESHOLD ?? 0.51);
-
-  private readonly queryEventsPath =
-    process.env.QUERY_EVENTS_PATH ?? "/query/oldEvents/1";
+  private readonly queryEventsPath: string;
+  private readonly alertPath: string;
+  private readonly confidenceThreshold: number;
 
   public constructor(
-    private readonly correlationRepo: Repository<Correlation>,
-    private readonly correlationEventMap: Repository<CorrelationEventMap>,
     private readonly llmChatApiService: ILLMChatAPIService,
     private readonly loggerService: ILoggerService
   ) {
     this.queryClient = createAxiosClient(process.env.QUERY_SERVICE_API ?? "");
     this.alertClient = createAxiosClient(process.env.ALERT_SERVICE_API ?? "");
+
+    this.queryEventsPath = process.env.QUERY_EVENTS_PATH ?? "/query/oldEvents/1";
+    this.alertPath = process.env.ALERT_CORRELATION_PATH ?? "/alerts/correlation";
+    this.confidenceThreshold = Number(process.env.CORRELATION_CONFIDENCE_THRESHOLD ?? 0.51);
   }
 
   public async findCorrelations(): Promise<void> {
-    await this.loggerService.info("[CorrelationService] Finding correlations");
+    await this.loggerService.info("[CorrelationService] Starting correlation run");
 
-    // 1) Fetch events 
-    const eventsJsonRes = await this.fetchEvents();
+    const eventsJsonRes = await this.fetchEventsJson();
     if (!eventsJsonRes.ok) {
-      await this.loggerService.error("[CorrelationService] Failed to fetch events", {
+      await this.loggerService.error("[CorrelationService] Failed to fetch events from Query Service", {
+        path: this.queryEventsPath,
         error: eventsJsonRes.error,
       });
       return;
     }
 
-    const eventsJson = eventsJsonRes.value;
-
-    // 2) Parse + sanitize into stable DTO 
-    const eventsDto = parseQueryEvents(eventsJson);
-
-    if (eventsDto.length === 0) {
-      await this.loggerService.warn("[CorrelationService] Query returned 0 parsable events");
+    const eventsRes = this.safeParseEvents(eventsJsonRes.value);
+    if (!eventsRes.ok) {
+      await this.loggerService.error("[CorrelationService] Failed to parse Query events", {
+        error: eventsRes.error,
+      });
       return;
     }
 
-    // 3) Ask LLM 
-    const candidates = await this.llmChatApiService.sendCorrelationPrompt(
-      JSON.stringify(eventsDto, null, 2)
-    );
+    const events = eventsRes.value;
+    if (events.length === 0) {
+      await this.loggerService.info("[CorrelationService] No events to correlate");
+      return;
+    }
 
+    const candidatesRes = await this.fetchCandidatesFromLLM(events);
+    if (!candidatesRes.ok) {
+      await this.loggerService.error("[CorrelationService] Failed to fetch correlation candidates from LLM", {
+        error: candidatesRes.error,
+      });
+      return;
+    }
+
+    const candidates = candidatesRes.value;
     if (candidates.length === 0) {
-      await this.loggerService.info("[CorrelationService] No correlation candidates returned");
+      await this.loggerService.info("[CorrelationService] LLM returned 0 correlation candidates");
       return;
     }
-
-    // 4) Policy + persist
-    const inputIdsArray = extractNumericEventIds(eventsJson);
-    const inputEventIds = new Set<number>(inputIdsArray);
 
     for (const candidate of candidates) {
-      if (!this.passesPolicy(candidate, inputEventIds)) continue;
-      await this.processCandidate(candidate, eventsDto);
+      if (!this.passesPolicy(candidate)) continue;
+
+      const dto = this.buildCorrelationDto(candidate, events);
+      await this.notifyAlertService(dto);
     }
+
+    await this.loggerService.info("[CorrelationService] Correlation run completed");
   }
 
-  private async fetchEvents(): Promise<
-    { readonly ok: true; readonly value: JsonValue } | { readonly ok: false; readonly error: string }
-  > {
+  private async fetchEventsJson(): Promise<Result<JsonValue>> {
     try {
       const res = await this.queryClient.get(this.queryEventsPath);
       return { ok: true, value: res.data as JsonValue };
-    } catch (e) {
-      return { ok: false, error: "query_service_fetch_failed" };
+    } catch {
+      return { ok: false, error: "query_fetch_failed" };
     }
   }
 
-  private async processCandidate(candidate: CorrelationDTO, events: QueryEventDTO[]): Promise<void> {
+  private safeParseEvents(raw: JsonValue): Result<QueryEventDTO[]> {
     try {
-      const correlationId = await this.saveCorrelation(candidate);
-
-      const firstId = candidate.correlatedEventIds[0];
-      const ipAddress = this.resolveIp(events, firstId);
-
-      const enriched: CorrelationDTO = {
-        ...candidate,
-        id: correlationId,
-        ipAddress,
-      };
-
-      await this.sendCorrelationAlertSafe(enriched);
-
-      await this.loggerService.info("[CorrelationService] Correlation stored", {
-        correlationId,
-      });
-    } catch (e) {
-      console.log(e);
-      await this.loggerService.error("[CorrelationService] Failed to process candidate", {
-        error: "process_candidate_failed",
-      });
+      const events = parseQueryEvents(raw);
+      return { ok: true, value: events };
+    } catch {
+      // parseQueryEvents ideally never throws, but we still comply with "never throw"
+      return { ok: false, error: "parse_query_events_failed" };
     }
   }
 
-  private resolveIp(events: QueryEventDTO[], eventId: number | undefined): string {
-    if (typeof eventId !== "number") return "unknown";
-    const match = events.find((e) => e.id === eventId);
-    const ip = match?.ipAddress;
-    return typeof ip === "string" && ip.trim().length > 0 ? ip : "unknown";
+  private async fetchCandidatesFromLLM(events: QueryEventDTO[]): Promise<Result<CorrelationCandidate[]>> {
+    try {
+      const payload = JSON.stringify(events, null, 2);
+      const candidates = await this.llmChatApiService.sendCorrelationPrompt(payload);
+      return { ok: true, value: candidates };
+    } catch {
+      return { ok: false, error: "llm_failed" };
+    }
   }
 
-  // ------------------------------------------------------------------
-  // POLICY VALIDATION
-  // ------------------------------------------------------------------
-  private passesPolicy(candidate: CorrelationDTO, inputEventIds: Set<number>): boolean {
+  private passesPolicy(candidate: CorrelationCandidate): boolean {
     if (!candidate.correlationDetected) return false;
     if (candidate.confidence < this.confidenceThreshold) return false;
     if (candidate.correlatedEventIds.length < 2) return false;
-
-    if (
-      inputEventIds.size > 0 &&
-      candidate.correlatedEventIds.some((id) => !inputEventIds.has(id))
-    ) {
-      return false;
-    }
-
     return true;
   }
 
-  // ------------------------------------------------------------------
-  // OUTBOUND INTEGRATIONS
-  // ------------------------------------------------------------------
-  private async sendCorrelationAlertSafe(correlation: CorrelationDTO): Promise<void> {
-    try {
-      await this.alertClient.post("/alerts/correlation", {
-        correlationId: correlation.id,
-        description: correlation.description,
-        severity: correlation.severity,
-        correlatedEventIds: correlation.correlatedEventIds,
-      });
-    } catch (e) {
-      await this.loggerService.warn("[CorrelationService] Failed to send correlation alert", {
-        correlationId: correlation.id,
+  private buildCorrelationDto(candidate: CorrelationCandidate, events: QueryEventDTO[]): CorrelationDTO {
+    const now = new Date();
+
+    const oldestRes = this.computeOldestEventTimestamp(candidate.correlatedEventIds, events);
+    const oldest = oldestRes.ok ? oldestRes.value : now;
+
+    if (!oldestRes.ok) {
+      void this.loggerService.warn("[CorrelationService] Could not compute oldestEventTimestamp; defaulting to now", {
+        reason: oldestRes.error,
+        correlatedEventIds: candidate.correlatedEventIds,
       });
     }
+
+    const ipAddress = this.resolveIpAddress(candidate.correlatedEventIds, events);
+
+    return {
+      correlationDetected: candidate.correlationDetected,
+      description: candidate.description,
+      timestamp: now,
+      oldestEventTimestamp: oldest,
+      category: candidate.category,
+      confidence: candidate.confidence,
+      severity: candidate.severity,
+      correlatedEventIds: candidate.correlatedEventIds,
+      ipAddress,
+    };
   }
 
-  private async saveCorrelation(dto: CorrelationDTO): Promise<number> {
-    const correlation = this.correlationRepo.create({
+  private resolveIpAddress(eventIds: number[], events: QueryEventDTO[]): string | undefined {
+    if (eventIds.length === 0) return undefined;
+
+    const firstId = eventIds[0];
+
+    for (const e of events) {
+      if (e.id === firstId) {
+        const ip = e.ipAddress.trim();
+        return ip.length > 0 ? ip : undefined;
+      }
+    }
+
+    return undefined;
+  }
+
+  private computeOldestEventTimestamp(eventIds: number[], events: QueryEventDTO[]): Result<Date> {
+    if (eventIds.length === 0) return { ok: false, error: "no_correlated_ids" };
+
+    const idSet = new Set<number>(eventIds);
+
+    let found = false;
+    let oldestMs: number | null = null;
+
+    for (const e of events) {
+      if (!idSet.has(e.id)) continue;
+      found = true;
+
+      const msRes = this.parseDateMs(e.timestamp);
+      if (!msRes.ok) continue;
+
+      if (oldestMs === null || msRes.value < oldestMs) oldestMs = msRes.value;
+    }
+
+    if (!found) return { ok: false, error: "no_matching_events" };
+    if (oldestMs === null) return { ok: false, error: "no_valid_timestamps" };
+
+    return { ok: true, value: new Date(oldestMs) };
+  }
+
+  private parseDateMs(raw: string): Result<number> {
+    const d = new Date(raw);
+    const ms = d.getTime();
+    if (Number.isNaN(ms)) return { ok: false, error: "invalid_timestamp" };
+    return { ok: true, value: ms };
+  }
+
+  private async notifyAlertService(dto: CorrelationDTO): Promise<void> {
+    const body = {
+      correlationDetected: dto.correlationDetected,
       description: dto.description,
-      timestamp: dto.timestamp,
-      isAlert: dto.correlationDetected,
-    });
-
-    const saved = await this.correlationRepo.save(correlation);
-
-    const maps = dto.correlatedEventIds.map((eventId) =>
-      this.correlationEventMap.create({
-        correlation_id: saved.id,
-        event_id: eventId,
-      })
-    );
-
-    await this.correlationEventMap.save(maps);
-
-    return saved.id;
-  }
-
-  public async deleteCorrelationsByEventIds(eventIds: number[]): Promise<number> {
-    if (eventIds.length === 0) return 0;
+      timestamp: dto.timestamp.toISOString(),
+      oldestEventTimestamp: dto.oldestEventTimestamp.toISOString(),
+      category: dto.category,
+      confidence: dto.confidence,
+      severity: dto.severity,
+      correlatedEventIds: dto.correlatedEventIds,
+      ipAddress: dto.ipAddress ?? "unknown",
+    };
 
     try {
-      const maps = await this.correlationEventMap.find({
-        where: { event_id: In(eventIds) },
+      await this.alertClient.post(this.alertPath, body);
+      await this.loggerService.info("[CorrelationService] Alert Service notified", {
+        category: dto.category,
+        severity: dto.severity,
       });
-
-      const ids = [...new Set(maps.map((m) => m.correlation_id))];
-      if (ids.length === 0) return 0;
-
-      await this.correlationRepo.manager.transaction(async (manager) => {
-        await manager.delete(CorrelationEventMap, { correlation_id: In(ids) });
-        await manager.delete(Correlation, { id: In(ids) });
+    } catch(e) {
+      console.error(e);
+      await this.loggerService.warn("[CorrelationService] Failed to notify Alert Service", {
+        path: this.alertPath,
+        category: dto.category,
       });
-
-      return ids.length;
-    } catch (e) {
-      await this.loggerService.error("[CorrelationService] deleteCorrelationsByEventIds failed", {
-        error: "delete_failed",
-      });
-      return 0;
     }
   }
 }
