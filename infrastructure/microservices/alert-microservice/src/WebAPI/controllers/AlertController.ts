@@ -8,10 +8,11 @@ import { CreateAlertDTO } from "../../Domain/DTOs/CreateAlertDTO";
 import { ResolveAlertDTO } from "../../Domain/DTOs/ResolveAlertDTO";
 import { CreateAlertFromCorrelationDTO } from "../../Domain/DTOs/CreateAlertFromCorrelationDTO";
 import { AlertQueryDTO } from "../../Domain/DTOs/AlertQueryDTO";
-import { 
-  validateAlertId, 
-  validateCreateAlertDTO, 
-  validateAlertStatus, 
+import { toHourlyWindowStartUtc, formatWindowStartIsoUtc, formatWindowStartHumanUtc } from "../../Utils/Time/CorrelationWindow";
+import {
+  validateAlertId,
+  validateCreateAlertDTO,
+  validateAlertStatus,
   validateAlertSeverity,
   validateResolveAlertDTO,
   validateCreateAlertFromCorrelationDTO
@@ -75,14 +76,25 @@ export class AlertController {
         return;
       }
 
+      const oldestEventTimestamp = new Date(data.oldestEventTimestamp);
+
+      const windowStartUtc = toHourlyWindowStartUtc(oldestEventTimestamp);
+      const windowLabel = formatWindowStartHumanUtc(windowStartUtc);
+      const windowIso = formatWindowStartIsoUtc(windowStartUtc);
+
+
+      const windowKey = windowIso.replace(/[:.]/g, "-");
+
       const alertData: CreateAlertDTO = {
-        title: `Security Correlation Detected #${data.correlationId}`,
+        title: `Security Correlation Detected (${data.category}) - window ${windowLabel}`,
         description: data.description,
         severity: data.severity || AlertSeverity.HIGH,
         correlatedEvents: data.correlatedEventIds,
         source: "AnalysisEngine",
-        detectionRule: `correlation_${data.correlationId}`,
-        ipAddress: data.ipAddress
+        detectionRule: `correlation_${data.category}_${windowKey}`,
+        ipAddress: data.ipAddress,
+        category: data.category,
+        oldestEventTimestamp
       };
 
       const alertValidation = validateCreateAlertDTO(alertData);
@@ -91,9 +103,15 @@ export class AlertController {
         return;
       }
 
-      await this.logger.log(`Creating alert from correlation #${data.correlationId}`);
+      await this.logger.log(`Creating alert from correlation category=${data.category} window=${windowIso}`);
 
       const alert = await this.alertService.createAlert(alertData);
+
+      if (alert.id === -1) {
+        await this.logger.log("Correlation alert creation failed (repo error). Not broadcasting.");
+        res.status(500).json({ message: "Service error: Failed to create alert from correlation." });
+        return;
+      }
       await this.notificationService.broadcastNewAlert(alert);
 
       res.status(201).json({ success: true, alert });
@@ -130,7 +148,7 @@ export class AlertController {
   private async getAllAlerts(req: Request, res: Response): Promise<void> {
     try {
       await this.logger.log("Fetching all alerts");
-      
+
       const alerts = await this.alertService.getAllAlerts();
       res.status(200).json(alerts);
     } catch (err: any) {

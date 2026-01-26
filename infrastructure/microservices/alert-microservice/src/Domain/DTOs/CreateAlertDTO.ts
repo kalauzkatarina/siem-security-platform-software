@@ -1,3 +1,4 @@
+import { AlertCategory } from "../enums/AlertCategory";
 import { AlertSeverity } from "../enums/AlertSeverity";
 
 export interface CreateAlertDTO {
@@ -8,4 +9,6 @@ export interface CreateAlertDTO {
   source: string;
   detectionRule?: string; 
   ipAddress?: string;
+  category: AlertCategory;
+  oldestEventTimestamp: Date;
 }
