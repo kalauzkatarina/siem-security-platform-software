@@ -43,6 +43,27 @@ app.use(
     methods: corsMethods,
   }),
 );
+
+app.get("/health", async (req, res) => {
+  try {
+    // Proveravamo bazu
+    await MySQLDb.query("SELECT 1");
+    
+    res.status(200).json({
+      status: "OK",
+      service: "QueryService",
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime()
+    });
+  } catch (err) {
+    res.status(503).json({ 
+      status: "DOWN", 
+      service: "QueryService",
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
 let loggerService: LoggerService;
 let queryRepositoryService: QueryRepositoryService;
 let queryAlertRepositoryService : QueryAlertRepositoryService; 

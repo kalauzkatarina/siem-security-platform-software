@@ -32,6 +32,26 @@ app.use(cors({
   methods: corsMethods,
 }));
 
+app.get("/health", async (req, res) => {
+  try {
+    // Provera baze: 
+    await Db.query("SELECT 1");
+
+    res.status(200).json({
+      status: "OK",
+      service: "StorageLogService", 
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime()
+    });
+  } catch (err) {
+    res.status(503).json({
+      status: "DOWN",
+      service: "StorageLogService",
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
 
 // inicijalizacija baze
 void (async () => {

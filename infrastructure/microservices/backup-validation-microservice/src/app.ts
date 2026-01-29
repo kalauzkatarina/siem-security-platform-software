@@ -28,6 +28,27 @@ app.use(cors({
   methods: corsMethods,
 }));
 
+// --- HEALTH CHECK START ---
+app.get("/health", async (req, res) => {
+  try {
+    // Provera baze 
+    await Db.query("SELECT 1");
+
+    res.status(200).json({
+      status: "OK",
+      service: "BackupValidationService", 
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime()
+    });
+  } catch (err) {
+    res.status(503).json({
+      status: "DOWN",
+      service: "BackupValidationService",
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
 const BACKUP_INTERVAL = 6 * 60 * 60 * 1000; // svakih sest sati
 
 // inicijalizacija baze

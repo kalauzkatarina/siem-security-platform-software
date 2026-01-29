@@ -32,6 +32,27 @@ app.use(express.json());
 
 initialize_database();
 
+app.get("/health", async (req, res) => {
+  try {
+    // Provera baze
+    await Db.query("SELECT 1");
+
+    res.status(200).json({
+      status: "OK",
+      service: "ParserService", 
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime()
+    });
+  } catch (err) {
+    // Ako baza padne, ceo status je DOWN sa kodom 503
+    res.status(503).json({
+      status: "DOWN",
+      service: "ParserService",
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
 // ORM Repositories
 const parserEventRepository: Repository<ParserEvent> = Db.getRepository(ParserEvent);
 

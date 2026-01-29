@@ -44,6 +44,27 @@ export async function createApp(): Promise<Express> {
   app.use(express.json());
   // TODO: add CORS setup
 
+    app.get("/health", async (req, res) => {
+    try {
+      // Provera baze: 
+      await Db.query("SELECT 1");
+
+      res.status(200).json({
+        status: "OK",
+        service: "SecurityMaturityService", 
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime()
+      });
+    } catch (err) {
+      // Ako baza padne, ceo status je DOWN sa kodom 503
+      res.status(503).json({
+        status: "DOWN",
+        service: "SecurityMaturityService",
+        timestamp: new Date().toISOString()
+      });
+    }
+  });
+
   try {
     // 1) Database initialization
     const dbOk = await initialize_database();
@@ -52,6 +73,8 @@ export async function createApp(): Promise<Express> {
       attachDegradedRoutes(app);
       return app;
     }
+
+
 
     // 2) Repositories
     const kpiRepo: Repository<KpiSnapshot> = Db.getRepository(KpiSnapshot);
