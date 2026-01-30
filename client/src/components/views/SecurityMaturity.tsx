@@ -7,6 +7,8 @@ import MaturityScoreCard from "../security-maturity/MaturityScoreCard";
 import MaturityKpiGrid from "../security-maturity/MaturityKpiGrid";
 import { SecurityMaturityTrendDTO } from "../../models/security-maturity/SecurityMaturityTrendDTO";
 import SecurityMaturityTrend from "../security-maturity/SecurityMaturityTrend";
+import IncidentsByCategoryChart from "../security-maturity/IncidentsByCategoryChart";
+import { AlertCategory } from "../../enums/AlertCategory";
 
 const testSecurityMaturity: SecuirtyMaturityCurrentDTO = {
   scoreValue: 72,
@@ -33,7 +35,6 @@ const testSecurityMaturityTrend: SecurityMaturityTrendDTO[] = [
   { bucketStart: "2024-04-01", value: 69, sampleCount: 180 },
   { bucketStart: "2024-05-01", value: 72, sampleCount: 200 },
 ];
-
 
 
 export default function SecurityMaturity({
@@ -72,6 +73,13 @@ export default function SecurityMaturity({
         return <div className="p-6">No security maturity data</div>;
     }
 
+    const incidentsByCategory = Object.entries(summary.categoryCounts).map(
+      ([category, count]) => ({
+        category: category as AlertCategory,
+        count
+      })
+    );
+
     return (
     <div className="p-6">
       <div className="grid grid-cols-2 gap-5">
@@ -100,6 +108,14 @@ export default function SecurityMaturity({
           </h2>
           
           <SecurityMaturityTrend data={trend} />
+        </div>
+
+        <div className="flex flex-col items-center rounded-lg border-2 border-[#282A28] bg-[#1f2123] p-6">
+          <h2 className="text-sm uppercase tracking-widest text-gray-400">
+            Incidents By Category
+          </h2>
+          
+          <IncidentsByCategoryChart data={incidentsByCategory} />
         </div>
     </div>
   );
