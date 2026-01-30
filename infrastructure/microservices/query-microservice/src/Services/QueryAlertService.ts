@@ -17,6 +17,7 @@ export class QueryAlertService implements IQueryAlertService {
     ): Promise<PaginatedAlertsDTO> {
         const key: string = alertQueryDTOToQuery(alertQueryDTO);
         const cacheResult = await this.queryAlertRepositoryService.findByKey(key);
+        console.log(cacheResult);
         const lastProcessedId =
             this.queryAlertRepositoryService.getLastProcessedId();
 

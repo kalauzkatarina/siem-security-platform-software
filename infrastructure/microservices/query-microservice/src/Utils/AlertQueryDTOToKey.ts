@@ -3,7 +3,6 @@ import { AlertQueryDTO } from "../Domain/DTOs/AlertQueryDTO";
 export function alertQueryDTOToQuery(alertQueryDTO: AlertQueryDTO) : string{
     const filters: string[] = [];
 
-    
     if (alertQueryDTO.severity) {
         filters.push(`severity=${alertQueryDTO.severity}`);
     }

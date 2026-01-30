@@ -7,7 +7,7 @@ export function ExpandedRow({ expanded, e, parserApi }: ExpandedProps) {
     const token = "token";      // TODO: DELETE AFTER TESTING!
     const [rawMsg, setRawMsg] = useState<string>();
     
-    useEffect(() => {
+  /*  useEffect(() => {
         // if (!e?.id) return; // čekaj dok e.id postoji
         const loadEventRawMessage = async () => {
             console.log("Event ",e);
@@ -21,7 +21,7 @@ export function ExpandedRow({ expanded, e, parserApi }: ExpandedProps) {
     };
 
     void loadEventRawMessage();
-}, [ token]); 
+}, [ token]); */
 
     return (
         <>

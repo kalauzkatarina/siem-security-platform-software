@@ -92,11 +92,10 @@ void (async () => {
   const queryStatisticsService = new QueryStatisticsService(loggerService, eventRepository, alertRepository);
 
   // WebAPI rute
-
   const queryController = new QueryController(queryService, queryRepositoryService, queryAlertRepositoryService);
-
   const queryStatisticsController = new QueryStatisticsController(queryStatisticsService);
   const queryAlertController = new QueryAlertContoller(queryAlertService, queryAlertRepositoryService);
+  
   // Registracija ruta
   app.use('/api/v1', queryController.getRouter());
   app.use('/api/v1', queryStatisticsController.getRouter());
