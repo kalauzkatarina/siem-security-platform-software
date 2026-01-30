@@ -1,7 +1,10 @@
+import { AlertDTO } from "../DTOs/AlertDTO";
+import { AlertQueryDTO } from "../DTOs/AlertQueryDTO";
 import { DistributionDTO } from "../DTOs/DistributionDTO";
 import { EventDTO } from "../DTOs/EventDTO";
 import { EventsResultDTO } from "../DTOs/EventsResultDTO";
 import { HourlyStatisticsDTO } from "../DTOs/HourlyStatisticsDTO";
+import { PaginatedAlertsDTO } from "../DTOs/PaginatedAlertsDTO";
 import { RiskEntityType } from "../enums/RiskEntityType";
 
 export interface IQueryGatewayService {
@@ -28,4 +31,8 @@ export interface IQueryGatewayService {
   getUniqueIpsCount(serviceName: string): Promise<number>;
   getUniqueServices(): Promise<string[]>;
   getUniqueIps(): Promise<string[]>;
+  getOldAlerts(hours: number): Promise<AlertDTO[]>;
+  getAllAlerts(): Promise<AlertDTO[]>;
+  searchAlerts(alertQueryDTO: AlertQueryDTO): Promise<PaginatedAlertsDTO>;
+  getAlertsCount(): Promise<number>;
 }

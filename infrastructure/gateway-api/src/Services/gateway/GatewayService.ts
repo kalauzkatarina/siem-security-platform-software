@@ -195,6 +195,22 @@ export class GatewayService implements IGatewayService {
     return this.queryService.getAlertStatistics();
   }
 
+  async getOldAlerts(hours: number): Promise<AlertDTO[]> {
+    return this.queryService.getOldAlerts(hours);
+  }
+
+  async getAllAlertsFromQuery(): Promise<AlertDTO[]> {
+    return this.queryService.getAllAlerts();
+  }
+
+  async searchAlertsFromQuery(alertQueryDTO: AlertQueryDTO): Promise<PaginatedAlertsDTO> {
+    return this.queryService.searchAlerts(alertQueryDTO);
+  }
+
+  async getAlertsCountFromQuery(): Promise<number> {
+    return this.queryService.getAlertsCount();
+  }
+
   async getTotalEventCount(entityType: RiskEntityType, entityId: string): Promise<number> {
     return this.queryService.getTotalEventCount(entityType, entityId);
   }

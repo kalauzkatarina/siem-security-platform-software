@@ -15,7 +15,7 @@ export class QueryAlertContoller{
     private initializeRoutes() {
         this.router.get("/query/oldAlerts/:hours", this.getOldAlerts.bind(this));
         this.router.get("/query/alerts", this.getAllAlerts.bind(this));
-        this.router.post("/query/search", this.searchAlerts.bind(this));
+        this.router.post("/query/searchAlerts", this.searchAlerts.bind(this));
         this.router.get("/query/alertsCount", this.getAlertsCount.bind(this));
     }
     private async getOldAlerts(req: Request, res: Response): Promise<void>{
@@ -44,7 +44,6 @@ export class QueryAlertContoller{
     private async searchAlerts(req: Request, res: Response): Promise<void> {
         try {
             const alertQueryDTO = req.body;
-            console.log(alertQueryDTO);
             const results = await this.queryAlertService.searchAlerts(alertQueryDTO);
             res.status(200).json(results);
         } catch (err) {
