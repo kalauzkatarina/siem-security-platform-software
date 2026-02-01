@@ -180,6 +180,20 @@ export default function Sidebar({ setSideMenuPage }: SidebarProps) {
                             Backup
                             <MdKeyboardArrowRight size={20}/>
                     </button>
+                    <button
+                        className={itemClass(10)}
+                        style={{ marginLeft: '20px', borderRadius: '0.75rem'}}
+                        onClick={() => {
+                            setSideMenuPage(10);
+                            setSelectedButton(10);
+                        }}
+                        onMouseEnter={() => setHover(10)}
+                        onMouseLeave={() => setHover(null)}
+                    >
+                        <PiShieldCheck size={22} />
+                        Integrity
+                        <MdKeyboardArrowRight size={20}/>
+                    </button>
                 </div>
             )}
         </div>

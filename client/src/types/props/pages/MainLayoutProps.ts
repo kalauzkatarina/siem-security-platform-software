@@ -7,6 +7,8 @@ import { DesktopNotificationService } from "../../../services/DesktopNotificatio
 import { IRiskScoreAPI } from "../../../api/risk-score/IRiskScoreAPI";
 import { IFirewallAPI } from "../../../api/firewall/IFirewallAPI";
 import { IBackupValidationAPI } from "../../../api/backup/IBackupValdationAPI";
+import { IIntegrityAPI } from "../../../api/integrity/IIntegrityAPI";
+import { IInsiderThreatAPI } from "../../../api/insider-threat/IInsiderThreatAPI";
 
 export interface MainLayoutProps {
     alertsAPI: IAlertAPI;
@@ -18,4 +20,5 @@ export interface MainLayoutProps {
     riskScoreApi: IRiskScoreAPI;
     firewallApi: IFirewallAPI;
     backupApi: IBackupValidationAPI;
+    integrityApi: IIntegrityAPI;
 }
