@@ -7,6 +7,7 @@ import BackupChart from "../backup/BackupChart";
 import BackupLogsToolbar from "../backup/BackupLogsToolbar";
 import BackupLogsTable from "../tables/backup/BackupLogsTable";
 import { BackupValidationLogDTO } from "../../models/backup/BackupValidationLogDTO";
+import BackupValidationButton from "../backup/BackupValidationButton";
 
 export default function Backup({ backupApi}: BackupProps) {
     const [stats, setStats] = useState<BackupValidationResultDTO | null>(null);
@@ -92,6 +93,16 @@ export default function Backup({ backupApi}: BackupProps) {
                         success: stats?.successRuns ?? 0,
                         failed: stats?.failedRuns ?? 0
                     }}/>
+                    <BackupValidationButton 
+                        backupApi={backupApi}
+                        onSuccess={async () => {
+                            const summary = await backupApi.getSummary();
+                            const logsResponse = await backupApi.getAllLogs();
+                            setStats(summary);
+                            setAllLogs(logsResponse ?? []);
+                            setLogs(logsResponse ?? []);
+                        }}
+                        />
                 </div>
 
                 <div className="flex flex-col min-h-[300px] rounded-lg border-2 border-[#282A28] bg-[#1f2123] p-3">

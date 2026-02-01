@@ -1,3 +1,4 @@
+import { AlertCategory } from "../enums/AlertCategory";
 import { AlertSeverity } from "../enums/AlertSeverity";
 
 // DTO koji AnalysisEngine salje Alert servisu kada pronadje korelaciju
@@ -6,5 +7,7 @@ export interface CreateAlertFromCorrelationDTO {
   description: string;
   severity: AlertSeverity;
   correlatedEventIds: number[];
+  category: AlertCategory;
+  oldestEventTimestamp: string;
   ipAddress?: string;
 }

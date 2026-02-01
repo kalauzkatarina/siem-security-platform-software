@@ -7,6 +7,9 @@ import { EventsResultDTO } from "../../Domain/DTOs/EventsResultDTO";
 import { DistributionDTO } from "../../Domain/DTOs/DistributionDTO";
 import { HourlyStatisticsDTO } from "../../Domain/DTOs/HourlyStatisticsDTO";
 import { RiskEntityType } from "../../Domain/enums/RiskEntityType";
+import { AlertDTO } from "../../Domain/DTOs/AlertDTO";
+import { AlertQueryDTO } from "../../Domain/DTOs/AlertQueryDTO";
+import { PaginatedAlertsDTO } from "../../Domain/DTOs/PaginatedAlertsDTO";
 
 
 export class QueryGatewayService implements IQueryGatewayService {
@@ -18,7 +21,7 @@ export class QueryGatewayService implements IQueryGatewayService {
       ...defaultAxiosClient
     });
   }
-
+  
   async searchEvents(query: string, targetPage: number, limit: number): Promise<EventsResultDTO> {
     const response = await this.client.get<EventsResultDTO>("/query/search", {
       params: { q: query, p: targetPage, l: limit },
@@ -148,5 +151,24 @@ export class QueryGatewayService implements IQueryGatewayService {
   async getUniqueIps(): Promise<string[]> {
     const response = await this.client.get<string[]>("/query/statistics/uniqueIps", {});
     return response.data;
+  }
+   async getOldAlerts(hours: number): Promise<AlertDTO[]> {
+    const response = await this.client.get<AlertDTO[]>(`/query/oldAlerts/${hours}`);
+    return response.data;
+  }
+
+  async getAllAlerts(): Promise<AlertDTO[]> {
+    const response = await this.client.get<AlertDTO[]>("/query/alerts");
+    return response.data;
+  }
+
+  async searchAlerts(alertQueryDTO: AlertQueryDTO): Promise<PaginatedAlertsDTO> {
+    const response = await this.client.post<PaginatedAlertsDTO>("/query/searchAlerts", alertQueryDTO);
+    return response.data;
+  }
+
+  async getAlertsCount(): Promise<number> {
+    const response = await this.client.get<{ count: number }>("/query/alertsCount");
+    return response.data.count;
   }
 }

@@ -7,7 +7,7 @@ export class AlertServiceClient {
   public constructor(private readonly client: AxiosInstance) {}
 
   public async fetchAlerts(from: Date, to: Date): Promise<AlertForKpi[]> {
-    const res = await this.client.get<AlertPayloadDto[]>("/alerts", {
+    const res = await this.client.get<AlertPayloadDto[]>("/alerts/for-kpi", {
       params: { from: from.toISOString(), to: to.toISOString() },
     });
 

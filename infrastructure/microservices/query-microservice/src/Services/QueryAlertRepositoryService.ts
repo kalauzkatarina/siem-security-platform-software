@@ -43,17 +43,22 @@ export class QueryAlertRepositoryService implements IQueryAlertRepositoryService
         const allAlerts = await this.getAllAlerts();
         const xHoursAgo = new Date(Date.now() - hours * 60 * 60 * 1000);
         
-        const oldEvents = allAlerts.filter(alert => new Date(alert.createdAt) < xHoursAgo);
-        oldEvents.forEach(event => {
-            this.invertedIndexStructureForAlerts.removeAlertFromIndex(event.id);
+        const oldAlerts = allAlerts.filter(alert => {
+            const alertDate = alert.createdAt instanceof Date ? alert.createdAt : new Date(alert.createdAt);
+            const isOld = alertDate.getTime() <= xHoursAgo.getTime();
+            return isOld;
         });
         
-        if (oldEvents.length > 0)
+        oldAlerts.forEach(alert => {
+            this.invertedIndexStructureForAlerts.removeAlertFromIndex(alert.id);
+        });
+        
+        if (oldAlerts.length > 0)
         {
-            this.cacheAlertRepository.clear();
+            await this.cacheAlertRepository.deleteMany({});
             this.loggerService.log("Deleted old events and cleared cache.");
-        }
-        return oldEvents;
+        } 
+        return oldAlerts;
     }
     findAlerts(query: string): Set<number> {
         const resultIds = this.invertedIndexStructureForAlerts.getIdsForTokens(query);

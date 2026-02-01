@@ -11,11 +11,15 @@ import { MainLayoutProps } from '../types/props/pages/MainLayoutProps';
 import RiskScore from '../components/views/RiskScore';
 import Firewall from '../components/views/Firewall';
 import Backup from '../components/views/Backup';
+<<<<<<< HEAD
 import Integrity from '../components/views/Integrity';
 
 interface ExtendedMainLayoutProps extends MainLayoutProps {
   //insiderThreatAPI: InsiderThreatAPI;
 }
+=======
+import SecurityMaturity from '../components/views/SecurityMaturity';
+>>>>>>> 444230731870a6dc8da8d22514e62d2a5f2dcb36
 
 export default function MainLayout({
   alertsAPI,
@@ -23,13 +27,18 @@ export default function MainLayout({
   queryAPI,
   storageAPI,
   simulatorAPI,
-  insiderThreatAPI,
+  insiderThreatApi, 
   desktopNotification,
   riskScoreApi,
   firewallApi,
   backupApi,
+<<<<<<< HEAD
   integrityApi
 }: ExtendedMainLayoutProps) {
+=======
+  securityMaturityApi
+}: MainLayoutProps) {  
+>>>>>>> 444230731870a6dc8da8d22514e62d2a5f2dcb36
   const [sideMenuPage, setSideMenuPage] = useState<number>(0);
 
   return (
@@ -57,7 +66,7 @@ export default function MainLayout({
           <Simulator simulatorApi={simulatorAPI} />
         )}
         {sideMenuPage === 6 && (
-          <InsiderThreats insiderThreatApi={insiderThreatAPI} />
+          <InsiderThreats insiderThreatApi={insiderThreatApi} />
         )}
         {sideMenuPage === 7 && (
           <RiskScore riskScoreApi={riskScoreApi} queryApi={queryAPI} />
@@ -69,7 +78,11 @@ export default function MainLayout({
           <Backup backupApi={backupApi}/>
         )}
         {sideMenuPage === 10 && (
+<<<<<<< HEAD
           <Integrity integrityApi={integrityApi} />
+=======
+          <SecurityMaturity securityMaturityApi={securityMaturityApi}/>
+>>>>>>> 444230731870a6dc8da8d22514e62d2a5f2dcb36
         )}
       </div>
     </div>

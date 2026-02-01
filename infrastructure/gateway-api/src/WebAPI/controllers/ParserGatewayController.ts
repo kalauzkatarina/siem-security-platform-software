@@ -41,7 +41,9 @@ export class ParserGatewayController {
     try {
       const rawMessage = req.body.message as string;
       const source = req.body.source as string;
-      const response = await this.gatewayService.log(rawMessage, source);
+      const ipAddress = req.body.ipAddress as string | undefined;
+
+      const response = await this.gatewayService.log(rawMessage, source, ipAddress);
       res.status(200).json(response);
     } catch (err) {
       res.status(500).json({ message: (err as Error).message });

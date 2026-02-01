@@ -39,6 +39,27 @@ void (async () => {
   await initialize_database();
 })();
 
+app.get("/health", async (req, res) => {
+  try {
+    // Provera baze
+    await Db.query("SELECT 1");
+
+    res.status(200).json({
+      status: "OK",
+      service: "EventCollectorService", 
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime()
+    });
+  } catch (err) {
+    // Ako baza padne, ceo status je DOWN sa kodom 503
+    res.status(503).json({
+      status: "DOWN",
+      service: "EventCollectorService",
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
 // ORM Repository
 const eventRepository: Repository<Event> = Db.getRepository(Event);
 

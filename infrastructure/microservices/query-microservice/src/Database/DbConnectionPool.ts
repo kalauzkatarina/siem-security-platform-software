@@ -2,6 +2,7 @@ import "reflect-metadata";
 import { DataSource } from "typeorm";
 import dotenv from "dotenv";
 import { CacheEntry } from "../Domain/models/CacheEntry";
+import { CacheAlertEntry } from "../Domain/models/CacheAlertEntry";
 import { Event } from "../Domain/models/Event";
 import { Alert } from "../Domain/models/Alert";
 
@@ -17,7 +18,7 @@ export const MongoDb = new DataSource({
   database: process.env.MONGO_DB_NAME,
   synchronize: true,
   logging: false,
-  entities: [CacheEntry],
+  entities: [CacheEntry, CacheAlertEntry],
 });
 
 export const MySQLDb = new DataSource({

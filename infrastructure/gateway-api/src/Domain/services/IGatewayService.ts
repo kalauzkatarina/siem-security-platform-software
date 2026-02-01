@@ -65,6 +65,10 @@ export interface IGatewayService {
   getEventDistribution(): Promise<DistributionDTO>;
   getEventStatistics(): Promise<HourlyStatisticsDTO[]>;
   getAlertStatistics(): Promise<HourlyStatisticsDTO[]>;
+  getOldAlerts(hours: number): Promise<AlertDTO[]>;
+  getAllAlertsFromQuery(): Promise<AlertDTO[]>;
+  searchAlertsFromQuery(alertQueryDTO: AlertQueryDTO): Promise<PaginatedAlertsDTO>;
+  getAlertsCountFromQuery(): Promise<number>;
   getTotalEventCount(entityType: RiskEntityType, entityId: string): Promise<number>;
   getErrorEventCount(entityType: RiskEntityType, entityId: string, hours: number): Promise<number>;
   getEventRate(entityType: RiskEntityType, entityId: string, hours: number): Promise<number>;
@@ -96,7 +100,7 @@ export interface IGatewayService {
   getAllParserEvents(): Promise<ParserEventDto[]>;
   getParserEventById(id: number): Promise<ParserEventDto>;
   deleteById(id: number): Promise<boolean>;
-  log(eventMessage: string, eventSource: string): Promise<EventDTO>;
+  log(eventMessage: string, eventSource: string, ipAddress?: string): Promise<EventDTO>;
 
   //Analysis Engine
   analysisEngineNormalize(rawMessage: string): Promise<NormalizedEventDTO>;

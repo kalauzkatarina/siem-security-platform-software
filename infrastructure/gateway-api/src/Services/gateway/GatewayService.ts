@@ -93,8 +93,8 @@ export class GatewayService implements IGatewayService {
   }
 
   // Parser
-  async log(eventMessage: string, eventSource: string): Promise<EventDTO> {
-    return this.parserService.log(eventMessage, eventSource);
+  async log(eventMessage: string, eventSource: string, ipAddress?: string): Promise<EventDTO> {
+    return this.parserService.log(eventMessage, eventSource, ipAddress);
   }
 
   async getAllParserEvents(): Promise<ParserEventDto[]> {
@@ -195,6 +195,23 @@ export class GatewayService implements IGatewayService {
 
   async getAlertStatistics(): Promise<HourlyStatisticsDTO[]> {
     return this.queryService.getAlertStatistics();
+  }
+
+  async getOldAlerts(hours: number): Promise<AlertDTO[]> {
+    return this.queryService.getOldAlerts(hours);
+  }
+
+  async getAllAlertsFromQuery(): Promise<AlertDTO[]> {
+    return this.queryService.getAllAlerts();
+  }
+
+  async searchAlertsFromQuery(alertQueryDTO: AlertQueryDTO): Promise<PaginatedAlertsDTO> {
+    console.log("Da loi ovde udje");
+    return this.queryService.searchAlerts(alertQueryDTO);
+  }
+
+  async getAlertsCountFromQuery(): Promise<number> {
+    return this.queryService.getAlertsCount();
   }
 
   async getTotalEventCount(entityType: RiskEntityType, entityId: string): Promise<number> {

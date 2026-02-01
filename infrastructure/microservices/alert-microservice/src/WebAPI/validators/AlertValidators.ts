@@ -4,6 +4,7 @@ import { ResolveAlertDTO } from "../../Domain/DTOs/ResolveAlertDTO";
 import { CreateAlertFromCorrelationDTO } from "../../Domain/DTOs/CreateAlertFromCorrelationDTO";
 import { AlertSeverity } from "../../Domain/enums/AlertSeverity";
 import { AlertStatus } from "../../Domain/enums/AlertStatus";
+import { AlertCategory } from "../../Domain/enums/AlertCategory";
 
 export function validateAlertId(id: number): ValidationResult {
   if (!Number.isInteger(id) || id <= 0) {
@@ -29,12 +30,37 @@ export function validateCreateAlertDTO(data: CreateAlertDTO): ValidationResult {
     return { success: false, message: "Invalid severity value!" };
   }
 
-  if (!Array.isArray(data.correlatedEvents)) {
-    return { success: false, message: "Invalid input: 'correlatedEvents' must be an array!" };
+  if (!Array.isArray(data.correlatedEvents) || data.correlatedEvents.length === 0) {
+    return { success: false, message: "Invalid input: 'correlatedEvents' must be a non-empty array!" };
+  }
+
+  const ok = data.correlatedEvents.every((x) => typeof x === "number" && Number.isFinite(x));
+  if (!ok) {
+    return { success: false, message: "Invalid input: 'correlatedEvents' must be an array of numbers!" };
   }
 
   if (!data.source || typeof data.source !== "string" || data.source.trim().length === 0) {
     return { success: false, message: "Invalid input: 'source' must be a non-empty string!" };
+  }
+
+  if (!Object.values(AlertCategory).includes(data.category)) {
+    return { success: false, message: "Invalid category value" };
+  }
+
+  if (!(data.oldestEventTimestamp instanceof Date) || Number.isNaN(data.oldestEventTimestamp.getTime())) {
+    return { success: false, message: "Invalid oldestEventTimestamp" };
+  }
+
+  return { success: true };
+}
+
+export function validateAlertTimeWindow(from: Date, to: Date): ValidationResult {
+  if (Number.isNaN(from.getTime()) || Number.isNaN(to.getTime())) {
+    return { success: false, message: "Invalid time window" };
+  }
+
+  if (from > to) {
+    return { success: false, message: "Invalid time window: from is after to" };
   }
 
   return { success: true };
@@ -69,12 +95,21 @@ export function validateResolveAlertDTO(data: ResolveAlertDTO): ValidationResult
 export function validateCreateAlertFromCorrelationDTO(
   data: CreateAlertFromCorrelationDTO
 ): ValidationResult {
-  if (!data.correlationId || data.correlationId <= 0) {
-    return { success: false, message: "Invalid correlationId" };
-  }
+  // if (!data.correlationId || data.correlationId <= 0) {
+  //   return { success: false, message: "Invalid correlationId" };
+  // }
 
   if (!data.description || data.description.trim() === "") {
     return { success: false, message: "Description is required" };
+  }
+
+  if (!Object.values(AlertCategory).includes(data.category)) {
+    return { success: false, message: "Invalid alert category" };
+  }
+
+  const ts = new Date(data.oldestEventTimestamp);
+  if (Number.isNaN(ts.getTime())) {
+    return { success: false, message: "Invalid oldestEventTimestamp" };
   }
 
   if (!Array.isArray(data.correlatedEventIds) || data.correlatedEventIds.length === 0) {

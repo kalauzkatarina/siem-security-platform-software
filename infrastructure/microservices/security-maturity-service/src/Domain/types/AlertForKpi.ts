@@ -7,5 +7,5 @@ export type AlertForKpi = {
   oldestCorrelatedEventAt: Date;
   category: AlertCategory;
   isFalseAlarm: boolean;
-  isValid: boolean;
+  isValid?: boolean;
 };

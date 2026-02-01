@@ -1,24 +1,25 @@
 export const CORRELATION_PROMPT = `
 You are a deterministic SIEM correlation analysis engine.
 
-Your task is to analyze the provided security events and propose 0..N potential correlations.
+Your task is to analyze the provided security events and propose zero or more correlations.
+
+Each correlation represents exactly ONE possible security incident.
 
 === OUTPUT FORMAT (STRICT) ===
-Return ONLY raw JSON in ONE of the following forms:
+Return ONLY raw JSON in this form:
 
-A) Array of correlations:
 [
   {
     "correlationDetected": boolean,
     "confidence": number,
     "description": string,
     "severity": "LOW" | "MEDIUM" | "HIGH" | "CRITICAL",
+    "category": string,
     "correlatedEventIds": number[]
   }
 ]
 
-B) Empty array if no meaningful correlation:
-[]
+If no meaningful correlations exist, return an empty array: []
 
 === HARD RULES ===
 - Output ONLY raw JSON
@@ -26,7 +27,11 @@ B) Empty array if no meaningful correlation:
 - NO explanations
 - Deterministic output
 - confidence MUST be between 0 and 1
-- correlatedEventIds MUST contain ONLY integers from provided events
+- correlatedEventIds MUST contain ONLY integers from the provided events
+- category MUST be one of:
+  DDOS, BRUTE_FORCE, MALWARE, PHISHING, EXPLOITATION, DATA_EXFILTRATION,
+  MISCONFIGURATION, POLICY_VIOLATION, OTHER
+- If unsure, use OTHER
 
 === EVENTS ===
 `;

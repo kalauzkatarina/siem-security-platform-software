@@ -61,14 +61,14 @@ export default function Dashboard({queryApi,storageApi}:DashboardProps) {
                 setErrorCount(errorCount);
                 getMostEventType(infoCount,errorCount,warningCount);
                 console.log("Ucitani events");
-                const archive=await storageApi.getLargestArchive(token);
+               /* const archive=await storageApi.getLargestArchive(token);
                 console.log("Arhiva largest ",archive)
                 setMostWeightArchive(archive.archiveName);
                 setMostWeightArchiveValue(archive.size);       
                 const event=await queryApi.getTopEventSource(token);
                 console.log("Top event ",event);
                 setTopEvent(event.source!);
-                setTopEventValue(event.count!);      
+                setTopEventValue(event.count!);    */  
             } catch (error) {
                 console.error("Error fetching data:", error);
             }

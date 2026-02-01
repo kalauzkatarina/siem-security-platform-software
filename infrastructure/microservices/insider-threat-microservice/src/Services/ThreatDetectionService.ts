@@ -8,20 +8,40 @@ import { detectPermissionChange } from "../Utils/Detectors/PermissionChangeDetec
 import { detectOffHoursAccess } from "../Utils/Detectors/OffHoursAccessDetector";
 import { correlateAuthEvents } from "../Utils/Analyzers/AuthEventCorrelator";
 
+
 export class ThreatDetectionService implements IThreatDetectionService {
   constructor(private readonly logger: ILoggerService) {}
 
-  async analyzeEvents(eventIds: number[]): Promise<DetectionResult[]> {
-    await this.logger.log(`Analyzing ${eventIds.length} events for insider threats`);
-    
-   
-    return [];
+
+  async analyzeEvents(userId: string, eventIds: number[]): Promise<DetectionResult[]> {
+    await this.logger.log(`Analyzing ${eventIds.length} events for user ${userId}`);
+
+    const results: DetectionResult[] = [];
+
+    const authResults = await this.correlateWithAuthEvents(userId, eventIds);
+    results.push(...authResults);
+
+    const offHours = await detectOffHoursAccess(userId, eventIds);
+    if (offHours) {
+      results.push(offHours);
+    }
+
+    const massRead = await detectMassDataRead(userId, eventIds);
+    if (massRead) {
+      results.push(massRead);
+    }
+
+    const permissionChange = await detectPermissionChange(userId, eventIds);
+    if (permissionChange) {
+      results.push(permissionChange);
+    }
+
+    return results;
   }
 
   async detectMassDataRead(userId: string, eventIds: number[]): Promise<DetectionResult | null> {
     await this.logger.log(`Checking for mass data read by user ${userId}`);
     
-    // Pozivamo helper funkciju iz Utils/Detectors
     const result = await detectMassDataRead(userId, eventIds);
     
     if (result) {
@@ -57,13 +77,6 @@ export class ThreatDetectionService implements IThreatDetectionService {
 
   async correlateWithAuthEvents(userId: string, eventIds: number[]): Promise<DetectionResult[]> {
     await this.logger.log(`Correlating events with auth data for user ${userId}`);
-    
-    const results = await correlateAuthEvents(userId, eventIds);
-    
-    if (results.length > 0) {
-      await this.logger.log(`Found ${results.length} correlations with auth events for user ${userId}`);
-    }
-    
-    return results;
+    return correlateAuthEvents(userId, eventIds);
   }
 }

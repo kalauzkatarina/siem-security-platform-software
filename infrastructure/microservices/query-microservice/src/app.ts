@@ -11,6 +11,7 @@ import { QueryRepositoryService } from './Services/QueryRepositoryService';
 import { QueryService } from './Services/QueryService';
 import { LoggerService } from './Services/LoggerService';
 import { QueryController } from './WebAPI/controllers/QueryController';
+import { QueryAlertContoller } from './WebAPI/controllers/QueryAlertController';
 import { saveQueryState } from './Utils/StateManager';
 import { Alert } from './Domain/models/Alert';
 import { QueryAlertRepositoryService } from './Services/QueryAlertRepositoryService';
@@ -42,6 +43,27 @@ app.use(
     methods: corsMethods,
   }),
 );
+
+app.get("/health", async (req, res) => {
+  try {
+    // Proveravamo bazu
+    await MySQLDb.query("SELECT 1");
+    
+    res.status(200).json({
+      status: "OK",
+      service: "QueryService",
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime()
+    });
+  } catch (err) {
+    res.status(503).json({ 
+      status: "DOWN", 
+      service: "QueryService",
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
 let loggerService: LoggerService;
 let queryRepositoryService: QueryRepositoryService;
 let queryAlertRepositoryService : QueryAlertRepositoryService; 
@@ -70,13 +92,15 @@ void (async () => {
   const queryStatisticsService = new QueryStatisticsService(loggerService, eventRepository, alertRepository);
 
   // WebAPI rute
-
   const queryController = new QueryController(queryService, queryRepositoryService, queryAlertRepositoryService);
   const queryStatisticsController = new QueryStatisticsController(queryStatisticsService);
-
+  const queryAlertController = new QueryAlertContoller(queryAlertService, queryAlertRepositoryService);
+  
   // Registracija ruta
   app.use('/api/v1', queryController.getRouter());
   app.use('/api/v1', queryStatisticsController.getRouter());
+  app.use('/api/v1', queryAlertController.getRouter());
+
 })();
 
 process.on('SIGINT', async () => {
@@ -104,17 +128,13 @@ process.on('SIGINT', async () => {
     }
   
     saveQueryAlertState({
-      lastProcessedId: queryRepositoryService.invertedIndexStructureForEvents.getLastProcessedId(),
-      invertedIndex: queryRepositoryService.invertedIndexStructureForEvents.getInvertedIndex(),
-      alertTokenMap: queryRepositoryService.invertedIndexStructureForEvents.getEventIdToTokens(),
-      alertCount: queryRepositoryService.getEventsCount()
+      lastProcessedId: queryAlertRepositoryService.invertedIndexStructureForAlerts.getLastProcessedId(),
+      invertedIndex: queryAlertRepositoryService.invertedIndexStructureForAlerts.getInvertedIndex(),
+      alertTokenMap: queryAlertRepositoryService.invertedIndexStructureForAlerts.getAlertIdToTokens(),
+      alertCount: queryAlertRepositoryService.getAlertsCount()
     });
     loggerService.log("State saved. Exiting...");
     
-    /*OVDE DODATI CUVANJE STANJA INVERTED INDEX STRUKTURE SA ALERTOVIMA NAKON DODAVANJA U qureyAlertRepoService-u
-    saveQueryAlertState({
-      
-    });*/
     process.exit(0);
   } catch(err){
     loggerService.log(`Error during shutdown: ${err}`);
