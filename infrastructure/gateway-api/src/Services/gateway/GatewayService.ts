@@ -39,6 +39,7 @@ import { RiskEntityType } from "../../Domain/enums/RiskEntityType";
 import { IRiskScoreGatewayService } from "../../Domain/services/IRiskScoreGatewayService";
 import { BackupHealthDTO } from "../../Domain/DTOs/BackupHealthDTO";
 import { BackupStatsDTO } from "../../Domain/DTOs/BackupStatsDTO";
+import { IIntegrityGatewayService } from "../../Domain/services/IIntegrityGatewayService";
 
 /**
  * Facade that delegates to domain-specific gateway services.
@@ -55,7 +56,8 @@ export class GatewayService implements IGatewayService {
     private readonly eventService: IEventCollectorGatewayService,
     private readonly backupService: IBackupGatewayService,
     private readonly insiderThreatService: IInsiderThreatGatewayService,
-    private readonly riskScoreService: IRiskScoreGatewayService
+    private readonly riskScoreService: IRiskScoreGatewayService,
+    private readonly integrityService: IIntegrityGatewayService
   ) { }
 
   // Event Collector
@@ -364,4 +366,7 @@ export class GatewayService implements IGatewayService {
   async getGlobalScore(): Promise<number> {
     return await this.riskScoreService.getGlobalScore();
   }
+  async getIntegrityStatus() { return await this.integrityService.getStatus(); }
+  async getCompromisedLogs() { return await this.integrityService.getCompromised(); }
+  async verifyIntegrity() { return await this.integrityService.verify(); }
 }

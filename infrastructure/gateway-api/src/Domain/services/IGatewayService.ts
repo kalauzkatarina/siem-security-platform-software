@@ -136,4 +136,8 @@ export interface IGatewayService {
   getUserRiskProfile(userId: string): Promise<UserRiskProfileDTO>;
   getUserRiskAnalysis(userId: string): Promise<UserRiskAnalysisDTO>;
   recalculateUserRisk(userId: string): Promise<UserRiskProfileDTO>;
+
+  getIntegrityStatus(): Promise<any>;
+  getCompromisedLogs(): Promise<any>;
+  verifyIntegrity(): Promise<any>;
 }

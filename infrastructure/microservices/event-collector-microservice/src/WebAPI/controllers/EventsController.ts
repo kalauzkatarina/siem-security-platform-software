@@ -4,6 +4,7 @@ import { ILoggerService } from "../../Domain/services/ILoggerService";
 import { EventDTO } from "../../Domain/DTOs/EventDTO";
 import { validateEventData } from "../validators/EventValidator";
 import { validateEventId, validateEventIdArray, validateEventsIdRange } from "../validators/EventIdValidator";
+import axios from "axios";
 
 export class EventsController {
     private readonly router: Router;
@@ -61,6 +62,18 @@ export class EventsController {
             }
 
             const created = await this.eventsService.createEvent(dto);
+
+            try {
+                await axios.post("http://localhost:3005/api/v1/integrity/protect", {
+                    eventId: created.id.toString(), 
+                    eventData: created            
+                });
+                console.log(`[Integrity] Event ${created.id} is now protected in blockchain.`);
+            } catch (hashError) {
+               
+                console.error("[Integrity Error] Could not connect to Integrity Service:", (hashError as Error).message);
+            }
+
             res.status(201).json(created);
         } catch (err) {
             const message = (err as Error).message;
