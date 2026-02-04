@@ -1,47 +1,124 @@
 import { Repository } from "typeorm";
-import { LogHash } from "../Domain/models/LogHash.js";
-import { HashUtil } from "../Utils/HashUtil.js";
+import { createHash } from "crypto";
+import { IntegrityLog } from "../Domain/models/IntegrityLog";
+import { Event } from "../Domain/models/Event";
+import type { IIntegrityService } from "../Domain/services/IIntegrityService";
+import type { IntegrityStatusDTO } from "../Domain/DTOs/IntegrityStatusDTO";
+import type { CompromisedLogDTO } from "../Domain/DTOs/CompromisedLogDTO";
 
-export class IntegrityService {
-    constructor(private repository: Repository<LogHash>) {}
+export class IntegrityService implements IIntegrityService {
+    constructor(
+        private readonly integrityRepository: Repository<IntegrityLog>,
+        private readonly eventRepository: Repository<Event>
+    ) { }
 
-    // Za kontroler: Vraća listu sumnjivih
-    public async getCompromisedEntries(): Promise<LogHash[]> {
-        return await this.repository.find({ where: { isCompromised: true } });
+    private calculateSHA256(data: string): string {
+        return createHash("sha256").update(data).digest("hex");
     }
 
-    // Za kontroler: Proverava ceo lanac
-    public async verifyIntegrity(): Promise<boolean> {
-        const chain = await this.repository.find({ order: { timestamp: "ASC" } });
-        let isValid = true;
-        for (let i = 1; i < chain.length; i++) {
-            if (chain[i].previousHash !== chain[i - 1].currentHash) {
-                chain[i].isCompromised = true;
-                await this.repository.save(chain[i]);
-                isValid = false;
+    async initializeHashChain(): Promise<void> {
+        // DODATO: where: {} da bi TypeORM znao da pretražuje sve
+        const lastHashEntry = await this.integrityRepository.findOne({
+            where: {},
+            order: { eventId: "DESC" }
+        });
+
+        const startId = lastHashEntry ? lastHashEntry.eventId + 1 : 1;
+
+        const newEvents = await this.eventRepository.createQueryBuilder("event")
+            .where("event.id >= :startId", { startId })
+            .orderBy("event.id", "ASC")
+            .getMany();
+
+        let previousHash = lastHashEntry ? lastHashEntry.hash : "0";
+
+        for (const event of newEvents) {
+            // Dodata provera za timestamp jer nekad može biti null
+            const time = event.timestamp ? event.timestamp.getTime() : 0;
+            const eventDataString = `${event.id}${event.source}${event.description}${time}`;
+            const currentHash = this.calculateSHA256(eventDataString + previousHash);
+
+            const newLogHash = this.integrityRepository.create({
+                eventId: event.id,
+                hash: currentHash,
+                previousHash: previousHash,
+                isCompromised: false
+            });
+
+            await this.integrityRepository.save(newLogHash);
+            previousHash = currentHash; 
+        }
+    }
+
+    async verifyAllLogs(): Promise<IntegrityStatusDTO> {
+        const allHashes = await this.integrityRepository.find({ order: { eventId: "ASC" } });
+        let compromisedCount = 0;
+
+        for (const record of allHashes) {
+            const originalEvent = await this.eventRepository.findOne({ where: { id: record.eventId } });
+
+            if (!originalEvent) {
+                if (!record.isCompromised) {
+                    record.isCompromised = true;
+                    await this.integrityRepository.save(record);
+                    await this.handleIntegrityViolation(record.eventId, "LOG_DELETED");
+                }
+                compromisedCount++;
+                continue;
+            }
+
+            const time = originalEvent.timestamp ? originalEvent.timestamp.getTime() : 0;
+            const eventDataString = `${originalEvent.id}${originalEvent.source}${originalEvent.description}${time}`;
+            const recalculatedHash = this.calculateSHA256(eventDataString + record.previousHash);
+
+            if (recalculatedHash !== record.hash) {
+                if (!record.isCompromised) {
+                    record.isCompromised = true;
+                    await this.integrityRepository.save(record);
+                    await this.handleIntegrityViolation(record.eventId, "DATA_MODIFIED");
+                }
+                compromisedCount++;
             }
         }
-        return isValid;
+
+        return {
+            isChainValid: compromisedCount === 0,
+            lastChecked: new Date(),
+            totalLogsChecked: allHashes.length,
+            compromisedSegmentsCount: compromisedCount
+        };
     }
 
-    // Za kontroler: Brzi status
-    public async isChainSecure(): Promise<boolean> {
-        const count = await this.repository.count({ where: { isCompromised: true } });
-        return count === 0;
+    async getCompromisedLogs(): Promise<CompromisedLogDTO[]> {
+        const compromisedEntries = await this.integrityRepository.find({
+            where: { isCompromised: true },
+            order: { eventId: "ASC" }
+        });
+
+        const results: CompromisedLogDTO[] = [];
+
+        for (const entry of compromisedEntries) {
+            const event = await this.eventRepository.findOne({ where: { id: entry.eventId } });
+            
+            const eventDto: any = event || { id: entry.eventId, description: "DELETED" };
+            
+            const time = event?.timestamp ? event.timestamp.getTime() : 0;
+            const currentDataStr = event ? `${event.id}${event.source}${event.description}${time}` : "DELETED";
+            const calculated = this.calculateSHA256(currentDataStr + entry.previousHash);
+
+            results.push({
+                event: eventDto,
+                storedHash: entry.hash,
+                calculatedHash: calculated,
+                isMissing: !event,
+                detectedAt: entry.createdAt
+            } as any);
+        }
+
+        return results;
     }
 
-    // Za internu upotrebu: Čuvanje novog heša
-    public async protectEvent(eventId: string, eventData: any): Promise<void> {
-        const lastEntry = await this.repository.findOne({ where: {}, order: { timestamp: "DESC" } });
-        const prevHash = lastEntry ? lastEntry.currentHash : "0".repeat(64);
-        const newHash = HashUtil.calculateSHA256(HashUtil.createDataString(eventData, prevHash));
-
-        const newEntry = new LogHash();
-        newEntry.eventId = eventId;
-        newEntry.previousHash = prevHash;
-        newEntry.currentHash = newHash;
-        newEntry.timestamp = new Date();
-        newEntry.isCompromised = false;
-        await this.repository.save(newEntry);
+    async handleIntegrityViolation(eventId: number, reason: string): Promise<void> {
+        console.log(`\x1b[31m[CRITICAL ALERT]\x1b[0m Integrity breach on Event ID ${eventId}: ${reason}`);
     }
 }

@@ -1,14 +1,11 @@
 console.clear();
+import app from './app';
+import dotenv from "dotenv";
 
-import('./app.js')
-  .then(({ default: app }) => {
-    const port = process.env.PORT || 3005;
-    app.listen(port, () => {
-      console.log(`\x1b[32m[IntegrityService]\x1b[0m running on localhost:${port}`);
-    });
-  })
-  .catch((err) => {
-    console.error("❌ FATAL ERROR DURING IMPORT:");
-    console.error(err);
-    process.exit(1);
-  });
+dotenv.config();
+
+const port = process.env.PORT || 8260;
+
+app.listen(port, () => {
+  console.log(`\x1b[32m[TCPListen@Integrity]\x1b[0m localhost:${port}`);
+});

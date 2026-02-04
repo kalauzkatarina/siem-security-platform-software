@@ -2,42 +2,78 @@ import express from 'express';
 import cors from 'cors';
 import 'reflect-metadata';
 import dotenv from 'dotenv';
-import { DataSource } from "typeorm";
-import { LogHash } from './Domain/models/LogHash.js';
-import { IntegrityService } from './Services/IntegrityService.js';
-import { IntegrityController } from './WebAPI/controllers/IntegrityController.js';
+import { IntegrityDb, EventDb } from './Database/DbConnectionPool';
+import { Repository } from 'typeorm';
+import { IntegrityLog } from './Domain/models/IntegrityLog';
+import { Event } from './Domain/models/Event';
+import { IntegrityService } from './Services/IntegrityService';
+import { IntegrityController } from './WebAPI/controllers/IntegrityController';
 
-dotenv.config();
+dotenv.config({ quiet: true });
 
 const app = express();
+
+// Parsiranje JSON body-ja
 app.use(express.json());
 
-const corsOrigin = process.env.CORS_ORIGIN?.split(",").map((m) => m.trim()) ?? ["*"];
-app.use(cors({ origin: corsOrigin, methods: ["GET", "POST"] }));
+// CORS podešavanje iz .env
+const corsOrigin =
+  process.env.CORS_ORIGIN?.split(",").map((m) => m.trim()) ?? ["*"];
 
-const AppDataSource = new DataSource({
-    type: "mongodb",
-    url: process.env.MONGO_URI || "mongodb://user:1234@localhost:27017/integrity_db?authSource=admin",
-    entities: [LogHash],
-    synchronize: true, 
-    logging: true
+const corsMethods =
+  process.env.CORS_METHODS?.split(",").map((m) => m.trim()) ??
+  ["GET", "POST", "DELETE", "OPTIONS"];
+
+app.use(
+  cors({
+    origin: corsOrigin,
+    methods: corsMethods,
+  }),
+);
+
+// Inicijalizacija obe baze podataka
+void (async () => {
+  try {
+    await IntegrityDb.initialize();
+    console.log("\x1b[34m[IntegrityDb]\x1b[0m Connected");
+    
+    await EventDb.initialize();
+    console.log("\x1b[34m[EventDb]\x1b[0m Connected (Read-Only Access)");
+  } catch (error) {
+    console.error("\x1b[31m[DbError]\x1b[0m Failed to connect to databases:", error);
+  }
+})();
+
+// Health Check ruta
+app.get("/health", async (req, res) => {
+  try {
+    await IntegrityDb.query("SELECT 1");
+    res.status(200).json({
+      status: "OK",
+      service: "IntegrityService",
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime()
+    });
+  } catch (err) {
+    res.status(503).json({
+      status: "DOWN",
+      service: "IntegrityService",
+      timestamp: new Date().toISOString()
+    });
+  }
 });
 
-void (async () => {
-    try {
-        console.log("Pokušaj povezivanja na MongoDB...");
-        await AppDataSource.initialize();
-        console.log("\x1b[32m[DB]\x1b[0m Uspešno povezan na bazu: integrity_db");
+// ORM Repositories (Svaki iz svoje baze!)
+const integrityRepository: Repository<IntegrityLog> = IntegrityDb.getRepository(IntegrityLog);
+const eventRepository: Repository<Event> = EventDb.getRepository(Event);
 
-        const logHashRepository = AppDataSource.getRepository(LogHash);
-        const integrityService = new IntegrityService(logHashRepository);
-        const integrityController = new IntegrityController(integrityService);
+// Servis (Prima oba repozitorijuma)
+const integrityService = new IntegrityService(integrityRepository, eventRepository);
 
-        app.use('/api/v1', integrityController.getRouter());
-    } catch (error: any) {
-        console.error("❌ GREŠKA PRILIKOM POKRETANJA:");
-        console.error(error.message || error);
-    }
-})();
+// WebAPI Kontroler (Napravićemo ga u sledećem koraku)
+const integrityController = new IntegrityController(integrityService);
+
+// Registracija ruta na /api/v1/integrity
+app.use('/api/v1/integrity', integrityController.getRouter());
 
 export default app;
