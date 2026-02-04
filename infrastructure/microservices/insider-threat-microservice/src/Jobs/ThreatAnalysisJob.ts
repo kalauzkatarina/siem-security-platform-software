@@ -3,8 +3,6 @@ import { IInsiderThreatService } from "../Domain/services/IInsiderThreatService"
 import { IUserRiskAnalysisService } from "../Domain/services/IUserRiskAnalysisService";
 import { IThreatDetectionService } from "../Domain/services/IThreatDetectionService";
 import { ILoggerService } from "../Domain/services/ILoggerService";
-import { UserCacheService } from "../Services/UserCacheService";
-
 
 export class ThreatAnalysisJob {
   private lastProcessedEventId: number = 0;
@@ -17,7 +15,6 @@ export class ThreatAnalysisJob {
     private readonly threatService: IInsiderThreatService,
     private readonly riskService: IUserRiskAnalysisService,
     private readonly detectionService: IThreatDetectionService,
-    private readonly userCacheService: UserCacheService,
     private readonly logger: ILoggerService,
     intervalMinutes: number = 15
   ) {
@@ -25,7 +22,9 @@ export class ThreatAnalysisJob {
   }
 
   start(): void {
-    this.logger.log(`Starting Threat Analysis Job - runs every ${this.intervalMinutes} minutes`);
+    this.logger.log(` THREAT ANALYSIS JOB STARTED`);
+    this.logger.log(`   Interval: ${this.intervalMinutes} minutes`);
+    
     this.run();
     this.intervalId = setInterval(() => this.run(), this.intervalMinutes * 60 * 1000);
   }
@@ -33,7 +32,7 @@ export class ThreatAnalysisJob {
   stop(): void {
     if (this.intervalId) {
       clearInterval(this.intervalId);
-      this.logger.log("Threat Analysis Job stopped");
+      this.logger.log(" Threat Analysis Job stopped");
     }
   }
 
@@ -44,7 +43,9 @@ export class ThreatAnalysisJob {
     }
 
     this.isRunning = true;
-    this.logger.log(`[ThreatAnalysisJob] Starting analysis - last processed ID: ${this.lastProcessedEventId}`);
+    const startTime = Date.now();
+    
+    this.logger.log(`[ThreatAnalysisJob] Starting analysis`);
 
     try {
       const maxEventId = await this.getMaxEventId();
@@ -59,23 +60,29 @@ export class ThreatAnalysisJob {
         maxEventId
       );
 
-      this.logger.log(`[ThreatAnalysisJob] Analyzing ${newEvents.length} new events (ID ${this.lastProcessedEventId + 1} to ${maxEventId})`);
+      this.logger.log(`[ThreatAnalysisJob] Analyzing ${newEvents.length} new events`);
 
-      const eventsByUser = await this.groupEventsByPrivilegedUsers(newEvents);
+      const eventsByUser = this.groupEventsByPrivilegedUsers(newEvents);
+      const privilegedUserCount = Object.keys(eventsByUser).length;
+      this.logger.log(` [ThreatAnalysisJob] Found ${privilegedUserCount} privileged users`);
 
-      this.logger.log(`[ThreatAnalysisJob] Found events for ${Object.keys(eventsByUser).length} privileged users`);
-
-      for (const [userId, events] of Object.entries(eventsByUser)) {
-        await this.analyzeUserEvents(userId, events);
+      let threatsDetected = 0;
+      for (const [userIdStr, events] of Object.entries(eventsByUser)) {
+        const userId = parseInt(userIdStr, 10);
+        const threats = await this.analyzeUserEvents(userId, events);
+        threatsDetected += threats;
       }
 
       this.lastProcessedEventId = maxEventId;
-      this.logger.log(`[ThreatAnalysisJob] Analysis completed - processed up to event ID: ${maxEventId}`);
+      
+      const duration = ((Date.now() - startTime) / 1000).toFixed(2);
+      this.logger.log(` [ThreatAnalysisJob] Analysis completed`);
+
 
     } catch (error: any) {
       this.logger.log(`[ThreatAnalysisJob] ERROR: ${error.message}`);
       if (error.stack) {
-        this.logger.log(`[ThreatAnalysisJob] Stack: ${error.stack}`);
+        this.logger.log(error.stack);
       }
     } finally {
       this.isRunning = false;
@@ -115,84 +122,72 @@ export class ThreatAnalysisJob {
     }
   }
 
-
-  private async groupEventsByPrivilegedUsers(events: any[]): Promise<Record<string, any[]>> {
+  private groupEventsByPrivilegedUsers(events: any[]): Record<string, any[]> {
     const grouped: Record<string, any[]> = {};
+    const validEvents = events.filter(e => e.userId && e.userRole);
 
-    this.logger.log(`[ThreatAnalysisJob] Grouping ${events.length} events by privileged users`);
-
-    const eventsWithUserId = events.filter(e => e.userId);
-    this.logger.log(`[ThreatAnalysisJob] Events with userId: ${eventsWithUserId.length} / ${events.length}`);
-    
-    if (eventsWithUserId.length === 0) {
-      this.logger.log(`[ThreatAnalysisJob]  WARNING: No events have userId field!`);
-      this.logger.log(`[ThreatAnalysisJob]  Make sure Gateway enriches requests with userId`);
+    if (validEvents.length === 0) {
+      this.logger.log("[ThreatAnalysisJob] WARNING: No events have userId and userRole!");
       return grouped;
     }
 
-    for (const event of eventsWithUserId) {
-      const userId = String(event.userId);
-      
-      const user = await this.userCacheService.getUserByUserId(userId);
-      
-      if (!user) {
+    this.logger.log(`   Valid events (with userId & userRole): ${validEvents.length} / ${events.length}`);
+
+    for (const event of validEvents) {
+      if (!this.isPrivilegedRole(event.userRole)) {
         continue;
       }
 
-      const isPrivileged = user.role === 0 || user.role === 1;
-      
-      if (!isPrivileged) {
-        continue;
-      }
+      const userId = String(event.userId);
 
       if (!grouped[userId]) {
         grouped[userId] = [];
-        this.logger.log(`[ThreatAnalysisJob] ✓ Found privileged user: ${user.username} (userId: ${userId}, role: ${user.role})`);
+        this.logger.log(`   Privileged user found: userId=${event.userId}, role=${event.userRole}`);
       }
+      
       grouped[userId].push(event);
     }
 
-    this.logger.log(`[ThreatAnalysisJob] Grouped events for ${Object.keys(grouped).length} privileged users`);
-    
     return grouped;
   }
 
+  private isPrivilegedRole(userRole: string): boolean {
+    const role = userRole.toUpperCase(); 
+    return role === "ADMIN" || role === "SYSADMIN";
+  }
 
-  private async analyzeUserEvents(userId: string, events: any[]): Promise<void> {
+  private async analyzeUserEvents(userId: number, events: any[]): Promise<number> {
     try {
-      const userInfo = await this.userCacheService.getUserByUserId(userId);
-      
-      if (!userInfo) {
-        this.logger.log(`[ThreatAnalysisJob] User ${userId} not found in cache`);
-        return;
+      const userRole = events[0].userRole;
+      const eventIds = events.map(e => e.id);
+
+      this.logger.log(`\n   🔎 Analyzing ${eventIds.length} events for userId=${userId} (${userRole})`);
+
+      let threatsDetected = 0;
+
+      threatsDetected += await this.detectMassDataRead(userId, eventIds);
+      threatsDetected += await this.detectOffHoursAccess(userId, eventIds);
+      threatsDetected += await this.detectPermissionChanges(userId, eventIds);
+      threatsDetected += await this.detectAuthCorrelations(userId, eventIds);
+
+      if (threatsDetected > 0) {
+        this.logger.log(`     Detected ${threatsDetected} threat(s) for userId=${userId}`);
       }
 
-      const eventIds = events.map(e => e.id);
-      const username = userInfo.username;
-
-      this.logger.log(`[ThreatAnalysisJob] Analyzing ${eventIds.length} events for user ${username} (ID: ${userId}, Role: ${userInfo.role})`);
-
-      await this.detectMassDataRead(userId, username, eventIds);
-      await this.detectOffHoursAccess(userId, username, eventIds);
-      await this.detectPermissionChanges(userId, username, eventIds);
-      await this.detectAuthCorrelations(userId, username, eventIds);
+      return threatsDetected;
 
     } catch (error: any) {
-      this.logger.log(`[ThreatAnalysisJob] Error analyzing events for user ${userId}: ${error.message}`);
+      this.logger.log(`    Error analyzing events for userId=${userId}: ${error.message}`);
+      return 0;
     }
   }
 
-  private async detectMassDataRead(
-    userId: string,
-    username: string,
-    eventIds: number[]
-  ): Promise<void> {
+  private async detectMassDataRead(userId: number, eventIds: number[]): Promise<number> {
     const result = await this.detectionService.detectMassDataRead(userId, eventIds);
     
     if (result && result.isDetected) {
       const threat = await this.threatService.createThreat({
         userId,
-        username,
         threatType: result.threatType,
         riskLevel: result.riskLevel,
         description: result.description,
@@ -201,22 +196,21 @@ export class ThreatAnalysisJob {
         source: "ThreatAnalysisJob",
       });
 
-      await this.riskService.updateUserRiskAfterThreat(userId, username, threat.id);
-      this.logger.log(`[ThreatAnalysisJob] ✓ Created threat ${threat.id} for ${username}: ${result.threatType}`);
+      await this.riskService.updateUserRiskAfterThreat(userId, threat.id);
+      
+      this.logger.log(`       THREAT #${threat.id}: ${result.threatType} (${result.riskLevel})`);
+      return 1;
     }
+    
+    return 0;
   }
 
-  private async detectOffHoursAccess(
-    userId: string,
-    username: string,
-    eventIds: number[]
-  ): Promise<void> {
+  private async detectOffHoursAccess(userId: number, eventIds: number[]): Promise<number> {
     const result = await this.detectionService.detectOffHoursAccess(userId, eventIds);
     
     if (result && result.isDetected) {
       const threat = await this.threatService.createThreat({
         userId,
-        username,
         threatType: result.threatType,
         riskLevel: result.riskLevel,
         description: result.description,
@@ -225,22 +219,21 @@ export class ThreatAnalysisJob {
         source: "ThreatAnalysisJob",
       });
 
-      await this.riskService.updateUserRiskAfterThreat(userId, username, threat.id);
-      this.logger.log(`[ThreatAnalysisJob] ✓ Created threat ${threat.id} for ${username}: ${result.threatType}`);
+      await this.riskService.updateUserRiskAfterThreat(userId, threat.id);
+      
+      this.logger.log(`       THREAT #${threat.id}: ${result.threatType} (${result.riskLevel})`);
+      return 1;
     }
+    
+    return 0;
   }
 
-  private async detectPermissionChanges(
-    userId: string,
-    username: string,
-    eventIds: number[]
-  ): Promise<void> {
+  private async detectPermissionChanges(userId: number, eventIds: number[]): Promise<number> {
     const result = await this.detectionService.detectPermissionChange(userId, eventIds);
     
     if (result && result.isDetected) {
       const threat = await this.threatService.createThreat({
         userId,
-        username,
         threatType: result.threatType,
         riskLevel: result.riskLevel,
         description: result.description,
@@ -249,23 +242,23 @@ export class ThreatAnalysisJob {
         source: "ThreatAnalysisJob",
       });
 
-      await this.riskService.updateUserRiskAfterThreat(userId, username, threat.id);
-      this.logger.log(`[ThreatAnalysisJob] ✓ Created threat ${threat.id} for ${username}: ${result.threatType}`);
+      await this.riskService.updateUserRiskAfterThreat(userId, threat.id);
+      
+      this.logger.log(`       THREAT #${threat.id}: ${result.threatType} (${result.riskLevel})`);
+      return 1;
     }
+    
+    return 0;
   }
 
-  private async detectAuthCorrelations(
-    userId: string,
-    username: string,
-    eventIds: number[]
-  ): Promise<void> {
+  private async detectAuthCorrelations(userId: number, eventIds: number[]): Promise<number> {
     const results = await this.detectionService.correlateWithAuthEvents(userId, eventIds);
     
+    let detected = 0;
     for (const result of results) {
       if (result.isDetected) {
         const threat = await this.threatService.createThreat({
           userId,
-          username,
           threatType: result.threatType,
           riskLevel: result.riskLevel,
           description: result.description,
@@ -274,9 +267,13 @@ export class ThreatAnalysisJob {
           source: "ThreatAnalysisJob",
         });
 
-        await this.riskService.updateUserRiskAfterThreat(userId, username, threat.id);
-        this.logger.log(`[ThreatAnalysisJob] ✓ Created threat ${threat.id} for ${username}: ${result.threatType}`);
+        await this.riskService.updateUserRiskAfterThreat(userId, threat.id);
+        
+        this.logger.log(`       THREAT #${threat.id}: ${result.threatType} (${result.riskLevel})`);
+        detected++;
       }
     }
+    
+    return detected;
   }
 }

@@ -329,7 +329,7 @@ export class GatewayService implements IGatewayService {
     return await this.insiderThreatService.getThreatById(id);
   }
 
-  async getInsiderThreatsByUserId(userId: string): Promise<InsiderThreatDTO[]> {
+  async getInsiderThreatsByUserId(userId: number): Promise<InsiderThreatDTO[]> {
     return await this.insiderThreatService.getThreatsByUserId(userId);
   }
 
@@ -354,15 +354,15 @@ export class GatewayService implements IGatewayService {
     return await this.insiderThreatService.getHighRiskUsers();
   }
 
-  async getUserRiskProfile(userId: string): Promise<UserRiskProfileDTO> {
+  async getUserRiskProfile(userId: number): Promise<UserRiskProfileDTO> {
     return await this.insiderThreatService.getUserRiskProfile(userId);
   }
 
-  async getUserRiskAnalysis(userId: string): Promise<UserRiskAnalysisDTO> {
+  async getUserRiskAnalysis(userId: number): Promise<UserRiskAnalysisDTO> {
     return await this.insiderThreatService.getUserRiskAnalysis(userId);
   }
 
-  async recalculateUserRisk(userId: string): Promise<UserRiskProfileDTO> {
+  async recalculateUserRisk(userId: number): Promise<UserRiskProfileDTO> {
     return await this.insiderThreatService.recalculateUserRisk(userId);
   }
 

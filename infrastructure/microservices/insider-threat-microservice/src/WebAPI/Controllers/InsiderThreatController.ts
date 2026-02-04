@@ -30,7 +30,6 @@ export class InsiderThreatController {
     this.router.get("/user-risk-profiles/:userId", this.getUserRiskProfile.bind(this));
   }
 
-
   private async getAllThreats(req: Request, res: Response): Promise<void> {
     try {
       const threats = await this.threatService.getAllThreats();
@@ -43,7 +42,6 @@ export class InsiderThreatController {
       });
     }
   }
-
 
   private async getThreatById(req: Request, res: Response): Promise<void> {
     try {
@@ -73,14 +71,15 @@ export class InsiderThreatController {
 
   private async getThreatsByUserId(req: Request, res: Response): Promise<void> {
     try {
-      const userId = req.params.userId;
+      const userId = parseInt(req.params.userId, 10);
       
-      this.logger.log(`[InsiderThreatController] GET /threats/user/${userId}`);
-      
-      if (!userId) {
-        res.status(400).json({ error: "userId is required" });
+      if (isNaN(userId)) {
+        res.status(400).json({ error: "Invalid userId - must be a number" });
         return;
       }
+
+      this.logger.log(`[InsiderThreatController] GET /threats/user/${userId}`);
+      
       const threats = await this.threatService.getThreatsByUserId(userId);
       
       this.logger.log(`[InsiderThreatController] Found ${threats.length} threats for user ${userId}`);
@@ -113,7 +112,7 @@ export class InsiderThreatController {
       const query = {
         page: req.query.page ? Number(req.query.page) : undefined,
         limit: req.query.limit ? Number(req.query.limit) : undefined,
-        userId: req.query.userId as string,
+        userId: req.query.userId ? parseInt(req.query.userId as string, 10) : undefined, 
         threatType: req.query.threatType as any,
         riskLevel: req.query.riskLevel as any,
         startDate: req.query.startDate ? new Date(req.query.startDate as string) : undefined,
@@ -164,7 +163,6 @@ export class InsiderThreatController {
     }
   }
 
-
   private async getAllUserRiskProfiles(req: Request, res: Response): Promise<void> {
     try {
       const profiles = await this.riskService.getAllUserRiskProfiles();
@@ -178,13 +176,12 @@ export class InsiderThreatController {
     }
   }
 
- 
   private async getUserRiskProfile(req: Request, res: Response): Promise<void> {
     try {
-      const { userId } = req.params;
+      const userId = parseInt(req.params.userId, 10);
 
-      if (!userId) {
-        res.status(400).json({ error: "userId is required" });
+      if (isNaN(userId)) {
+        res.status(400).json({ error: "Invalid userId - must be a number" });
         return;
       }
 
@@ -221,14 +218,15 @@ export class InsiderThreatController {
 
   private async getUserRiskAnalysis(req: Request, res: Response): Promise<void> {
     try {
-      const userId = req.params.userId;
+      const userId = parseInt(req.params.userId, 10);
       
-      this.logger.log(`[InsiderThreatController] GET /user-risk-profiles/${userId}/analysis`);
-      
-      if (!userId) {
-        res.status(400).json({ error: "userId is required" });
+      if (isNaN(userId)) {
+        res.status(400).json({ error: "Invalid userId - must be a number" });
         return;
       }
+
+      this.logger.log(`[InsiderThreatController] GET /user-risk-profiles/${userId}/analysis`);
+      
       const analysis = await this.riskService.getUserRiskAnalysis(userId);
       
       this.logger.log(`[InsiderThreatController] Generated risk analysis for user ${userId}`);
@@ -241,14 +239,15 @@ export class InsiderThreatController {
 
   private async recalculateUserRisk(req: Request, res: Response): Promise<void> {
     try {
-      const userId = req.params.userId;
+      const userId = parseInt(req.params.userId, 10);
       
-      this.logger.log(`[InsiderThreatController] POST /user-risk-profiles/${userId}/recalculate`);
-      
-      if (!userId) {
-        res.status(400).json({ error: "userId is required" });
+      if (isNaN(userId)) {
+        res.status(400).json({ error: "Invalid userId - must be a number" });
         return;
       }
+
+      this.logger.log(`[InsiderThreatController] POST /user-risk-profiles/${userId}/recalculate`);
+      
       const profile = await this.riskService.recalculateUserRisk(userId);
       
       this.logger.log(`[InsiderThreatController] Recalculated risk for user ${userId}`);

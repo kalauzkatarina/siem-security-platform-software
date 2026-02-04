@@ -129,7 +129,7 @@ export interface IGatewayService {
   //insider threat detection
   getAllInsiderThreats(): Promise<InsiderThreatDTO[]>;
   getInsiderThreatById(id: number): Promise<InsiderThreatDTO>;
-  getInsiderThreatsByUserId(userId: string): Promise<InsiderThreatDTO[]>;
+  getInsiderThreatsByUserId(userId: number): Promise<InsiderThreatDTO[]>;
   getUnresolvedInsiderThreats(): Promise<InsiderThreatDTO[]>;
   searchInsiderThreats(query: ThreatQueryDTO): Promise<PaginatedThreatsDTO>;
   resolveInsiderThreat(id: number, resolvedBy: string, resolutionNotes?: string): Promise<InsiderThreatDTO>;
@@ -137,9 +137,9 @@ export interface IGatewayService {
   //user risk analysis
   getAllUserRiskProfiles(): Promise<UserRiskProfileDTO[]>;
   getHighRiskUsers(): Promise<UserRiskProfileDTO[]>;
-  getUserRiskProfile(userId: string): Promise<UserRiskProfileDTO>;
-  getUserRiskAnalysis(userId: string): Promise<UserRiskAnalysisDTO>;
-  recalculateUserRisk(userId: string): Promise<UserRiskProfileDTO>;
+  getUserRiskProfile(userId: number): Promise<UserRiskProfileDTO>;
+  getUserRiskAnalysis(userId: number): Promise<UserRiskAnalysisDTO>;
+  recalculateUserRisk(userId: number): Promise<UserRiskProfileDTO>;
 
   getIntegrityStatus(): Promise<any>;
   getCompromisedLogs(): Promise<any>;
