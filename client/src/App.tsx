@@ -26,6 +26,7 @@ import { IInsiderThreatAPI } from "./api/insider-threat/IInsiderThreatAPI";
 import { InsiderThreatAPI } from "./api/insider-threat/InsiderThreatAPI";
 import { ISecurityMaturityAPI } from "./api/security-maturity/ISecurityMaturityAPI";
 import { SecurityMaturityAPI } from "./api/security-maturity/SecurityMaturityAPI";
+import { StatusMonitorAPI } from "./api/status-monitor/StatusMonitorAPI";
 
 const auth_api: IAuthAPI = new AuthAPI();
 const alerts_api: IAlertAPI = new AlertAPI();
@@ -40,6 +41,7 @@ const backup_api: IBackupValidationAPI = new BackupValidationAPI();
 const integrity_api: IIntegrityAPI = new IntegrityAPI();
 const insider_threat_api: IInsiderThreatAPI = new InsiderThreatAPI(); 
 const securityMaturityApi: ISecurityMaturityAPI = new SecurityMaturityAPI();
+const statusMonitorApi = new StatusMonitorAPI("http://localhost:5793/api/v1");
 
 function App() {
   return (
@@ -61,7 +63,8 @@ function App() {
           simulatorAPI={simulator_api} desktopNotification={desktopNotification}
           riskScoreApi={risk_score_api} firewallApi={firewall_api} backupApi={backup_api} 
           insiderThreatApi={insider_threat_api} securityMaturityApi={securityMaturityApi}
-          integrityApi={integrity_api}/>}/>
+          integrityApi={integrity_api}
+          statusMonitorApi={statusMonitorApi}/>}/>
       </Routes>
     </>
   );
