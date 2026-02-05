@@ -62,7 +62,7 @@ app.use('/api/v1', new AlertGatewayController(gatewayService, authenticate, logg
 app.use('/api/v1', new QueryGatewayController(gatewayService, authenticate).getRouter());
 app.use('/api/v1', new StorageGatewayController(gatewayService, authenticate).getRouter());
 
-app.use('/api/v1',new EventCollectorGatewayController(gatewayService, authenticate, loggerService).getRouter());
+app.use('/api/v1', new EventCollectorGatewayController(gatewayService, authenticate, loggerService).getRouter());
 app.use('/api/v1', new IntegrityGatewayController(gatewayService, /*authenticate,*/ loggerService).getRouter());
 app.use('/api/v1', new ParserGatewayController(gatewayService).getRouter());
 app.use('/api/v1', new SimulatorGatewayController(simulatorService, authenticate).getRouter());
