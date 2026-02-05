@@ -11,11 +11,6 @@ import { calculateMostEventType } from "../../helpers/calculateMostEvent";
 import { DashboardProps } from "../../types/props/dashboard/DashboardProps";
 
 export default function Dashboard({ queryApi, storageApi }: DashboardProps) {
-    /* const events: EventRow[] = [
-         { id: 1, source: "Auth Service", time: "01:23:33   22/11/2025", type: EventType.INFO, description: "User login successful" },
-         { id: 2, source: "Auth Service", time: "01:25:49   22/11/2025", type: EventType.WARNING, description: "Multiple failed login attempts" },
-         { id: 3, source: "Database", time: "21:03:11   20/11/2025", type: EventType.ERROR, description: "Database connection lost" },
-     ];*/
     const [eventsData, setEventsData] = useState<EventRow[]>([]);
     const [allEventsCount, setEventCount] = useState<number>(0);
     const [infoCount, setInfoCount] = useState<number>(0);
@@ -27,8 +22,7 @@ export default function Dashboard({ queryApi, storageApi }: DashboardProps) {
     const [mostWeightArchiveValue, setMostWeightArchiveValue] = useState(0)
     const [topEvent, setTopEvent] = useState("-");
     const [topEventValue, setTopEventValue] = useState(0)
-    //const { token } = useAuth();
-    const token = "token";      // TODO: DELETE AFTER TESTING!
+    const { token } = useAuth();
 
     // types, interfaces and classes will be moved too
     const getMostEventType = (infoCount: number, errorCount: number, warningCount: number) => {
@@ -38,8 +32,8 @@ export default function Dashboard({ queryApi, storageApi }: DashboardProps) {
     }
     useEffect(() => {
         const fetchData = async () => {
-            //if (!token) return;           // TODO: DELETE COMMENT AFTER TESTING
-            //DON`T USE api=QueryApi() WE HAVE PROPS !!!
+            if (!token) return;
+
             try {
                 const recentEvents = await queryApi.getLastThreeEvents(token);
                 const mappedEvents: EventRow[] = recentEvents.map(event => ({

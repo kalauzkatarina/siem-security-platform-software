@@ -63,8 +63,8 @@ app.use('/api/v1', new QueryGatewayController(gatewayService, authenticate).getR
 app.use('/api/v1', new StorageGatewayController(gatewayService, authenticate).getRouter());
 
 app.use('/api/v1', new EventCollectorGatewayController(gatewayService, authenticate, loggerService).getRouter());
-app.use('/api/v1', new IntegrityGatewayController(gatewayService, /*authenticate,*/ loggerService).getRouter());
-app.use('/api/v1', new ParserGatewayController(gatewayService).getRouter());
+app.use('/api/v1', new IntegrityGatewayController(gatewayService, authenticate, loggerService).getRouter());
+app.use('/api/v1', new ParserGatewayController(gatewayService, authenticate).getRouter());
 app.use('/api/v1', new SimulatorGatewayController(simulatorService, authenticate).getRouter());
 app.use('/api/v1', new BackupGatewayController(gatewayService, authenticate).getRouter());
 app.use('/api/v1', new InsiderThreatGatewayController(gatewayService, authenticate, loggerService).getRouter());

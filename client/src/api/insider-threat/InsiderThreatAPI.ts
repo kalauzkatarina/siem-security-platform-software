@@ -8,7 +8,7 @@ import { UserRiskAnalysisDTO } from "../../models/insider-threat/UserRiskAnalysi
 export class InsiderThreatAPI implements IInsiderThreatAPI {
   private readonly axiosInstance: AxiosInstance;
   private readonly basePath = "insider-threats";
-  private readonly riskPath = "siem/user-risk"; 
+  private readonly riskPath = "siem/user-risk";
 
   constructor() {
     this.axiosInstance = axios.create({

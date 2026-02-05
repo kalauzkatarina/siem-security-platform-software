@@ -21,32 +21,32 @@ export class InsiderThreatGatewayController {
     // Threat endpoints
     this.router.get(
       "/insider-threats/search",
-      // this.authenticate,
+      this.authenticate,
       this.searchThreats.bind(this)
     );
     this.router.get(
       "/insider-threats/unresolved",
-      // this.authenticate,
+      this.authenticate,
       this.getUnresolvedThreats.bind(this)
     );
     this.router.get(
       "/insider-threats",
-      // this.authenticate,
+      this.authenticate,
       this.getAllThreats.bind(this)
     );
     this.router.get(
       "/insider-threats/:id",
-      // this.authenticate,
+      this.authenticate,
       this.getThreatById.bind(this)
     );
     this.router.get(
       "/insider-threats/user/:userId",
-      // this.authenticate,
+      this.authenticate,
       this.getThreatsByUserId.bind(this)
     );
     this.router.put(
       "/insider-threats/:id/resolve",
-      // this.authenticate,
+      this.authenticate,
       requireSysAdmin,
       this.resolveThreat.bind(this)
     );
@@ -54,27 +54,27 @@ export class InsiderThreatGatewayController {
     // User risk endpoints
     this.router.get(
       "/siem/user-risk/profiles",
-      // this.authenticate,
+      this.authenticate,
       this.getAllUserRiskProfiles.bind(this)
     );
     this.router.get(
       "/siem/user-risk/high-risk",
-      // this.authenticate,
+      this.authenticate,
       this.getHighRiskUsers.bind(this)
     );
     this.router.get(
       "/siem/user-risk/:userId",
-      // this.authenticate,
+      this.authenticate,
       this.getUserRiskProfile.bind(this)
     );
     this.router.get(
       "/siem/user-risk/:userId/analysis",
-      // this.authenticate,
+      this.authenticate,
       this.getUserRiskAnalysis.bind(this)
     );
     this.router.post(
       "/siem/user-risk/:userId/recalculate",
-      // this.authenticate,
+      this.authenticate,
       requireSysAdmin,
       this.recalculateUserRisk.bind(this)
     );

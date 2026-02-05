@@ -94,8 +94,8 @@ export class GatewayService implements IGatewayService {
   }
 
   // Parser
-  async log(eventMessage: string, eventSource: string, ipAddress?: string, userId?: number,userRole?: string): Promise<EventDTO> {
-    return this.parserService.log(eventMessage, eventSource, ipAddress,  userId, userRole);
+  async log(eventMessage: string, eventSource: string, ipAddress?: string, userId?: number, userRole?: string): Promise<EventDTO> {
+    return this.parserService.log(eventMessage, eventSource, ipAddress, userId, userRole);
   }
 
   async getAllParserEvents(): Promise<ParserEventDto[]> {
@@ -296,7 +296,7 @@ export class GatewayService implements IGatewayService {
     return this.analysisService.deleteCorrelationsByEventIds(eventIds);
   }
 
-  async analysisEngineGenerateBusinessInsights(businessLLMInput: BusinessLLMInputDto): Promise<BusinessResponseDto>{
+  async analysisEngineGenerateBusinessInsights(businessLLMInput: BusinessLLMInputDto): Promise<BusinessResponseDto> {
     return this.analysisService.analysisEngineGenerateBusinessInsights(businessLLMInput);
   }
 
@@ -324,7 +324,7 @@ export class GatewayService implements IGatewayService {
   async getStats(rangeDays: number): Promise<BackupStatsDTO[]> {
     return this.backupService.getStats(rangeDays);
   }
-  
+
   // Insider
   async getAllInsiderThreats(): Promise<InsiderThreatDTO[]> {
     return await this.insiderThreatService.getAllThreats();
@@ -375,11 +375,11 @@ export class GatewayService implements IGatewayService {
   async calculateScore(entityType: RiskEntityType, entityId: string, hours: number): Promise<number> {
     return await this.riskScoreService.calculateScore(entityType, entityId, hours);
   }
-  
+
   async getLatestScore(entityType: RiskEntityType, entityId: string): Promise<number | null> {
     return await this.riskScoreService.getLatestScore(entityType, entityId);
   }
-  
+
   async getScoreHistory(entityType: RiskEntityType, entityId: string, hours: number): Promise<{ score: number; createdAt: Date; }[]> {
     return await this.riskScoreService.getScoreHistory(entityType, entityId, hours);
   }
@@ -387,15 +387,15 @@ export class GatewayService implements IGatewayService {
   async getGlobalScore(): Promise<number> {
     return await this.riskScoreService.getGlobalScore();
   }
-  async getIntegrityStatus(): Promise<any> { 
-  return await this.integrityService.getStatus(); 
-}
+  async getIntegrityStatus(): Promise<any> {
+    return await this.integrityService.getStatus();
+  }
 
-async getCompromisedLogs(): Promise<any> { 
-  return await this.integrityService.getCompromised(); 
-}
+  async getCompromisedLogs(): Promise<any> {
+    return await this.integrityService.getCompromised();
+  }
 
-async verifyIntegrity(): Promise<any> { 
-  return await this.integrityService.verify(); 
-}
+  async verifyIntegrity(): Promise<any> {
+    return await this.integrityService.verify();
+  }
 }
