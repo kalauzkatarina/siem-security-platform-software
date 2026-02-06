@@ -22,6 +22,7 @@ import { PaginatedAlertsDTO } from "../DTOs/PaginatedAlertsDTO";
 import { ParserEventDto } from "../DTOs/ParserEventDTO";
 import { SecuirtyMaturityCurrentDTO } from "../DTOs/SecurityMaturityCurrentDTO";
 import { SecuirtyMaturityIncidentsByCategoryDTO } from "../DTOs/SecurityMaturityIncidentsByCategoryDTO";
+import { SecurityMaturityRecommendationDTO } from "../DTOs/SecurityMaturityRecommendationDTO";
 import { SecurityMaturityTrendDTO } from "../DTOs/SecurityMaturityTrendDTO";
 import { StorageLogResponseDTO } from "../DTOs/StorageLogResponseDTO";
 import { PaginatedThreatsDTO, ThreatQueryDTO } from "../DTOs/ThreatQueryDTO";
@@ -220,4 +221,7 @@ export interface IGatewayService {
   getSecurityMaturityIncidentsByCategory(
     period: string,
   ): Promise<SecuirtyMaturityIncidentsByCategoryDTO[]>;
+  getSecurityMaturityRecommendations(): Promise<
+    SecurityMaturityRecommendationDTO[]
+  >;
 }
