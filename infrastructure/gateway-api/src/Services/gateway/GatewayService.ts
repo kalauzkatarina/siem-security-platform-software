@@ -387,7 +387,6 @@ export class GatewayService implements IGatewayService {
   async getGlobalScore(): Promise<number> {
     return await this.riskScoreService.getGlobalScore();
   }
-<<<<<<< HEAD
   
 //Integrity
   async initializeHashChain(): Promise<{ message: string }> {
@@ -402,17 +401,4 @@ async getCompromisedLogs(): Promise<any[]> {
   return await this.integrityService.getCompromisedLogs();
 }
 
-=======
-  async getIntegrityStatus(): Promise<any> {
-    return await this.integrityService.getStatus();
-  }
-
-  async getCompromisedLogs(): Promise<any> {
-    return await this.integrityService.getCompromised();
-  }
-
-  async verifyIntegrity(): Promise<any> {
-    return await this.integrityService.verify();
-  }
->>>>>>> f51f5f8e12bc7d5fbaf8bd0fb9c11011a3a01abe
 }
