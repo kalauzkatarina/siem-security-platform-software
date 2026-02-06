@@ -1,7 +1,7 @@
-import { FirewallLogDTO } from "../../types/firewall/FirewallLogDTO";
 import { FirewallModeDTO } from "../../types/firewall/FirewallModeDTO";
 import { FirewallRuleDTO } from "../../types/firewall/FirewallRuleDTO";
 import { FirewallTestDTO } from "../../types/firewall/FirewallTestDTO";
+import { PaginatedFirewallLogsDTO } from "../../types/firewall/PaginatedFirewallLogsDTO";
 
 export interface IFirewallAPI {
     getAllRules(): Promise<FirewallRuleDTO[]>;
@@ -13,5 +13,5 @@ export interface IFirewallAPI {
 
     testConnection(ipAddress: string, port: number): Promise<FirewallTestDTO>;
 
-    getAllLogs(): Promise<FirewallLogDTO[]>;
+    getAllLogs(page: number, limit: number): Promise<PaginatedFirewallLogsDTO>;
 }

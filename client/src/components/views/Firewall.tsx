@@ -9,6 +9,7 @@ import { IFirewallAPI } from "../../api/firewall/IFirewallAPI";
 import { FirewallModeDTO } from "../../types/firewall/FirewallModeDTO";
 import { FirewallRuleDTO } from "../../types/firewall/FirewallRuleDTO";
 import { FirewallLogDTO } from "../../types/firewall/FirewallLogDTO";
+import Pagination from "../common/Pagination";
 
 interface FirewallViewProps {
     firewallApi: IFirewallAPI;
@@ -19,21 +20,44 @@ export default function Firewall({ firewallApi }: FirewallViewProps) {
     const [rules, setRules] = useState<FirewallRuleDTO[]>([]);
     const [logs, setLogs] = useState<FirewallLogDTO[]>([]);
 
+    const [logsPage, setLogsPage] = useState<number>(1);
+    const [logsPageSize, setLogsPageSize] = useState<number>(50);
+    const [logsTotalItems, setLogsTotalItems] = useState<number>(0);
+
+    const logsTotalPages = Math.ceil(logsTotalItems / logsPageSize);
+
     // Load initial data
     const loadInitialData = async () => {
         try {
-            const [fMode, fRules, fLogs] = await Promise.all([
+            const [fMode, fRules] = await Promise.all([
                 firewallApi.getMode(),
                 firewallApi.getAllRules(),
-                firewallApi.getAllLogs(),
             ]);
+
             setMode(fMode);
             setRules(fRules);
-            setLogs(fLogs);
+
+            await loadFirewallLogs(1, logsPageSize);
         } catch (err) {
             console.error("Failed to load firewall data", err);
         };
     }
+
+    const loadFirewallLogs = async (
+        targetPage: number = logsPage,
+        limit: number = logsPageSize
+    ) => {
+        try {
+            const response = await firewallApi.getAllLogs(targetPage, limit);
+
+            setLogs(response.data);
+            setLogsTotalItems(response.total);
+            setLogsPage(response.page);
+        } catch (err) {
+            console.error("Failed to load firewall logs", err);
+        }
+    };
+
 
     useEffect(() => {
         void loadInitialData();
@@ -100,18 +124,37 @@ export default function Firewall({ firewallApi }: FirewallViewProps) {
 
             {/* Row 3: Firewall Rules + Logs */}
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-3">
-                <div className="flex flex-col justify-center items-center min-h-[400px] rounded-lg border-2 border-[#282A28] bg-[#1f2123] p-6 overflow-hidden">
+                <div className="flex flex-col justify-center items-center min-h-[440px] rounded-lg border-2 border-[#282A28] bg-[#1f2123] p-6 overflow-hidden">
                     <FirewallRulesTable
                         rules={rules}
                         deleteRule={handleDeleteRule}
                     />
                 </div>
 
-                <div className="flex flex-col justify-center items-center min-h-[400px] max-h-[380px] rounded-lg border-2 border-[#282A28] bg-[#1f2123] p-6 overflow-y-auto">
-                    <FirewallLogsTable logs={logs} />
+                <div className="flex flex-col h-[440px] rounded-lg border-2 border-[#282A28] bg-[#1f2123] overflow-hidden">
+                    <div className="flex-1 overflow-auto px-2">
+                        <FirewallLogsTable logs={logs} />
+                    </div>
+
+                    <div className="border-t border-[#3a3a3a] bg-[#1f2123]">
+                        <Pagination
+                            currentPage={logsPage}
+                            totalPages={logsTotalPages}
+                            pageSize={logsPageSize}
+                            totalItems={logsTotalItems}
+                            onPageChange={(newPage) => {
+                                setLogsPage(newPage);
+                                loadFirewallLogs(newPage, logsPageSize);
+                            }}
+                            onPageSizeChange={(newSize) => {
+                                setLogsPageSize(newSize);
+                                setLogsPage(1);
+                                loadFirewallLogs(1, newSize);
+                            }}
+                        />
+                    </div>
                 </div>
             </div>
-
         </div>
     );
 }

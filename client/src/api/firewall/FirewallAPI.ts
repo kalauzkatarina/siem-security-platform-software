@@ -2,8 +2,8 @@ import axios, { AxiosInstance, AxiosResponse } from "axios";
 import { FirewallRuleDTO } from "../../types/firewall/FirewallRuleDTO";
 import { FirewallModeDTO } from "../../types/firewall/FirewallModeDTO";
 import { FirewallTestDTO } from "../../types/firewall/FirewallTestDTO";
-import { FirewallLogDTO } from "../../types/firewall/FirewallLogDTO";
 import { IFirewallAPI } from "./IFirewallAPI";
+import { PaginatedFirewallLogsDTO } from "../../types/firewall/PaginatedFirewallLogsDTO";
 
 export class FirewallAPI implements IFirewallAPI {
     private readonly axiosInstance: AxiosInstance;
@@ -52,8 +52,13 @@ export class FirewallAPI implements IFirewallAPI {
     }
 
     // =============== LOGS ===============
-    async getAllLogs(): Promise<FirewallLogDTO[]> {
-        const response: AxiosResponse = await this.axiosInstance.get("/firewall/logs");
+    async getAllLogs(page: number, limit: number): Promise<PaginatedFirewallLogsDTO> {
+        const response: AxiosResponse<PaginatedFirewallLogsDTO> =
+            await this.axiosInstance.get("/firewall/logs", {
+                params: { page, limit },
+            });
+
         return response.data;
     }
+
 }

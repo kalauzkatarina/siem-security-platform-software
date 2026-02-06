@@ -21,4 +21,24 @@ export class FirewallLogRepositoryService implements IFirewallLogRepository {
         const logs = await this.firewallLogRepository.find({ order: { createdAt: "DESC" } });
         return logs.map(l => firewallLogToDTO(l));
     }
+
+    async getPaginated(page: number, limit: number): Promise<{
+        data: FirewallLogDTO[];
+        total: number;
+        page: number;
+    }> {
+        const skip = (page - 1) * limit;
+
+        const [logs, total] = await this.firewallLogRepository.findAndCount({
+            order: { createdAt: "DESC" },
+            skip,
+            take: limit,
+        });
+
+        return {
+            data: logs.map(l => firewallLogToDTO(l)),
+            total,
+            page,
+        };
+    }
 }

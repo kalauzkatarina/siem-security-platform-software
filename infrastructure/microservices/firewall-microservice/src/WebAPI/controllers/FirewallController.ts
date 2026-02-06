@@ -135,9 +135,11 @@ export class FirewallController {
     // Logs
     private async getAllLogs(req: Request, res: Response): Promise<void> {
         try {
-            await this.logger.log("Fetching all firewall logs");
-            const logs = await this.logRepo.getAll();
-            res.status(200).json(logs);
+            const page = Number(req.query.page) || 1;
+            const limit = Number(req.query.limit) || 50;
+
+            const result = await this.logRepo.getPaginated(page, limit);
+            res.status(200).json(result);
         } catch (err) {
             await this.logger.log("Error fetching firewall logs: " + err);
             res.status(500).json({ message: "Failed to fetch firewall logs" });
