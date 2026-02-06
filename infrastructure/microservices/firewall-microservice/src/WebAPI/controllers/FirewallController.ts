@@ -40,9 +40,14 @@ export class FirewallController {
     // Rules
     private async getAllRules(req: Request, res: Response): Promise<void> {
         try {
-            await this.logger.log("Fetching all firewall rules");
-            const rules = await this.ruleRepo.getAll();
-            res.status(200).json(rules);
+            await this.logger.log("Fetching firewall rules");
+
+            const page = parseInt(req.query.page as string) || 1;
+            const limit = parseInt(req.query.limit as string) || 10;
+
+            const result = await this.ruleRepo.getPaginated(page, limit);
+
+            res.status(200).json(result);
         } catch (err) {
             await this.logger.log("Error fetching firewall rules: " + err);
             res.status(500).json({ message: "Failed to fetch firewall rules" });

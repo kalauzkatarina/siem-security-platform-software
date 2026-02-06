@@ -4,6 +4,7 @@ import { FirewallModeDTO } from "../../types/firewall/FirewallModeDTO";
 import { FirewallTestDTO } from "../../types/firewall/FirewallTestDTO";
 import { IFirewallAPI } from "./IFirewallAPI";
 import { PaginatedFirewallLogsDTO } from "../../types/firewall/PaginatedFirewallLogsDTO";
+import { PaginatedFirewallRulesDTO } from "../../types/firewall/PaginatedFirewallRulesDTO";
 
 export class FirewallAPI implements IFirewallAPI {
     private readonly axiosInstance: AxiosInstance;
@@ -17,8 +18,14 @@ export class FirewallAPI implements IFirewallAPI {
     }
 
     // =============== RULES ===============
-    async getAllRules(): Promise<FirewallRuleDTO[]> {
-        const response: AxiosResponse = await this.axiosInstance.get("/firewall/rules");
+    async getAllRules(page: number, limit: number): Promise<PaginatedFirewallRulesDTO> {
+        const response: AxiosResponse = await this.axiosInstance.get("/firewall/rules", {
+            params: {
+                page,
+                limit,
+            },
+        });
+
         return response.data;
     }
 

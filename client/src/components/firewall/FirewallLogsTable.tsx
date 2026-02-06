@@ -11,7 +11,7 @@ export default function FirewallLogsTable({ logs }: FirewallLogsTableProps) {
                 Firewall Logs
             </h3>
 
-            <div className="overflow-auto w-full h-full">
+            <div className="w-full h-full">
                 <table className="w-full table-fixed border-collapse text-sm">
                     <thead className="bg-[#2a2a2a]">
                         <tr>

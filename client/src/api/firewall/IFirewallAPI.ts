@@ -2,9 +2,10 @@ import { FirewallModeDTO } from "../../types/firewall/FirewallModeDTO";
 import { FirewallRuleDTO } from "../../types/firewall/FirewallRuleDTO";
 import { FirewallTestDTO } from "../../types/firewall/FirewallTestDTO";
 import { PaginatedFirewallLogsDTO } from "../../types/firewall/PaginatedFirewallLogsDTO";
+import { PaginatedFirewallRulesDTO } from "../../types/firewall/PaginatedFirewallRulesDTO";
 
 export interface IFirewallAPI {
-    getAllRules(): Promise<FirewallRuleDTO[]>;
+    getAllRules(page: number, limit: number): Promise<PaginatedFirewallRulesDTO>
     addRule(ipAddress: string, port: number): Promise<FirewallRuleDTO>;
     deleteRule(id: number): Promise<{ success: boolean }>;
 

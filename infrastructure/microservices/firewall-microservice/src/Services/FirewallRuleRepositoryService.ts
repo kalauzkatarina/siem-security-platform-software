@@ -16,6 +16,26 @@ export class FirewallRuleRepositoryService implements IFirewallRuleRepository {
         return rules.map(r => firewallRuleToDTO(r));
     }
 
+    async getPaginated(page: number, limit: number): Promise<{
+        data: FirewallRuleDTO[];
+        total: number;
+        page: number;
+    }> {
+        const skip = (page - 1) * limit;
+
+        const [rules, total] = await this.firewallRuleRepository.findAndCount({
+            order: { createdAt: "DESC" },
+            skip,
+            take: limit,
+        });
+
+        return {
+            data: rules.map(r => firewallRuleToDTO(r)),
+            total,
+            page,
+        };
+    }
+
     async getByIpAndPort(ipAddress: string, port: number): Promise<FirewallRuleDTO> {
         const rule = await this.firewallRuleRepository.findOne({ where: { ipAddress, port } });
         if (!rule) {

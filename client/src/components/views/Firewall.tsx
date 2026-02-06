@@ -24,24 +24,26 @@ export default function Firewall({ firewallApi }: FirewallViewProps) {
     const [logsPageSize, setLogsPageSize] = useState<number>(50);
     const [logsTotalItems, setLogsTotalItems] = useState<number>(0);
 
+    const [rulesPage, setRulesPage] = useState(1);
+    const [rulesPageSize, setRulesPageSize] = useState(10);
+    const [rulesTotalItems, setRulesTotalItems] = useState(0);
+
     const logsTotalPages = Math.ceil(logsTotalItems / logsPageSize);
 
     // Load initial data
     const loadInitialData = async () => {
         try {
-            const [fMode, fRules] = await Promise.all([
-                firewallApi.getMode(),
-                firewallApi.getAllRules(),
-            ]);
-
+            const fMode = await firewallApi.getMode();
             setMode(fMode);
-            setRules(fRules);
 
-            await loadFirewallLogs(1, logsPageSize);
+            await Promise.all([
+                loadFirewallLogs(1, logsPageSize),
+                loadFirewallRules(1, rulesPageSize),
+            ]);
         } catch (err) {
             console.error("Failed to load firewall data", err);
-        };
-    }
+        }
+    };
 
     const loadFirewallLogs = async (
         targetPage: number = logsPage,
@@ -58,6 +60,17 @@ export default function Firewall({ firewallApi }: FirewallViewProps) {
         }
     };
 
+    const loadFirewallRules = async (page = rulesPage, size = rulesPageSize) => {
+        try {
+            const response = await firewallApi.getAllRules(page, size);
+
+            setRules(response.data);
+            setRulesTotalItems(response.total);
+            setRulesPage(response.page);
+        } catch (err) {
+            console.error("Failed to load firewall rules", err);
+        }
+    };
 
     useEffect(() => {
         void loadInitialData();
@@ -124,14 +137,35 @@ export default function Firewall({ firewallApi }: FirewallViewProps) {
 
             {/* Row 3: Firewall Rules + Logs */}
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-3">
-                <div className="flex flex-col justify-center items-center min-h-[440px] rounded-lg border-2 border-[#282A28] bg-[#1f2123] p-6 overflow-hidden">
-                    <FirewallRulesTable
-                        rules={rules}
-                        deleteRule={handleDeleteRule}
-                    />
+                <div className="flex flex-col h-[440px] rounded-lg border-2 border-[#282A28] bg-[#1f2123]">
+                    <div className="flex-1 overflow-auto px-2">
+                        <FirewallRulesTable
+                            rules={rules}
+                            deleteRule={handleDeleteRule}
+                        />
+                    </div>
+
+                    <div className="border-t border-[#3a3a3a] bg-[#1f2123]">
+                        <Pagination
+                            currentPage={rulesPage}
+                            totalPages={Math.ceil(rulesTotalItems / rulesPageSize)}
+                            pageSize={rulesPageSize}
+                            totalItems={rulesTotalItems}
+                            onPageChange={(newPage) => {
+                                setRulesPage(newPage);
+                                loadFirewallRules(newPage, rulesPageSize);
+                            }}
+                            onPageSizeChange={(newSize) => {
+                                setRulesPageSize(newSize);
+                                setRulesPage(1);
+                                loadFirewallRules(1, newSize);
+                            }}
+                        />
+                    </div>
                 </div>
 
-                <div className="flex flex-col h-[440px] rounded-lg border-2 border-[#282A28] bg-[#1f2123] overflow-hidden">
+
+                <div className="flex flex-col h-[440px] rounded-lg border-2 border-[#282A28] bg-[#1f2123]">
                     <div className="flex-1 overflow-auto px-2">
                         <FirewallLogsTable logs={logs} />
                     </div>
