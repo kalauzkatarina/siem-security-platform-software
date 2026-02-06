@@ -66,11 +66,19 @@ export default function SecurityMaturity({
   }, [token, securityMaturityApi]);
 
   if (isLoading) {
-    return <div className="p-6">Loading security maturity...</div>;
+    return (
+      <div className="bg-transparent border-2 border-solid rounded-[14px] border-[#282A28] p-6">
+        Loading security maturity...
+      </div> 
+    );
   }
 
   if (!summary) {
-    return <div className="p-6">No security maturity data</div>;
+    return (
+      <div className="bg-transparent border-2 border-solid rounded-[14px] border-[#282A28] p-6">
+        No security data
+      </div>
+    );
   }
 
   const incidentsByCategory = Object.entries(summary.categoryCounts).map(
@@ -81,41 +89,35 @@ export default function SecurityMaturity({
   );
 
   return (
-    <div className="p-6">
-      <div className="grid grid-cols-2 gap-5">
+    <div className="bg-transparent border-2 border-solid rounded-[14px] border-[#282A28]">
+      <h2 className="mt-[3px]! p-[5px]! m-[10px]!">Security Maturity</h2>
+      <div className="p-6 p-[10px]! space-y-5">
 
-        <div className="flex flex-col gap-5">
-          <div className="rounded-lg border-2 border-[#282A28] bg-[#1f2123] p-6">
-            <MaturityScoreGauge score={summary.scoreValue} />
+        <div className="grid grid-cols-2 gap-5 mb-5">
+          <div className="flex flex-col gap-5">
+            <div className="rounded-lg border-2 border-[#282A28] bg-[#1f2123] p-6">
+              <MaturityScoreGauge score={summary.scoreValue} />
+            </div>
+
+            <div className="flex items-end justify-end">
+              <MaturityScoreCard level={summary.maturityLevel} />
+            </div>
           </div>
 
-          <MaturityScoreCard level={summary.maturityLevel} />
+          <div className="flex flex-col items-center rounded-lg border-2 border-[#282A28] bg-[#1f2123] p-6">
+            <MaturityKpiGrid data={summary} />
+          </div>
         </div>
 
-        <div className="flex flex-col items-center rounded-lg border-2 border-[#282A28] bg-[#1f2123] p-6">
-          <h2 className="text-sm uppercase tracking-widest text-gray-400">
-            Security Metrics
-          </h2>
+        <div className="mt-5! grid grid-cols-2 gap-5">
+          <div className="rounded-lg border-2 border-[#282A28] bg-[#1f2123] p-6 h-full pt-4 pb-4">
+            <SecurityMaturityTrend data={trend} />
+          </div>
 
-          <MaturityKpiGrid data={summary} />
+          <div className="rounded-lg border-2 border-[#282A28] bg-[#1f2123] p-6 h-full pt-4 pb-4">
+            <IncidentsByCategoryChart data={incidentsByCategory} />
+          </div>
         </div>
-
-
-      </div>
-      <div className="flex flex-col items-center rounded-lg border-2 border-[#282A28] bg-[#1f2123] p-6">
-        <h2 className="text-sm uppercase tracking-widest text-gray-400">
-          Security Maturity Trend
-        </h2>
-
-        <SecurityMaturityTrend data={trend} />
-      </div>
-
-      <div className="flex flex-col items-center rounded-lg border-2 border-[#282A28] bg-[#1f2123] p-6">
-        <h2 className="text-sm uppercase tracking-widest text-gray-400">
-          Incidents By Category
-        </h2>
-
-        <IncidentsByCategoryChart data={incidentsByCategory} />
       </div>
     </div>
   );

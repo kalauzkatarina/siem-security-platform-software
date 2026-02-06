@@ -54,30 +54,32 @@ export default function MaturityScoreGauge({score}: Props){
     };
 
     return (
-        <div className="flex flex-col items-center">
+        <div className="flex flex-col items-center justify-center w-full min-h-[220px]" style={{marginTop: "30px", marginBottom: "30px"}}>
             <h3 className="text-sm uppercase tracking-widest text-gray-400">
                 Security Maturity Score
             </h3>
 
-            <PieChart width={width} height={height}>
-                <Pie
-                    data={data}
-                    dataKey="value"
-                    startAngle={0}
-                    endAngle={180}
-                    cx={cx}
-                    cy={cy}
-                    innerRadius={innerRadius}
-                    outerRadius={outerRadius}
-                    stroke="none">
-                        {data.map((d, i) => (
-                            <Cell key={i} fill={d.color} opacity={0.4} />
-                        ))}
-                    </Pie>
-                    {needle(score, activeColor)}
-            </PieChart>
+            <div style={{ width: width, height: height }}>
+              <PieChart width={width} height={height}>
+                 <Pie
+                     data={data}
+                     dataKey="value"
+                     startAngle={0}
+                     endAngle={180}
+                     cx={cx}
+                     cy={cy}
+                     innerRadius={innerRadius}
+                     outerRadius={outerRadius}
+                     stroke="none">
+                         {data.map((d, i) => (
+                             <Cell key={i} fill={d.color} opacity={0.4} />
+                         ))}
+                     </Pie>
+                     {needle(score, activeColor)}
+              </PieChart>
+            </div>
 
-            <div className="text-5xl font-bold mt-2" style={{ color: activeColor }}>
+            <div className={`mt-4 text-6xl font-bold`} style={{ color: activeColor }}>
                 {score}
             </div>
         </div>

@@ -12,12 +12,12 @@ export default function MaturityScoreCard({level, }: {level: MaturityLevel;}) {
     };
 
     return (
-        <div className="rounded-lg border-2 border-[#282A28] bg-[#1f2123] p-6 text-center">
-            <h4 className="text-sm uppercase tracking-widest text-gray-400">
+       <div className="rounded-lg border-2 border-[#282A28] bg-[#1f2123] p-6 text-center h-[200px] w-full flex flex-col items-center justify-center">
+            <h3 className="text-sm uppercase tracking-widest text-gray-400">
                 Maturity Level
-            </h4>
+            </h3>
 
-            <div className="text-2x1 font-bold mt-3" style={{color: colorMap[level]}}>
+            <div className="mt-4 text-5xl font-bold" style={{ color: colorMap[level] }}>
                 {level.replace("_", " ")}
             </div>
         </div>

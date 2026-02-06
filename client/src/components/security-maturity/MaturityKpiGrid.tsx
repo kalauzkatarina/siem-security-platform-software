@@ -4,20 +4,31 @@ export default function MaturityKpiGrid({
     data,
 }: {data: SecuirtyMaturityCurrentDTO;}) {
     return (
-        <div className="grid grid-cols-2 gap-4">
-            <Kpi label="MTTD (min)" value={data.mttdMinutes} />
-            <Kpi label="MTTR (min)" value={data.mttrMinutes} />
-            <Kpi label="False Alarm Rate" value={`${(data.falseAlarmRate * 100).toFixed(1)}%`} />
-            <Kpi label="Open Alerts" value={data.openAlerts} />
+        <div className="flex flex-col items-center justify-center w-full min-h-[220px]" style={{marginTop: "30px", marginBottom: "30px"}}>
+            <h3 className="text-sm uppercase tracking-widest text-gray-400">
+                Security Metrics
+            </h3>
+            <div className="grid grid-cols-2 gap-4 w-full">
+                <Kpi label="MTTD (min)" value={data.mttdMinutes} />
+                <Kpi label="MTTR (min)" value={data.mttrMinutes} />
+                <Kpi label="False Alarm Rate" value={`${(data.falseAlarmRate * 100).toFixed(1)}%`} />
+                <Kpi label="Open Alerts" value={data.openAlerts} />
+            </div>
         </div>
     );
 }
 
 function Kpi({label, value} : {label: string; value: string | number}){
     return (
-        <div className="rounded-lg border border-[#282A28] bg-[#1f2123] p-4">
-            <div className="rounded-lg border border-[#282A28] bg-[#1f2123] p-4">{label}</div>
-            <div className="text-xl font-semibold">{value}</div>
+        <div className="m-5! rounded-lg border border-[#282A28] bg-[#1f2123] p-6 min-h-[120px] flex items-center justify-center">
+            <div className="text-center">
+                <div className="text-xl uppercase tracking-widest text-gray-400 mb-3">
+                    {label}
+                </div>
+                <div className="text-4xl font-bold">
+                    {value}
+                </div>
+            </div>
         </div>
     );
 }

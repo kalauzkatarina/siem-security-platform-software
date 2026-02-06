@@ -7,19 +7,23 @@ interface Props{
 
 export default function SecurityMaturityTrend({data}: Props){
     return (
-        <div className="w-full rounded-lg border-2 border-[#282A28] bg-[#1f2123] p-6 mt-5">
-            <div className="w-full h-[220px]">
+        <div className="flex flex-col items-center justify-center w-full min-h-[250]" style={{marginTop: "30px", marginBottom: "10px"}}>
+            <h3 className="text-sm uppercase tracking-widest text-gray-400">
+                    Security Maturity Trend
+            </h3>
+
+            <div className="w-full h-[220px] mt-5! mr-5!">
                 <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={data}>
-                        <CartesianGrid stroke="#2a2a2a" strokeDasharray="3 3" />
+                        <CartesianGrid stroke="#333" strokeDasharray="3 3" vertical={false} opacity={0.5} />
 
-                        <XAxis dataKey="bucketStart" tickFormatter={(v) => v.slice(5, 7)} stroke="#9ca3af" />
-                        <YAxis domain={[0, 100]} stroke="#9ca3af" tickFormatter={(v) => `${v}`} />
+                        <XAxis dataKey="bucketStart" tickFormatter={(v) => v.slice(5, 7)} tick={{ fill: "#ffffff", fontSize: 13, fontWeight: "bold" }} axisLine={false} tickLine={false} />
+                        <YAxis domain={[0, 100]} tick={{ fill: "#ffffff", fontSize: 13, fontWeight: "bold" }} axisLine={false} tickLine={false} />
 
                         <Tooltip contentStyle={{
                             backgroundColor: "#1f2123",
                             border: "1px solid #292a28",
-                            color: "#fff",
+                            borderRadius: "8px",
                         }}
                         labelFormatter={(label) => `Period: ${label}`}
                         formatter={(value) => [`Score: ${value}`, ""]} />
