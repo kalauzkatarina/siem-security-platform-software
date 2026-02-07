@@ -197,16 +197,26 @@ export class AlertController {
 
   private async getAlertsForKpi(req: Request, res: Response): Promise<void> {
     try {
-      const fromRaw = req.query.from as string | undefined;
-      const toRaw = req.query.to as string | undefined;
+      const fromRaw = (req.query.from as string | undefined)?.trim();
+      const toRaw = (req.query.to as string | undefined)?.trim();
 
       if (!fromRaw || !toRaw) {
         res.status(400).json({ success: false, message: "Invalid time window parameters" });
         return;
       }
 
-      const from = new Date(fromRaw);
-      const to = new Date(toRaw);
+      const fromParsed = new Date(fromRaw);
+      const toParsed = new Date(toRaw);
+
+      if (Number.isNaN(fromParsed.getTime()) || Number.isNaN(toParsed.getTime())) {
+        res.status(400).json({ success: false, message: "Invalid time window" });
+        return;
+      }
+
+      const toLocal = (d: Date) => new Date(d.getTime() - d.getTimezoneOffset() * 60_000);
+
+      const from = toLocal(fromParsed);
+      const to = toLocal(toParsed);
 
       const validation = validateAlertTimeWindow(from, to);
       if (!validation.success) {
@@ -214,11 +224,9 @@ export class AlertController {
         return;
       }
 
-      await this.logger.log(
-        `Fetching alerts for KPI from ${from.toISOString()} to ${to.toISOString()}`
-      );
-
       const alerts = await this.alertService.getAlertsForKpi(from, to);
+
+     
 
       res.status(200).json(alerts);
     } catch (err: any) {
