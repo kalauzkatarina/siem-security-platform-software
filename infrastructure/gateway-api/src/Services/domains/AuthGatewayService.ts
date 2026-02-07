@@ -110,7 +110,7 @@ export class AuthGatewayService implements IAuthGatewayService {
         return { valid: false, error: "Token missing user id or username." };
       }
       const payload = { user_id: userId, username, role };
-      const isSysAdmin = role === 0 || role === 1; // ADMIN or SYS_ADMIN
+      const isSysAdmin = role === 1; // SYS_ADMIN only
       return { valid: true, payload, isSysAdmin };
     } catch (error: any) {
       const msg = error?.message ?? String(error);

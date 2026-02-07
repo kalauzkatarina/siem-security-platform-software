@@ -12,8 +12,16 @@ dotenv.config({ quiet: true });
 const app = express();
 app.use(express.json());
 
-const corsOrigin = process.env.CORS_ORIGIN?.split(",").map((m) => m.trim()) ?? ["*"];
-const corsMethods = process.env.CORS_METHODS?.split(",").map((m) => m.trim()) ?? ["GET", "POST"];
+const rawCorsOrigin = process.env.CORS_ORIGIN?.trim() ?? "*";
+const corsOrigin =
+  rawCorsOrigin === "*"
+    ? "*"
+    : rawCorsOrigin.split(",").map((m) => m.trim()).filter(Boolean);
+const corsMethods = process.env.CORS_METHODS?.split(",").map((m) => m.trim()) ?? [
+  "GET",
+  "POST",
+  "OPTIONS",
+];
 
 app.use(
   cors({
@@ -21,6 +29,7 @@ app.use(
     methods: corsMethods,
   })
 );
+app.options(/.*/, cors({ origin: corsOrigin, methods: corsMethods }));
 
 const eventCollectorUrl = process.env.EVENT_COLLECTOR_API;
 const emitter: IEventEmitter = new HttpEventEmitter(eventCollectorUrl);

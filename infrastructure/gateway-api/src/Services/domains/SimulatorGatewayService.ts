@@ -31,9 +31,18 @@ export class SimulatorGatewayService {
   private readonly client: AxiosInstance;
 
   constructor(baseUrl?: string) {
+    const internalHeaders: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
+
+    const adminKey = process.env.SIMULATOR_ADMIN_KEY;
+    if (adminKey && adminKey.trim().length > 0) {
+      internalHeaders["x-simulator-admin-key"] = adminKey.trim();
+    }
+
     this.client = axios.create({
       baseURL: baseUrl,
-      headers: { "Content-Type": "application/json" },
+      headers: internalHeaders,
       timeout: 10000,
     });
   }

@@ -15,7 +15,16 @@ const typeOptions: { value: SimulationType; label: string }[] = [
 ];
 
 export function SimulationPanel({ simulatorApi }: SimulationPanelProps) {
-  const { token } = useAuth();
+  const { token, user } = useAuth();
+  const hasSimulatorAccess = useMemo(() => {
+    const role = user?.role;
+    if (role === undefined || role === null) {
+      return false;
+    }
+
+    const normalized = String(role).toLowerCase();
+    return normalized === "1" || normalized === "sys_admin" || normalized === "sysadmin";
+  }, [user?.role]);
 
   const [type, setType] = useState<SimulationType>("BRUTE_FORCE");
   const [intensity, setIntensity] = useState<number>(5);
@@ -34,6 +43,11 @@ export function SimulationPanel({ simulatorApi }: SimulationPanelProps) {
   }, [activeSimulation]);
 
   const startSimulation = async () => {
+    if (!hasSimulatorAccess) {
+      setError("Simulator is available only for SysAdmin users.");
+      return;
+    }
+
     if (!token) {
       setError("No auth token available.");
       return;
@@ -60,6 +74,11 @@ export function SimulationPanel({ simulatorApi }: SimulationPanelProps) {
   };
 
   const stopSimulation = async () => {
+    if (!hasSimulatorAccess) {
+      setError("Simulator is available only for SysAdmin users.");
+      return;
+    }
+
     if (!token || !activeSimulation) return;
     setIsLoading(true);
     setError(null);
@@ -76,6 +95,11 @@ export function SimulationPanel({ simulatorApi }: SimulationPanelProps) {
   };
 
   const refreshSimulation = async () => {
+    if (!hasSimulatorAccess) {
+      setError("Simulator is available only for SysAdmin users.");
+      return;
+    }
+
     if (!token || !activeSimulation) return;
     setIsLoading(true);
     setError(null);
@@ -151,25 +175,31 @@ export function SimulationPanel({ simulatorApi }: SimulationPanelProps) {
         </label>
       </div>
 
+      {!hasSimulatorAccess && (
+        <div className="text-[12px] text-amber-300 mb-3 pl-4">
+          Access restricted: only SysAdmin can run simulations.
+        </div>
+      )}
+
       <div className="flex flex-wrap items-center gap-3 mb-4 pl-4">
         <button
           className="px-3 py-2 rounded bg-[#4ade80] text-[#0f0f0f] text-[12px] font-semibold"
           onClick={startSimulation}
-          disabled={isLoading}
+          disabled={isLoading || !hasSimulatorAccess}
         >
           Start
         </button>
         <button
           className="px-3 py-2 rounded bg-[#f87171] text-[#0f0f0f] text-[12px] font-semibold"
           onClick={stopSimulation}
-          disabled={!activeSimulation || isLoading}
+          disabled={!activeSimulation || isLoading || !hasSimulatorAccess}
         >
           Stop
         </button>
         <button
           className="px-3 py-2 rounded bg-[#3b82f6] text-white text-[12px] font-semibold"
           onClick={refreshSimulation}
-          disabled={!activeSimulation || isLoading}
+          disabled={!activeSimulation || isLoading || !hasSimulatorAccess}
         >
           Refresh
         </button>
