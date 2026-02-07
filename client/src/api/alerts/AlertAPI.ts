@@ -47,6 +47,7 @@ export class AlertAPI implements IAlertAPI {
   }
 
   async resolveAlert(id: number, resolvedBy: string, status: string, token: string): Promise<AlertDTO> {
+
     const response: AxiosResponse = await this.axiosInstance.post("", {
       url: `${this.basePath}/${id}/resolve`,
       method: "PUT",

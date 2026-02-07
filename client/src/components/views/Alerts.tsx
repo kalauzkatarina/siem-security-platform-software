@@ -141,7 +141,7 @@ export default function Alerts({ alertsApi }: AlertsProps) {
 
   const handleResolve = async (id: number, resolvedBy: string, markedFalse: boolean) => {
     try {
-      await alertsApi.resolveAlert(id, resolvedBy, markedFalse ? "true" : "false", token!);
+      await alertsApi.resolveAlert(id, resolvedBy, markedFalse ? AlertStatus.MARKED_FALSE : AlertStatus.RESOLVED, token!);
 
       // Update local state
       setAlerts(prev => prev.map(a =>
