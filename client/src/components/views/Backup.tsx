@@ -24,6 +24,7 @@ export default function Backup({ backupApi }: BackupProps) {
     const { token } = useAuth();
 
     useEffect(() => {
+        if (!token) return;
         const fetchData = async () => {
             try {
                 setIsLoading(true);
@@ -42,7 +43,7 @@ export default function Backup({ backupApi }: BackupProps) {
             }
         };
         fetchData();
-    }, []);
+    }, [token]);
 
     useEffect(() => {
         let result = allLogs;
