@@ -101,14 +101,7 @@ app.use(
     loggerService,
   ).getRouter(),
 );
-app.use(
-  "/api/v1",
-  new IntegrityGatewayController(
-    gatewayService,
-    authenticate,
-    loggerService,
-  ).getRouter(),
-);
+
 app.use(
   "/api/v1",
   new ParserGatewayController(gatewayService, authenticate).getRouter(),
