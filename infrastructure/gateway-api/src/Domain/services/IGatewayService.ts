@@ -225,9 +225,6 @@ export interface IGatewayService {
   getSecurityMaturityRecommendations(): Promise<
     SecurityMaturityRecommendationDTO[]
   >;
-  //getIntegrityStatus(): Promise<any>;
-  getCompromisedLogs(): Promise<any>;
- // verifyIntegrity(): Promise<any>;
 
   // UEBA
   analyzeUserBehavior(userId: number): Promise<AnomalyResultDTO[]>;
