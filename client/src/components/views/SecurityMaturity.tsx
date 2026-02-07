@@ -3,7 +3,6 @@ import { SecurityMaturityProps } from "../../types/props/security-maturity/Secur
 import { SecuirtyMaturityCurrentDTO } from "../../models/security-maturity/SecurityMaturityCurrentDTO";
 import { MaturityLevel } from "../../enums/MaturityLevel";
 import MaturityScoreGauge from "../security-maturity/MaturityScoreGauge";
-import MaturityScoreCard from "../security-maturity/MaturityScoreCard";
 import MaturityKpiGrid from "../security-maturity/MaturityKpiGrid";
 import { SecurityMaturityTrendDTO } from "../../models/security-maturity/SecurityMaturityTrendDTO";
 import SecurityMaturityTrend from "../security-maturity/SecurityMaturityTrend";
@@ -132,11 +131,7 @@ export default function SecurityMaturity({
         <div className="grid grid-cols-2 gap-5 mb-5">
           <div className="flex flex-col gap-5">
             <div className="rounded-lg border-2 border-[#282A28] bg-[#1f2123] p-6">
-              <MaturityScoreGauge score={summary.scoreValue} />
-            </div>
-
-            <div className="flex items-end justify-end">
-              <MaturityScoreCard level={summary.maturityLevel} />
+              <MaturityScoreGauge score={summary.scoreValue} level={summary.maturityLevel} />
             </div>
           </div>
 
