@@ -122,7 +122,7 @@ export default function SecurityMaturityTrend({data, period, onPeriodChange}: Pr
                             : "bg-[#313338]"
                         }`}
                     >
-                        {metric}
+                        {metric.replace(/_/g, " ")}
                     </button>
                     )
                 )}

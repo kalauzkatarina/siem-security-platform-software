@@ -125,7 +125,7 @@ export default function SecurityMaturity({
   const { token } = useAuth();
   const [summary, setSummary] = useState<SecuirtyMaturityCurrentDTO | null>(null);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
-  const [isUpdatingTrends, setIsUpdatingTrends] = useState(false);
+  const [, setIsUpdatingTrends] = useState(false);
   const [trends, setTrends] = useState<Partial<Record<TrendMetricType, SecurityMaturityTrendDTO[]>>>({});
   const [period, setPeriod] = useState<"24h" | "7d">("7d");
 
@@ -234,7 +234,7 @@ export default function SecurityMaturity({
         </div>
 
         <div className="mt-5! text-center rounded-lg border-2 border-[#282A28] bg-[#1f2123] p-6">
-          <h3 className="text-sm uppercase tracking-widest text-gray-400 mb-4">
+          <h3 className="text-sm uppercase tracking-widest text-gray-400 mb-4! mt-5!">
             Security Improvement Recommendations
           </h3>
 
