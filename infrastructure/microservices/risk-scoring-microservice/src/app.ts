@@ -26,6 +26,32 @@ app.use(express.json());
 
 // Database Initialization
 initialize_mysql_database();
+
+// --- HEALTH CHECK
+app.get("/health", async (req, res) => {
+  try {
+    if (MySQLDb.isInitialized) {
+        await MySQLDb.query("SELECT 1");
+    } else {
+        throw new Error("Database not initialized");
+    }
+
+    res.status(200).json({
+      status: "OK",
+      service: "RiskScoreService",
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime()
+    });
+  } catch (err) {
+    res.status(503).json({
+      status: "DOWN",
+      service: "RiskScoreService",
+      timestamp: new Date().toISOString(),
+      error: err instanceof Error ? err.message : "Database connection failed"
+    });
+  }
+});
+
 const riskScoreRepository: Repository<SecurityMetrics> = MySQLDb.getRepository(SecurityMetrics);
 // Repository
 

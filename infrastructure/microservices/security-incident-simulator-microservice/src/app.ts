@@ -31,6 +31,16 @@ app.use(
 );
 app.options(/.*/, cors({ origin: corsOrigin, methods: corsMethods }));
 
+// --- HEALTH CHECK START -
+app.get("/health", (req, res) => {
+  res.status(200).json({
+    status: "OK",
+    service: "SimulatorService",
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime()
+  });
+});
+
 const eventCollectorUrl = process.env.EVENT_COLLECTOR_API;
 const emitter: IEventEmitter = new HttpEventEmitter(eventCollectorUrl);
 const simulationService: ISimulationService = new SimulationService(emitter);
